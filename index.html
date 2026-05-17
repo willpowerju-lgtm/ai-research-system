@@ -1727,6 +1727,14 @@
           </div>
           <div class="artifact-arrow">→</div>
         </div>
+        <div class="artifact-card" data-sample="acme-deck">
+          <div class="artifact-icon">PPTX</div>
+          <div class="artifact-body">
+            <div class="artifact-title">Acme Semis · Initiating Coverage</div>
+            <div class="artifact-sub">acme 模板族示例 —— JSON SSOT → 浅色商务 deck</div>
+          </div>
+          <div class="artifact-arrow">→</div>
+        </div>
       </div>
     </div>
   </div>
@@ -2263,6 +2271,14 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
             </span>
             <span class="pic-arrow">→</span>
           </a>
+          <a class="pipeline-output-card" href="#" onclick="event.preventDefault(); openModal('aapl-deck');">
+            <span class="pic-icon">PPTX</span>
+            <span>
+              <div class="pic-title">AAPL · HF Investment Case</div>
+              <div class="pic-meta">2.3 MB · 买方 IC deck · thesis tree → 6 段 storyline</div>
+            </span>
+            <span class="pic-arrow">→</span>
+          </a>
         </div>
       </div>
     </section>
@@ -2582,6 +2598,14 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
       pipeline: ['report-prep-nlm', 'deep-research-workflow', 'data-validator', 'ic-pptx', 'pptx-eval'],
       meta: { '文件大小': '17.5 MB', '受众': '行业概览', 'Workflow': 'deep-research-workflow', '恢复': 'State-machine 可恢复', '跨模型 eval': 'Yes', '模板族': 'ic master' },
       file: 'HV_Transmission_sample.pptx'
+    },
+    'acme-deck': {
+      type: 'PPTX · 渲染模板族示例',
+      title: 'Acme Semis · Initiating Coverage',
+      desc: 'acme-slides-creator-json 模板族（浅色商务风）的渲染示例。一份虚构 “Acme Semis” 的 initiating coverage deck —— 9 页覆盖 revenue / margin build、Q3 scorecard、segment deep-dive、catalyst + watch items、product & strategy。展示从 JSON SSOT 到原生 PPTX 的版式、配色与品牌字体锁定；公司与数字均为占位，不含真实研究内容。',
+      pipeline: ['acme-slides-creator-json'],
+      meta: { '文件大小': '2.8 MB', '页数': '9 页', '模板族': 'acme（浅色商务）', 'Render 路径': 'JSON SSOT → 原生 PPTX', '内容': '虚构占位 · 模板演示' },
+      file: 'ACME sample slides.pptx'
     }
   };
 
