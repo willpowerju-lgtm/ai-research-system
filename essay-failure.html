@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>失败是金矿 — 可怕的是 not even wrong — 投研架构笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F3EEE4;
+    --bg-2: #EFE8DA;
+    --surface: #FAF6EE;
+    --text: #1a1410;
+    --text-2: #5b4f44;
+    --text-3: #918578;
+    --text-4: #b0a596;
+    --border: #DDD2BD;
+    --border-strong: #C4B79E;
+    --accent: #C04E2D;
+    --accent-bg: #FAEBE0;
+    --font-serif: 'Spectral', 'Noto Serif SC', Georgia, 'Times New Roman', serif;
+    --font-sans: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(circle at 1px 1px, rgba(91, 79, 68, 0.06) 1px, transparent 0);
+    background-size: 28px 28px;
+  }
+  nav.top {
+    position: sticky; top: 0;
+    background: rgba(243, 238, 228, 0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    padding: 14px 0;
+  }
+  nav.top .inner {
+    max-width: 1000px; margin: 0 auto; padding: 0 36px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  nav.top .back {
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    font-size: 13px; font-weight: 500;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+    transition: color 0.15s;
+  }
+  nav.top .back:hover { color: var(--accent); }
+  nav.top .back::before { content: '←'; font-size: 16px; }
+  nav.top .brand {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-2);
+  }
+
+  main.essay {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 36px 100px;
+  }
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+  .doc-title {
+    font-family: var(--font-serif);
+    font-size: clamp(28px, 3.6vw, 38px);
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 48px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .md-content > *:first-child { margin-top: 0; }
+  .md-content h1 {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.018em;
+    margin: 12px 0 24px;
+    line-height: 1.25;
+  }
+  .md-content h2 {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 48px 0 16px;
+    padding-top: 36px;
+    border-top: 1px solid var(--border);
+    letter-spacing: -0.012em;
+    line-height: 1.3;
+  }
+  .md-content h2:first-child { padding-top: 0; border-top: none; margin-top: 0; }
+  .md-content h3 {
+    font-family: var(--font-serif);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 32px 0 12px;
+    letter-spacing: -0.005em;
+  }
+  .md-content h4 {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 24px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .md-content p {
+    font-size: 16.5px;
+    line-height: 1.85;
+    color: var(--text-2);
+    margin-bottom: 18px;
+  }
+  .md-content p strong, .md-content li strong { color: var(--text); font-weight: 600; }
+  .md-content em { font-style: italic; color: var(--text); }
+  .md-content ul, .md-content ol { padding-left: 26px; margin-bottom: 20px; }
+  .md-content li {
+    color: var(--text-2);
+    font-size: 16.5px;
+    line-height: 1.8;
+    margin-bottom: 8px;
+  }
+  .md-content blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 20px;
+    margin: 24px 0;
+    font-style: italic;
+    color: var(--text);
+    font-size: 17px;
+  }
+  .md-content blockquote p { margin-bottom: 0; }
+  .md-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 14px;
+    font-family: var(--font-sans);
+  }
+  .md-content thead { border-bottom: 2px solid var(--border-strong); }
+  .md-content th, .md-content td {
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px 10px 0;
+    text-align: left;
+    vertical-align: top;
+  }
+  .md-content th {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .md-content td { color: var(--text-2); }
+  .md-content code {
+    background: var(--bg-2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 13.5px;
+    font-family: var(--font-mono);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .md-content pre {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    border-radius: 6px;
+    margin: 22px 0;
+    font-size: 13px;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .md-content pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    color: var(--text);
+  }
+  .md-content .wl {
+    color: var(--text-3);
+    border-bottom: 1px dotted var(--text-4);
+    cursor: help;
+    font-style: italic;
+  }
+  .md-content a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .md-content a:hover { color: var(--text); }
+  .md-content hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* Obsidian callout */
+  .md-content .callout {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+  .md-content .callout-title {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 14px;
+    letter-spacing: 0.01em;
+  }
+  .md-content .callout-body > *:first-child { margin-top: 0; }
+  .md-content .callout-body > *:last-child { margin-bottom: 0; }
+  .md-content .callout-body p {
+    font-size: 15.5px;
+    line-height: 1.75;
+    margin-bottom: 12px;
+  }
+  .md-content .callout-body ol, .md-content .callout-body ul {
+    margin: 8px 0 14px;
+    padding-left: 22px;
+  }
+  .md-content .callout-body li {
+    font-size: 15.5px;
+    line-height: 1.7;
+    margin-bottom: 6px;
+  }
+  .md-content .callout-info,
+  .md-content .callout-summary { border-left-color: var(--accent); }
+  .md-content .callout-warning,
+  .md-content .callout-caution { border-left-color: var(--gold, #B8862A); }
+  .md-content .callout-warning .callout-title,
+  .md-content .callout-caution .callout-title { color: var(--gold, #B8862A); }
+  .md-content .callout-tip,
+  .md-content .callout-note { border-left-color: var(--teal, #1B4D5C); }
+  .md-content .callout-tip .callout-title,
+  .md-content .callout-note .callout-title { color: var(--teal, #1B4D5C); }
+
+  footer.foot {
+    padding: 36px 36px 40px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 11.5px;
+    font-family: var(--font-mono);
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.04em;
+  }
+  footer.foot a { color: var(--text-3); text-decoration: none; }
+  footer.foot a:hover { color: var(--accent); }
+
+  @media (max-width: 720px) {
+    main.essay { padding: 40px 24px 80px; }
+    nav.top .inner { padding: 0 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="inner">
+    <a class="back" href="index.html" onclick="backToMain(event)">返回主站</a>
+    <div class="brand">投研架构笔记</div>
+  </div>
+</nav>
+
+<main class="essay">
+  <div class="eyebrow">Essay · 2026-05-16</div>
+  <h1 class="doc-title">失败是金矿 — 可怕的是 not even wrong</h1>
+  <article class="md-content">
+<h2>一、AI agent 不怕失败，只怕 not even wrong</h2>
+<p>和 AI 一起干活，最不缺的就是失败。每天 cowork 几个小时，它会犯各种各样的错——算错一个数、跑崩一段代码、误解一条指示、漏掉一个本该做的判断</p>
+<p>可能大多数人对这些失败的态度是烦躁和懊恼，但很多时候正确的可以被识别的失败是进化的阶梯，可怕的是混在一堆成功里面静默的失败 or 根本无法明确判断的失败 something is not even wrong</p>
+<p>一个失败要变成资产，前提只有一个——你能清楚地判定"它确实错了"</p>
+<p>这话听着像废话，其实不是。判定一个东西错没错，你需要一把尺子：一个明确的、能拿来量的标准。而不同的任务，造这把尺子的难度天差地别</p>
+<p>我们先来看看造尺子大体有两种办法</p>
+<p>第一种是用规则造。写代码、做数学题属于这一类。"对"本身可以被写成一条可执行的检验——单元测试过没过、答案等不等于标准答案。这把尺子在原理上就造得出来，造出来也没有歧义。更关键的是，这类任务还附赠一样东西：错误会自己报警。代码写错了就跑不起来，推导错了就对不上答案。你不用专门去"发现"错误，错误自己跳出来找你。正因为尺子免歧义、又自带报警，这类领域的 AI 已经可以自己跟自己迭代——生成、验证、改进、再生成，整个回路不需要人插手</p>
+<p>第二种是靠专家共识造。投研、法律、医疗、管理——大部分人类社会的高价值工作属于这一类。这类工作的麻烦在两头。一头是评判标准本身就很难用规则写出来："一篇投资备忘录写得好不好"没法被还原成一条可执行的检验，里面有相当一部分是主观的。另一头是错误是静默的——不像代码错了就跑不起来，一篇判断有缺陷的备忘录，看上去和一篇好备忘录没什么两样，错就那么安安静静躺在里面，没有编译器替你报警</p>
+<p>听上去这类工作没救了——标准写不出来，错误又不报警，还怎么判定对错？</p>
+<p>但这里有个关键的转机。"标准很难写成规则"，不等于"标准不存在"。把同一份产出摆到一群有经验的领域专家面前，大多数人会给出收敛的反馈：他们未必能事先把标准写成条文，但看到具体的东西能判断，而且彼此判断的结果大体一致。换句话说，尺子不是一条写出来的规则，而是从专家共识里采出来的。这个"采集专家判断、再把它归一化成一个可复用标准"的过程，本身就是一次对齐</p>
+<p>所以"能不能为一个任务造一把可信的尺子"，不是一道是非题，是一根连续的轴：造尺子的难度，从 code、math 这头的"写条规则就行"，一直延伸到那头的"几乎不可能"。而且同一个领域内部也有梯度——还是投研，"这家公司的 thesis 最终对不对"几乎造不出尺子，但"这篇分析里该做的那个减法有没有做"，这种 process 层面的东西，尺子是造得出来的</p>
+<p>这根轴，是后面所有东西的总开关。一个失败落在轴的哪一段，决定了它是金矿还是噪声</p>
+<h2>二、尺子造得出的那头：明确的错误是金矿</h2>
+<p>当一个任务的尺子造得出来——不管是用规则造的，还是从专家共识里采的——AI 在这个任务上的失败，就是一个"明确的错误"：它能被清楚地指认、记录、归类</p>
+<p>而一旦失败是明确的，它就值得被认真记下来。我在自己的工作站里维护着一份 error log——AI 在真实工作里犯过的错，一条条记：错在哪、什么场景触发的、根因是什么。单看一条，它只是一条错误；但定期把 log 整理一遍、归纳一下，就会看见错误是有 pattern 的——同一类失误反复出现，背后是同一个能力缺口</p>
+<p>归纳出来的 error pattern，有三个去处</p>
+<p><strong>第一个去处，是迭代我的 skill。</strong> 我的工作站是几十个 skill 加一套 hook 拼起来的，本质上是 AI 的一层外壳（harness，分层逻辑我在<span class="wl" title="2026-05-13_AI-Agent三层架构<em>Guide-Hook-Eval</em>脱敏版">另一篇</span>里写过）。每一条 error pattern，都可以变成 skill 里的一条新规则、一道新 gate：上次它在这里栽过，那就在这里加一道检查，让这个错以后在结构上不可能再犯。这是最直接、最确定的回报，今天就能拿到。我那份 error log 里有一列专门记"这个错有没有对应的 gate"——这一列，就是 harness 一条条变厚的过程</p>
+<p>但要注意，加一道 gate，修的是我自己的工作流。gate 拦住了错误，可它没有改变模型——模型本身还是会犯这个错，只是被外壳挡住了</p>
+<p><strong>第二个去处，是把 error pattern 变成一个 benchmark。</strong> 这就从 harness 层走到了 model 层：benchmark 测的不是"我的工作流好不好"，而是"模型本身还有没有这个弱点"——把外壳拿掉、不给它兜底的时候，它会不会栽</p>
+<p>这种 benchmark 有一个很重要的特点：它不是人为出的题。传统的测试题，是有人坐下来、想象哪里会难、然后编一道题出来——难度是想象出来的。而从 error log 里长出来的 benchmark，题目是天然任务里真实发生过的失败。任务是真的（就是日常的投研工作），失败是真的（真栽过、真付过代价），只有"把它归一化成一道可复现的题"这一步是工程化的</p>
+<p>归一化，是把一条具体失败变成一道 benchmark 题的关键。你不能直接拿那条原始错误去考模型，那只是一个孤例。你要做的是把它抽象成 pattern，再用归一化的方式，在新的材料上把这个 pattern 重新实例化：换一家公司、换一批文档，把它包成一个真实的任务（比如"读这几份材料、写一篇投资备忘录"），但考的还是同一类判断。这样，一条真实失败就变成了一台出题机，能在模型没见过的材料上不断生成新题——模型也没法靠背题蒙混过去</p>
+<p><strong>第三个去处，是反哺模型的后训练。</strong> 一个 error pattern 一旦被归一化成可自动评分的题，它就同时有了两个身份：既是一道 eval 题，也是一个可验证的训练信号。理论上，这些信号可以进到后训练里，从源头修掉模型的弱点。这一条我放在最后，也明确标成"潜在的延伸"——它需要模型训练侧的能力，不在大多数人的掌控范围里。但方向是清楚的</p>
+<p>这三个去处，其实是同一个属性的三个面。一个明确的错误，因为有确定的对错，所以能自动评分；因为能自动评分，所以不用人逐条复判就能跨模型、跨任务地跑，这就是可 scale；也因为能自动评分，它才能当训练信号。"明确"这一个属性，一口气解锁了"可记录、可 scale、可训练"。这就是为什么明确的错误是金矿</p>
+<h2>三、尺子造不出的那头：not even wrong</h2>
+<p>物理学家 Pauli（泡利）有句经典名言，"Not even wrong"。他指的是那种含糊到无法被证伪的东西——一个错的理论，至少还能被检验、被推翻、被修正；而"算不上错"的理论，连进入检验场的资格都没有</p>
+<p>把这句话搬到 cowork 上，它精确地描述了那根轴的另一头</p>
+<p>当一个任务的尺子造不出来——指示本身就模糊，没有定义好的 eval，甚至连一群专家都不会收敛到一致的判断——AI 在这个任务上的产出，就处在 not even wrong 的状态。它不是"错了"。是根本没有一把尺子，能让你说它对还是错。AI 自己不知道，你也没有一致的标准去说</p>
+<p>这才是真正可怕的地方。可怕不在于它有多危险，而在于它是一种看不见的浪费。你花了一整轮 cowork 的成本——你的时间、你的注意力、模型的算力——结果什么可挖的东西都没留下：归纳不出 pattern，做不成 benchmark，更喂不了后训练。它连一条"明确的错误"都算不上，进不了上一节那条金矿链路。更糟的是，你常常意识不到自己一无所获，因为没有任何东西报警——它是上一节说的那种静默错误的极端形态</p>
+<p>好在 not even wrong 是可以事前挡住的，不必等事后发现。在让 AI 跑一个任务之前，问自己一句话就够了：如果它做砸了，我——或者一个这个领域的专家——能不能清楚说出它砸在哪，而且这个判断是会收敛的？如果答不上来，你就是在 not even wrong 区里操作。这时候正确的动作不是让它先跑起来再说，而是先停下，把指示写清楚、把 eval 定义出来——先把那把尺子造出来</p>
+<h2>四、飞轮、限速器，和快车道</h2>
+<p>把前面几节连起来，是一个飞轮：AI 在真实任务里犯错 → 错误记进 error log → 归纳出 pattern → 一边变成 skill 的新 gate，一边变成 benchmark 的新题 → 我的产出质量更高、对模型能力的度量更准 → 我敢把更难的任务交给 AI → 于是撞出新的、更难的明确错误。每转一圈，harness 厚一层，benchmark 多一道题，能交给 AI 的边界往外推一格</p>
+<p>但这个飞轮有一个明确的限速器：human expert input</p>
+<p>回到第二节那根轴。code 和 math 能让 AI 自己跟自己迭代，是因为它们的尺子用规则就能造、还自带报警。而绝大多数知识工作的尺子造不出这样的规则版本，得靠专家共识来采。这意味着在这些领域里，人类专家本身就是那把尺子。他在飞轮里干两件事：一是当探测器——代码有编译器替你报错，知识工作没有，静默错误得靠一个有经验的人盯着才看得见；二是当尺子的来源——他每指认一个明确的错误，就为那个具体任务临时造了一把尺子。飞轮能转多快，取决于专家能多快地造尺子</p>
+<p>我认为，这一点正是垂直领域 AI 商业化落地的核心</p>
+<p>把 AI 真正用进投研、法律、医疗这些领域，核心工作其实不是调模型——模型已经足够强了。核心工作是建一套装置，让一个领域专家能高效地带着 AI 迭代试错、把经验沉淀下来、再反哺回去。也就是这篇文章前面讲的那一整套东西：完善的 error log、归一化的 feedback、一道道 gate、一个长在真实任务上的 benchmark。换个说法：在尺子难造的领域里把 AI 落地，落的不是模型，是"专家 × AI 的迭代基础设施"</p>
+<p>那终点在哪？</p>
+<p>我的判断是：当 AI 在一个垂直领域里学到了足够深——它开始内化这个领域里"好"到底意味着什么、什么叫对齐得当——它就有可能开始自己为新任务 derive 出合理的 eval。到那一刻，人类专家就不再是限速器，这个领域也就"毕业"了，进入 code 和 math 已经在跑的那条自我迭代的快车道</p>
+<p>而这篇文章讲的那条 error log → benchmark 的链路，恰恰就是从"专家带着跑"通往"自己能跑"的那条 on-ramp。每一条被归一化的明确错误、每一个 pattern，都在教 AI 这个领域的"好"和"错"长什么样。专家做的事，本质上是在用一种好的方式，把自己变得不必要</p>
+<p>这里有一个值得警惕的地方。交接的那一刻最危险：AI 自己 derive 出来的那把尺子，本身可能就是 not even wrong——一把看上去合理、其实方向歪掉的尺子，会让 AI 信心十足地朝错误的方向自我迭代。所以专家最后的工作不会消失，只会从"抓错误"变成"验收 AI 造出来的尺子"。"Not even wrong" 在这里又出现了一次，只是升到了 meta 层</p>
+<h2>五、一个真实案例：我自己开发的一套 FAGB玩具</h2>
+<p>前面五节是框架。最后用一个我真正做过的东西把它落地——一个金融分析能力的 benchmark，我叫它 FAGB</p>
+<p>它做的事，是从真实的投研材料里——研报、会议纪要、财务模型——合成出一批可以自动评分的测试题，考的是分析判断力</p>
+<p>它在前面那个框架里的位置很清楚。投研整体是个尺子难造的领域，但第二节说过，领域内部有梯度。FAGB 没有去碰"这个 thesis 最终对不对"那一头——那一头几乎造不出尺子；它专挑投研里尺子造得出的那个 sub-layer：process 和判断。不测结论对不对，测"该做的推理有没有做"。开头那个例子——燃油车合营净利比集团净利还高、所以新能源在亏钱——这个减法做没做，是可以明确判定的</p>
+<p>它造尺子的几个做法，正好对应前面讲的概念</p>
+<p>每道题由一组 checkpoint 构成，checkpoint 把"对"归一化成一条机器能判定的判据——这就是把模糊的判断标准，归一化成一把可复用的尺子</p>
+<p>题目按一套陷阱分类来组织——我归纳成八类，像"沉默的数字漂移"（一个数字改了，却被描述成维持不变）、"管理层说法和数据自相矛盾"、"同一事件三个口径的数字"这些。这套分类，本质上就是一份 error pattern 的 taxonomy，是从一轮轮测试里归纳出来的</p>
+<p>每道题都要过一个"删除测试"：把材料里能直接给出答案的那句话删掉，模型还能不能从剩下的数据里把答案推出来。推得出来，说明考的是真判断；推不出来，那只是信息检索，不合格。这一步把"判断"和"检索"切开，确保题目测的是明确的分析错误，而不是搬运能力。FAGB 会根据现有归纳的pattern，基于新的材料生成新的测试题，防止模型作弊，确保他真正的理解做到</p>
+<p>测出来的结果：前沿模型在这套题上的正确率大约只有三成（多轮不同题目正确率收敛3成左右）。而且失败不是随机的，归纳下来有三类几乎100%反复出现的系统性弱点——不做独立计算（材料没算的，它也不算）、不质疑权威（管理层说什么它信什么，哪怕数据对不上）、不追踪静默的修订（一个数字从一版改到下一版、却被说成"维持不变"，它看不出来）。这三类，全都是静默错误：模型不报错，输出看上去都很完整，但人类专家一眼就可以看出来错误</p>
+<p>FAGB作为我的一个玩具， 现在还是一个 stage-2的产物——他可以根据error log自行判断归一化的pattern，可以定时拿来玩玩 看看不同模型的进步程度</p>
+  </article>
+</main>
+
+<footer class="foot">
+  <a href="index.html" onclick="backToMain(event)">← 返回主站</a>
+</footer>
+
+<script>
+  // 从主站进来（openDocReader 设了 sessionStorage 标记）用 history.back() 保留滚动位置；
+  // 直接打开 essay（无标记）则按 href 跳到主站顶部
+  function backToMain(e) {
+    if (sessionStorage.getItem('cameFromMain') === '1') {
+      e.preventDefault();
+      window.history.back();
+    }
+  }
+</script>
+
+</body>
+</html>

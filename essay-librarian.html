@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Librarian 升级 — 从记忆系统到主动投研助手 — 投研架构笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F3EEE4;
+    --bg-2: #EFE8DA;
+    --surface: #FAF6EE;
+    --text: #1a1410;
+    --text-2: #5b4f44;
+    --text-3: #918578;
+    --text-4: #b0a596;
+    --border: #DDD2BD;
+    --border-strong: #C4B79E;
+    --accent: #C04E2D;
+    --accent-bg: #FAEBE0;
+    --font-serif: 'Spectral', 'Noto Serif SC', Georgia, 'Times New Roman', serif;
+    --font-sans: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(circle at 1px 1px, rgba(91, 79, 68, 0.06) 1px, transparent 0);
+    background-size: 28px 28px;
+  }
+  nav.top {
+    position: sticky; top: 0;
+    background: rgba(243, 238, 228, 0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    padding: 14px 0;
+  }
+  nav.top .inner {
+    max-width: 1000px; margin: 0 auto; padding: 0 36px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  nav.top .back {
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    font-size: 13px; font-weight: 500;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+    transition: color 0.15s;
+  }
+  nav.top .back:hover { color: var(--accent); }
+  nav.top .back::before { content: '←'; font-size: 16px; }
+  nav.top .brand {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-2);
+  }
+
+  main.essay {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 36px 100px;
+  }
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+  .doc-title {
+    font-family: var(--font-serif);
+    font-size: clamp(28px, 3.6vw, 38px);
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 48px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .md-content > *:first-child { margin-top: 0; }
+  .md-content h1 {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.018em;
+    margin: 12px 0 24px;
+    line-height: 1.25;
+  }
+  .md-content h2 {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 48px 0 16px;
+    padding-top: 36px;
+    border-top: 1px solid var(--border);
+    letter-spacing: -0.012em;
+    line-height: 1.3;
+  }
+  .md-content h2:first-child { padding-top: 0; border-top: none; margin-top: 0; }
+  .md-content h3 {
+    font-family: var(--font-serif);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 32px 0 12px;
+    letter-spacing: -0.005em;
+  }
+  .md-content h4 {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 24px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .md-content p {
+    font-size: 16.5px;
+    line-height: 1.85;
+    color: var(--text-2);
+    margin-bottom: 18px;
+  }
+  .md-content p strong, .md-content li strong { color: var(--text); font-weight: 600; }
+  .md-content em { font-style: italic; color: var(--text); }
+  .md-content ul, .md-content ol { padding-left: 26px; margin-bottom: 20px; }
+  .md-content li {
+    color: var(--text-2);
+    font-size: 16.5px;
+    line-height: 1.8;
+    margin-bottom: 8px;
+  }
+  .md-content blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 20px;
+    margin: 24px 0;
+    font-style: italic;
+    color: var(--text);
+    font-size: 17px;
+  }
+  .md-content blockquote p { margin-bottom: 0; }
+  .md-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 14px;
+    font-family: var(--font-sans);
+  }
+  .md-content thead { border-bottom: 2px solid var(--border-strong); }
+  .md-content th, .md-content td {
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px 10px 0;
+    text-align: left;
+    vertical-align: top;
+  }
+  .md-content th {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .md-content td { color: var(--text-2); }
+  .md-content code {
+    background: var(--bg-2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 13.5px;
+    font-family: var(--font-mono);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .md-content pre {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    border-radius: 6px;
+    margin: 22px 0;
+    font-size: 13px;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .md-content pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    color: var(--text);
+  }
+  .md-content .wl {
+    color: var(--text-3);
+    border-bottom: 1px dotted var(--text-4);
+    cursor: help;
+    font-style: italic;
+  }
+  .md-content a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .md-content a:hover { color: var(--text); }
+  .md-content hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* Obsidian callout */
+  .md-content .callout {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+  .md-content .callout-title {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 14px;
+    letter-spacing: 0.01em;
+  }
+  .md-content .callout-body > *:first-child { margin-top: 0; }
+  .md-content .callout-body > *:last-child { margin-bottom: 0; }
+  .md-content .callout-body p {
+    font-size: 15.5px;
+    line-height: 1.75;
+    margin-bottom: 12px;
+  }
+  .md-content .callout-body ol, .md-content .callout-body ul {
+    margin: 8px 0 14px;
+    padding-left: 22px;
+  }
+  .md-content .callout-body li {
+    font-size: 15.5px;
+    line-height: 1.7;
+    margin-bottom: 6px;
+  }
+  .md-content .callout-info,
+  .md-content .callout-summary { border-left-color: var(--accent); }
+  .md-content .callout-warning,
+  .md-content .callout-caution { border-left-color: var(--gold, #B8862A); }
+  .md-content .callout-warning .callout-title,
+  .md-content .callout-caution .callout-title { color: var(--gold, #B8862A); }
+  .md-content .callout-tip,
+  .md-content .callout-note { border-left-color: var(--teal, #1B4D5C); }
+  .md-content .callout-tip .callout-title,
+  .md-content .callout-note .callout-title { color: var(--teal, #1B4D5C); }
+
+  footer.foot {
+    padding: 36px 36px 40px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 11.5px;
+    font-family: var(--font-mono);
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.04em;
+  }
+  footer.foot a { color: var(--text-3); text-decoration: none; }
+  footer.foot a:hover { color: var(--accent); }
+
+  @media (max-width: 720px) {
+    main.essay { padding: 40px 24px 80px; }
+    nav.top .inner { padding: 0 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="inner">
+    <a class="back" href="index.html" onclick="backToMain(event)">返回主站</a>
+    <div class="brand">投研架构笔记</div>
+  </div>
+</nav>
+
+<main class="essay">
+  <div class="eyebrow">Essay · 2026-05-11</div>
+  <h1 class="doc-title">Librarian 升级 — 从记忆系统到主动投研助手</h1>
+  <article class="md-content">
+<h2>一、上篇的未完成，以及真正的卖点</h2>
+<p>上个月写了<span class="wl" title="2026-04-14_用Obsidian构建持久化的投研记忆系统">记忆系统的架构</span>，核心想法是：Obsidian 做持久化知识库（所有研究材料以 markdown 形式落盘），NotebookLM（Google 的多文档问答工具，下文简称 NLM）做跨源检索，librarian（我自己写的 Python 脚本，专门维护这个 vault）做日常打理。一个月跑下来，架构没问题，但真正的能力边界比当时预想的要远得多</p>
+<p>这套系统最变态的能力是跨源综合</p>
+<p>举个例子，一家公司的信息可能散布在十几种来源里：管理层纪要披露了海外单车净利和分动力总成的毛利率结构，几个月前的电话会讲了出口节奏和经销返利的设计，行业深度稿分析了商业模式的飞轮和定价逻辑，券商研报给了TP和forecast，模型里有季度拆分，公众号追踪了最新订单数据。这些信息从不同时间、不同视角、不同置信度进入vault，传统做法是在需要的时候靠记忆或者临时搜索把它们拼起来——拼不完整是常态，拼错是风险</p>
+<p>现在librarian做的事是：自动扫描vault里所有提及该公司的文件，按来源分类、按时间排序、按主题聚合，在你需要之前就把跨源综合做完了。打开任何一家公司的wiki页面，你看到的不是某一篇文章的摘要，而是过去90天所有相关材料交叉验证后的完整画面</p>
+<p>这个能力延伸出五样东西：每日信息流、analyst-level 的任务跟踪、Q&A 双链复利、健康检查与跨源仲裁、全链路 QC。以下逐个展开，最后用一个新建 coverage 的完整案例把它们串起来</p>
+<h2>二、每日信息流：活的公司主页</h2>
+<p>上篇架构里的wiki page是静态的——上次session更新了什么，就停在那里，直到下次有人想起来再改</p>
+<p>升级后，每家被覆盖公司的wiki page变成了一个活的信息流</p>
+<p>Holdings（已建仓的持仓）和 Coverage（在跟踪、还没建仓的标的）合起来就是这支基金的 focus list——所有这些公司的 wiki page 遵守同一套 14 段标准结构。其中 §3 Valuations（估值段）是实时的：librarian 每天拉最新股价，按 <code>当天股价 / 模型基准股价</code> 的比例对模型里的市值、EV、PE、EV/EBITDA 这些估值指标整体缩放一遍。模型本身季度更新一次，但 wiki 上的估值每天都是活的。这个区分很重要——"今天股价多少、对应估值多少"是每天都要回答的问题，必须自动化；"基本面有没有变化、模型该不该改"需要人判断，所以模型季度才动一次</p>
+<p>除了实时估值，wiki page 上还有几个段落是研究沉淀的高密度资产——更新频率不高，但每个字都来自反复验证和判断，是这家公司真正的高质量信息：</p>
+<ul><li><strong>关键指引（Key Guidance）</strong>：管理层在历次电话会、业绩交流、调研里给出的指引数字——全年销量目标、毛利率区间、CapEx 节奏、海外扩张时点、利润率改善路径。指引本身属于 B 级（管理层口径有 talk book 风险），但价值在于它锚定了未来——后续每个季度实际数字都要和这里对照，看 deliver 还是 miss，miss 的方向和幅度往往就是 thesis 改不改的触发点</li><li><strong>Known Truth</strong>：经过多源交叉验证、反复确认的稳定事实——商业模式的核心机制、关键利润驱动因素、市占率结构、护城河来源、行业地位。这一段更新频率最低，但每次更新都意味着对公司的认知发生了质变（比如"原来以为的护城河其实在被削弱"），所以每次改动都值得追溯到具体触发证据</li><li><strong>近期 Thesis</strong>：当前对这家公司的核心论点——为什么 long/short/hold、市场定价错在哪里、催化剂是什么、风险在哪里、退出条件是什么。这是整个研究的最终落点，其他所有段落（估值、Key Take-Away、关键指引、Known Truth）都是为这一段服务的——它们要么是 thesis 的证据，要么是 thesis 的反证</li></ul>
+<p>§4 Key Take-Away 是每天滚动自动聚合的：每天扫描 vault 近 90 天窗口里所有提及该公司的文件，按文件名 token 和 frontmatter 分类，塞进 7 个桶：</p>
+<table><thead><tr><th>优先级</th><th>桶</th><th>数据源</th><th>更新节奏</th></tr></thead><tbody><tr><td>1</td><td>🔬 近期研究 Activity & Task</td><td>question-list / Q&A / 分析稿 / meeting-prep</td><td>每次研究动作落盘即刷新</td></tr><tr><td>2</td><td>📢 公司公告</td><td>财报/公告/IR材料</td><td>紧贴财报和重大事件</td></tr><tr><td>3</td><td>📑 券商研报</td><td>banker目录</td><td>按事件节奏，新报告入库即更新</td></tr><tr><td>4</td><td>🎙 会议纪要</td><td>visiting record / 管理层访谈</td><td>按访谈/调研节奏</td></tr><tr><td>5</td><td>📰 新闻动态</td><td>每日 WebSearch 抓取 + 公众号订阅</td><td><strong>每天</strong>有新材料进来</td></tr><tr><td>6</td><td>⚖️ 监管政策</td><td>每日 WebSearch（监管 query）</td><td><strong>每天</strong>跑监管类搜索</td></tr><tr><td>7</td><td>🏭 竞品动态</td><td>每日 WebSearch（竞品 query）</td><td><strong>每天</strong>跑竞品类搜索</td></tr></tbody></table>
+<p>daily feed 的"活性"主要靠 📰 新闻、⚖️ 监管、🏭 竞品三个桶撑起来——librarian 每天对 focus list 上每个 ticker 跑预设好的 4 类 WebSearch query：<strong>company_news</strong>（公司动态）/ <strong>regulatory</strong>（监管政策）/ <strong>competitor</strong>（竞品动态）/ <strong>announcement</strong>（公告）。WebSearch 结果走 URL 去重后写入 vault 对应公司目录，再被 wiki_builder 自动拾取入桶。这本质上是把 librarian 当成一个每天替我跑搜索引擎的 RA——同样一组 query 一年 365 天稳定跑下来，覆盖率比靠人记得"今天该去 google 一下这家公司"要可靠得多，也避免了"出差几天回来发现重要新闻已经被淹没在信息流里"的常见失误。其他几个桶（公告 / 研报 / 纪要）则按各自事件节奏更新，新材料进来后同样自动入桶</p>
+<p>对比一下，daily feed 的 7 桶讲的是"最近发生了什么"——新闻、研报、纪要、公告，是动态信息流；前面那三段沉淀资产（关键指引 / Known Truth / 近期 Thesis）讲的是"我们当前怎么看"——是静态判断锚点。两者合起来才是完整的活 wiki：左手最新动态、右手沉淀判断；前者每天在变，后者每次变都伴随一次研究升级</p>
+<p>研究活动置顶是刻意的。打开wiki page第一眼看到的不是过期新闻，而是"我们最近在做什么"——做了哪些分析、准备了哪些会议、提出了哪些问题。这在做IC Memo时回答了一个关键问题："过去一个季度我们在这家公司上做了什么工作"，不用翻session log</p>
+<p>模型数据的更新走另一条链：每个数据点注册在registry里，记录了从哪个Excel模型的哪个tab的哪一行提取。组合内重点持仓单家公司大致注册30+数据点。librarian定期扫描模型文件的修改时间，一旦发现变化，自动提取全部注册数据点和上次快照做diff，变化写进日志。模型更新后wiki上不会悄悄过期——diff会明确告诉你哪些数字变了、变了多少</p>
+<p>你每天打开一家公司的wiki page，看到的是持续更新的信息流，不是上次session留下的静态快照。这跟真人分析师每天跟踪一家公司的工作模式一样：看新闻、更新模型、跟踪催化剂、维护研究笔记。区别是librarian不会忘记，不会遗漏，不会因为忙别的事情断更</p>
+<h2>三、任务跟踪：Question List 与 vault 扫描</h2>
+<p>daily feed 解决了"信息怎么流入"的问题。但投研不只是被动接收信息——你要主动提问题、做分析、准备会议、跟进待办。这些任务需要被跟踪、有上下文、进度可见</p>
+<p>Question List 机制把这些需求工程化了。要见一家公司的分析师之前，建一个 question list 文件列出问题，librarian 对 vault 做全量扫描，在每个问题下面自动附上一段"vault 扫描初步结论"——交叉综合现有的所有纪要、研报、公众号、模型数据，列出当前知识库已经能回答的部分、已知的矛盾点、以及建议的追问方向。打印出来就是一份完整的会前 briefing</p>
+<p>这套机制最大的副作用是：vault 扫描经常会主动纠正你的认知偏差。你以为的数字和 vault 里实际能找到的数字经常有出入，系统把两个数字摆在一起，矛盾立刻暴露——这种纠正如果在会上才发生，代价就大了</p>
+<p>会后，question list 转化为 Q&A 存档：逐题回填分析师回答，标注来源和日期；没问到的、回避的、和 vault 信息矛盾的分别标状态。然后触发 wiki 级联更新——新数据更新对应段落，Key Take-Away 刷新，催化剂日历加入分析师提到的时间节点，Next steps 从"还缺什么"自动生成</p>
+<p>完整链路——"问之前知道什么 → 问了什么 → 得到了什么 → 还缺什么"——全部可追溯。这段抽象描述看完不一定立刻 click，§七的案例会一步步展开，看跨源综合具体能拼出什么东西、认知偏差是怎么被标红的</p>
+<h2>四、Q&A双链：知识复利的底层机制</h2>
+<p>上面的每一步——daily feed、question list、会后归档——单独看都有价值。但它们之间有一条暗线把所有价值串成了复利：每次研究活动都在强化下一次的起点</p>
+<p>这靠的是Q&A的双链机制</p>
+<p>第一条链是"问题→答案→存档"。每次问了一个问题，不管是vault内检索、NLM跨源综合、还是分析师口头确认，答案都持久化存储，带路由方式、来源标注、置信度评分。高置信度的答案下次直接复用；低置信度的留着做质量追踪，等更好的来源出现时覆盖更新</p>
+<p>第二条链是"答案→wiki→下次提问的上下文"。答案不只是存在Q&A存档里，它还会更新wiki page的对应段落。下一次vault扫描的时候，更新后的wiki内容会成为新问题的背景知识——question list的"vault扫描初步结论"自动包含了上次的研究成果</p>
+<p>两条链合在一起就是复利：</p>
+<pre><code>新建 coverage → 原始材料入库 → wiki v1
+  → 分析师会议 → question list引用wiki v1 → 获得新信息
+    → Q&amp;A归档 → wiki v2（吸收了分析师信息）
+      → 下次季报 → question list引用wiki v2 → 更精准的问题
+        → 新的Q&amp;A → wiki v3 …</code></pre>
+<p>每一轮循环，wiki变厚一层，question list的起点变高一层，提出的问题更精准，获得的答案更有价值。三个季度下来，一家公司的wiki page不再是"材料汇总"，而是一份经过反复交叉验证的、带完整研究脉络的知识资产</p>
+<p>这个复利是真实的、可观测的。§4 Key Take-Away的🔬研究桶清楚地列着每一次研究活动——什么时候做了哪个分析，什么时候准备了哪个会议，什么时候回填了哪些答案。整个研究历程一目了然</p>
+<h2>五、健康检查与跨源仲裁：让 wiki 自己维护自己</h2>
+<p>前三节讲的是"信息怎么流入、怎么沉淀"。但 vault 越厚，新的问题就越凸显：同一家公司的不同来源材料越堆越多，事实层的矛盾必然出现——卖方 forecast 和管理层指引不一致、新研报和旧研报 TP 差距明显、模型数字和公众号披露的运营数据对不上。这些矛盾如果没人主动管，wiki page 就会慢慢退化成"信息汇总"，而不再是"可信事实集合"</p>
+<p>健康检查就是给这件事兜底的，每天自动跑两层</p>
+<p><strong>第一层：状态巡查。</strong> 每天六项检查：目标价（TP，target price）超 60 天没更新？距财报不到 21 天？股价偏离 TP 超过 30%？新研报没反映到页面？催化剂到期未验证？触发 WARNING 后，系统写 flag，Claude 下次上线时由 LLM 把整页过一遍，看论点是否前后一致、关键数据有没有过时</p>
+<p><strong>第二层：跨源矛盾扫描。</strong> 每天对同一家公司的多个来源做一次冲突检测——管理层指引和卖方 forecast 不一致？新研报的 TP 和旧研报差得大？模型里的数字和公众号披露的运营数据对不上？IR 口径和实地调研拿到的渠道反馈方向相反？这些"事实层冲突"全部被自动捕捉，系统按 <strong>信源置信度 + 时间锚定</strong> 两个维度做仲裁：</p>
+<ul><li><strong>信源置信度</strong>：A 级来源（财报、模型原始数据）覆盖 B 级（实地调研纪要、管理层口径、卖方推算、web search 得来的二手数字）</li><li><strong>时间锚定</strong>：同级冲突按时间，新数据覆盖旧数据，并在 wiki 上保留 diff 痕迹</li></ul>
+<p>仲裁判不准的——比如两份 A 级来源相互打架，或者时间差太近无法分先后——系统不会硬选一个，而是主动 raise 出来 ping 我介入：把两份冲突数据并排展示，附上各自来源和时间戳，让我做最终确认再回填</p>
+<p>更关键的是，这些跨源冲突本身就是价值发现的入口。买方的研究 alpha 很少来自"又找到一个新数据点"——大多数 alpha 来自"同一个事实，在不同来源里口径不一致"：管理层口径领先卖方 forecast、调研拿到的渠道反馈和报表趋势相反、公众号披露的运营数据和 IR 口径方向不一致。这种 gap 一旦被系统显式标出来，就是研究该深挖的方向。所以矛盾扫描的产出不只是"该用哪个数字"的清单，更是一份"值得追问的问题"清单——人看到的不只是"哪个对"，而是"这个 gap 为什么会存在、它在告诉我什么"。从这个角度看，B 级信源的存在意义不是和 A 级竞争权威性，而是和 A 级形成对照——它们的"软"反而是价值所在，因为只有软信息才能携带 A 级硬数据还没沉淀进去的 forward-looking 信号</p>
+<p>这一层是这套系统能称为"主动投研助手"而不是"被动记忆系统"的核心理由——wiki page 不只是被动归档信息，它在主动维护一份"系统当前认为最可信的事实集合"，能自己判断的自己判断，判不准的明确把模糊地带交回给人，并且把那些"判得了但值得追问"的矛盾也一并端上来。机器干机器擅长的活（穷举扫描、规则仲裁、写 diff 日志），人留人擅长的活（判断哪个来源在当前 context 下更可信、哪个 gap 背后藏着 alpha）</p>
+<h2>六、全链路QC：一致性是过程的产物</h2>
+<p>传统做IC Memo或写research report，质量控制是最后一步——写完了回头检查数字对不对、来源标了没有、前后有没有矛盾。这个过程痛苦且容易遗漏</p>
+<p>这套系统的QC不是事后的，是嵌在过程里的</p>
+<p><strong>数据入口QC</strong>：每个数据点进入wiki时就带着来源血缘——从哪个文件的哪一行提取的，是A级（财报/模型原始数据）还是B级（实地调研纪要/管理层口径/券商推算/web search）。分级在入库时就确定了，不是用的时候才想起来标</p>
+<p><strong>注册表QC</strong>：模型数字通过registry追踪，模型更新后自动diff，变化列出来让你确认。wiki上不会出现"模型更新了但页面还是旧数字"的情况</p>
+<p><strong>格式QC</strong>：12条硬规则覆盖所有踩过的坑。表格不能有空单元格，来源引用必须是wikilink，年度和季度数据不能混在同一张表。每次更新自动lint，不通过不算完成</p>
+<p><strong>时效QC</strong>：健康检查每天巡查六项条件，TP/研报/催化剂/财报日期全覆盖</p>
+<p><strong>交叉QC</strong>：vault扫描生成question list时主动对比不同来源的数字，差异超5%就标记</p>
+<p>这些QC分布在研究流程的每个阶段，不需要单独花时间做"质量检查"。到出IC Memo或做PPT的时候，数据已经是验证过的，来源已经是标注过的，前后一致性已经是保证过的</p>
+<p><strong>所有研究过程清晰可见。</strong> wiki page上每个数字可追溯来源，每次更新有diff日志，每轮Q&A有完整记录，每天的信息流有时间戳。这意味着最终生成PPT或Word时，系统直接从wiki page拉数据、引用wikilink作为来源注释——而这些数据已经经过入库、注册、交叉验证、时效检查的全链路QC</p>
+<p>最终输出物的质量和一致性，是过程的自然结果，不是事后修补的产物</p>
+<h2>七、核心实现：某OEM onboarding 全生命周期</h2>
+<p>被老板催着看 AUTO 出海，临时 onboard 的某 OEM，走一遍从零到持续跟踪的全流程</p>
+<p><strong>丢材料</strong>。一家头部中资投行的首次覆盖研报、两家中小券商的跟踪报告、第三方的两篇行业深度分析、三份管理层调研纪要（FY25 全年电话会、Q1 业绩交流、实地调研）、从 CapIQ拉的模型底稿、公众号里半年的追踪文章——全部一股脑丢进 vault。格式五花八门，来源质量参差不齐。传统做法到这一步就开始痛苦：信息太多，不知道从哪看起</p>
+<p><strong>标准归档 → wiki page</strong>。librarian走标准流程：扫描全部新入库文件，提取实体提及，按来源分类建索引，触发14段wiki构建。出来的 coverage page 不是空壳——§2 Model Snapshot从Excel注册表自动拉取，每个数字可追溯到tab和行号；§3 Valuations拉当天股价做实时缩放；§4 Key Take-Away对近90天所有该公司相关文件做7桶聚合；§7 Analyst Ratings从券商索引自动汇总。页面上的每个数字都知道自己从哪来的——这不是排版，是数据血缘</p>
+<p><strong>跨源自检 → 人机 cowork 分析</strong>。wiki build 完成不是终点——librarian 紧接着对刚入库的所有材料跑一遍跨源综合自检（就是 §五讲的那套矛盾扫描机制，在 onboarding 阶段第一次启动）：首覆研报的 FY25 销量预测和管理层 Q1 业绩交流给的指引差多少？两家中小券商对欧洲市占的判断方向一致吗？模型里的 ASP 假设和实地调研拿到的渠道反馈对得上吗？公众号追踪的月度订单和卖方 forecast 的季度节奏匹配吗？新建 coverage 时所有材料一股脑同时丢进来，矛盾密度远高于日常运营——这一轮自检会扫出几十条 gap，能按"信源置信度 + 时间锚定"自动 resolve 的写进 wiki 的 diff log，判不准的全部 raise 出来 ping 我介入</p>
+<p>接下来这一步本身就是研究的开始。我和 librarian 一起 cowork 过这批 raise 出来的矛盾——librarian 负责把两边数据并排展示，附上来源、时间戳和数据血缘；我负责带着 context 做判断。每条 gap 要么 resolve 成"用 A 不用 B 的理由是什么"写回 wiki，要么升级成"这是值得追问分析师的问题"进 question list 的种子库。这一轮 review 跑完，wiki page 不再是"信息已归档"的空壳，而是一份"我对这家公司当前最重要的几个 gap 已经心里有数"的研究起点——而 question list 也已经有了第一批高质量种子问题，不再是从零开始空想要问什么</p>
+<p><strong>约卖方分析师 → Question List + vault 扫描</strong>。建 question list，23 个问题分六个模块。librarian 对 vault 做全量扫描，每个问题下面附初步结论。跨源综合的威力在这里充分展现——"这家 OEM 估值为什么这么低"这一题，系统同时调取了第三方对折价三因素的分析、卖方的定价逻辑（给 10 倍 PE 对应目标价 HK$40）、Q1 业绩交流里管理层把汇兑等一次性损益剥离后还原出的核心净利润（同比 +52% 至 33.5 亿）、以及 CapIQ 收集的卖方一致预期下的前瞻 PE（forward PE，用未来 12 个月预测利润算出来的 PE）。综合结论自动浮现：市场定价把它当成"低价走量"的廉价整车厂，但管理层口径指向完全不同的画面——海外单车净利是国内的两倍，3200 个排他经销网点已经运营了 20 年，混动出口毛利 18%，远高于把所有动力总成和市场混在一起算的全口径毛利。这些数据散布在三份不同时期的纪要里，任何一篇单独看都不会给你这个结论</p>
+<p>vault扫描还主动纠正了认知偏差。我用Q1数据线性外推，估计FY25汇兑收益"近100亿"。但4月底的业绩交流纪要明确披露全年只有27亿——Q1的24.3亿是全年高峰，之后急剧回落。系统在会前就把矛盾标红了</p>
+<p><strong>聊完回来 → 录音归档，逐题回填</strong>。会后录音走 ASR（语音转文字）转写，再结构化成纪要归档到 visiting record 目录。question list里23个问题逐题回填分析师回答，标注来源和日期。然后wiki级联更新：新确认的数据更新对应段落，Key Take-Away刷新，催化剂日历加入分析师提到的时间节点（港股通纳入、产能投产），Next steps从"还缺什么"自动生成</p>
+<p>到这一步，这家OEM的wiki page已经不是那个用公开材料填充的初始版本了。它吸收了一次完整的分析师交互，每个数据点经过交叉验证或主动质疑，研究的厚度肉眼可见地增加了</p>
+<p><strong>进入日常跟踪</strong>。之后每天：新公众号文章自动归类，估值实时缩放，Key Take-Away持续刷新，催化剂日历持续巡查，健康检查持续跑。下次季报出来，question list引用的是wiki v2而不是v1，提出的问题更精准。再往后做IC Memo或deck的时候，不需要从头收集数据——wiki page已经是一份经过持续跟踪、反复交叉验证、全链路QC的知识资产，直接拉数据、选呈现方式就行</p>
+<h2>八、和真人分析师的对比</h2>
+<table><thead><tr><th>维度</th><th>传统workflow</th><th>Librarian升级后</th></tr></thead><tbody><tr><td>信息收集</td><td>临时搜索，靠记忆，经常遗漏</td><td>vault持续归档，扫描覆盖所有入库材料</td></tr><tr><td>跨源综合</td><td>人脑拼接，受限于短期记忆</td><td>自动交叉验证，矛盾标红，结论浮现</td></tr><tr><td>每日跟踪</td><td>看新闻+邮件，容易断更</td><td>daily feed自动更新，7桶分类，不遗漏</td></tr><tr><td>任务跟踪</td><td>脑子里记着，偶尔忘</td><td>question list全程可溯源，progress可见</td></tr><tr><td>会议准备</td><td>翻笔记列问题，花半天</td><td>question list + vault扫描，一小时出briefing</td></tr><tr><td>会后归档</td><td>写个纪要扔文件夹里</td><td>逐题回填 → Q&A存档 → wiki级联更新 → next steps</td></tr><tr><td>数据一致性</td><td>事后人工检查，容易出错</td><td>全链路QC，注册表追踪，入库即标注</td></tr><tr><td>知识传承</td><td>换人就丢，离职带走</td><td>vault里所有研究历程可溯源，新人打开即用</td></tr><tr><td>出报告/做deck</td><td>从头收集数据，反复核对</td><td>wiki已是验证过的数据源，直接引用</td></tr></tbody></table>
+<p>真正的差距在最后一行。传统workflow里"做deck"是一个独立的、痛苦的、容易出错的阶段。在新的系统里，做deck只是从wiki page抽取已验证的数据和结论，选择呈现方式——信息收集、交叉验证、来源标注这些脏活在过去的日常跟踪中已经做完了。这就是为什么最终输出的PPT和Word的质量和一致性会非常高——不是因为最后一步做得好，是因为前面每一步都做对了</p>
+<p>一套好的投研系统不只是帮你记住了什么，而是在你需要之前就把信息拼好了、验证好了、分类好了。你要做的只是判断</p>
+  </article>
+</main>
+
+<footer class="foot">
+  <a href="index.html" onclick="backToMain(event)">← 返回主站</a>
+</footer>
+
+<script>
+  // 从主站进来（openDocReader 设了 sessionStorage 标记）用 history.back() 保留滚动位置；
+  // 直接打开 essay（无标记）则按 href 跳到主站顶部
+  function backToMain(e) {
+    if (sessionStorage.getItem('cameFromMain') === '1') {
+      e.preventDefault();
+      window.history.back();
+    }
+  }
+</script>
+
+</body>
+</html>

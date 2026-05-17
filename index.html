@@ -1,0 +1,2679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投研系统架构笔记 — Architecture Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F3EEE4;
+    --bg-2: #EFE8DA;
+    --surface: #FAF6EE;
+    --surface-2: #FFFEFA;
+    --text: #1a1410;
+    --text-2: #5b4f44;
+    --text-3: #918578;
+    --text-4: #b0a596;
+    --border: #DDD2BD;
+    --border-strong: #C4B79E;
+    --accent: #C04E2D;
+    --accent-dim: rgba(192, 78, 45, 0.12);
+    --accent-soft: #E89F87;
+    --accent-bg: #FAEBE0;
+    --teal: #1B4D5C;
+    --teal-dim: rgba(27, 77, 92, 0.1);
+    --gold: #B8862A;
+    --radius: 4px;
+    --radius-lg: 10px;
+    --radius-xl: 16px;
+    --maxw: 1180px;
+    --readw: 720px;
+    --font-serif: 'Spectral', 'Noto Serif SC', Georgia, 'Times New Roman', serif;
+    --font-sans: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-serif);
+    font-size: 17px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    background-image: radial-gradient(circle at 1px 1px, rgba(91, 79, 68, 0.06) 1px, transparent 0);
+    background-size: 28px 28px;
+  }
+  .ui, .mono, nav *, button, .stat-num, .ui-text, .badge, .label, .small-cap {
+    font-family: var(--font-sans);
+  }
+  .mono, code, pre { font-family: var(--font-mono); }
+  .container { max-width: var(--maxw); margin: 0 auto; padding: 0 36px; }
+  a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: var(--text); }
+
+  /* Nav */
+  nav.top {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: rgba(243, 238, 228, 0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    padding: 14px 0;
+  }
+  nav.top .inner {
+    max-width: var(--maxw); margin: 0 auto; padding: 0 36px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  nav.top .brand {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: -0.005em;
+    color: var(--text);
+  }
+  nav.top .brand em { font-style: italic; font-weight: 400; }
+  nav.top .brand .dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 10px;
+    vertical-align: middle;
+    position: relative; top: -2px;
+  }
+  nav.top .links { display: flex; gap: 24px; }
+  nav.top .links a {
+    color: var(--text-2); font-size: 13px; font-weight: 500;
+    text-decoration: none; transition: color 0.15s;
+  }
+  nav.top .links a:hover { color: var(--accent); }
+
+  /* Hero */
+  section.hero {
+    min-height: 95vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 140px 0 100px;
+    position: relative;
+  }
+  .hero-eyebrow {
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 36px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: ''; height: 1px; background: var(--accent); opacity: 0.5;
+  }
+  .hero-eyebrow::before { width: 28px; }
+  .hero-eyebrow::after { flex: 1; max-width: 100px; }
+  h1.headline {
+    font-family: var(--font-serif);
+    font-size: clamp(38px, 5.8vw, 72px);
+    line-height: 1.15;
+    letter-spacing: -0.018em;
+    font-weight: 500;
+    margin-bottom: 36px;
+    max-width: 980px;
+    color: var(--text);
+  }
+  h1.headline em { font-style: normal; color: var(--accent); font-weight: 500; }
+  .hero-sub {
+    color: var(--text-2);
+    font-size: 20px;
+    line-height: 1.7;
+    max-width: 700px;
+    margin-bottom: 64px;
+    font-family: var(--font-serif);
+    font-weight: 400;
+  }
+  .hero-sub em { color: var(--text); font-style: italic; }
+  .hero-sub p strong { color: var(--text); font-weight: 600; }
+  .hero-intro {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--text-3);
+    max-width: 660px;
+    margin-bottom: 32px;
+    padding-left: 16px;
+    border-left: 2px solid var(--border-strong);
+  }
+  .hero-pillars {
+    list-style: none;
+    padding: 6px 0;
+    margin: 0;
+    max-width: 720px;
+  }
+  .hero-pillars li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 14px;
+    font-family: var(--font-serif);
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .hero-pillars li:last-child { margin-bottom: 0; }
+  .hero-pillars li::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 14px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .hero-pillars li strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 36px;
+    max-width: 880px;
+  }
+  .hero-stats .stat { border-right: 1px solid var(--border); padding: 0 28px; }
+  .hero-stats .stat:first-child { padding-left: 0; }
+  .hero-stats .stat:last-child { border-right: none; }
+  .hero-stats .num {
+    font-family: var(--font-serif);
+    font-size: 38px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    line-height: 1;
+  }
+  .hero-stats .num .unit {
+    font-size: 16px; color: var(--text-3); font-weight: 400; margin-left: 2px;
+  }
+  .hero-stats .lbl {
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    color: var(--text-3);
+    margin-top: 8px;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+
+  /* Section frame */
+  section.block {
+    padding: 120px 0;
+    border-top: 1px solid var(--border);
+    position: relative;
+  }
+  .section-head { margin-bottom: 64px; }
+  .section-num {
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    letter-spacing: 0.18em;
+    margin-bottom: 18px;
+    text-transform: uppercase;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-num::before { content: '§'; font-family: var(--font-serif); font-style: italic; font-size: 18px; opacity: 0.7; }
+  h2.section-title {
+    font-family: var(--font-serif);
+    font-size: clamp(24px, 3.0vw, 36px);
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    line-height: 1.2;
+    margin-bottom: 22px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .submod-head h3 { white-space: nowrap; }
+  h2.section-title em { font-style: normal; color: var(--accent); font-weight: 500; }
+  .section-lede {
+    color: var(--text-2);
+    font-size: 18px;
+    line-height: 1.75;
+    max-width: 680px;
+    font-family: var(--font-serif);
+  }
+  .section-lede strong { color: var(--text); font-weight: 600; }
+
+  /* Architecture: tabbed explorer */
+  .arch-tabs {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+    overflow-x: auto;
+  }
+  .arch-tab {
+    background: none; border: none;
+    color: var(--text-2);
+    padding: 14px 24px;
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .arch-tab .tab-num {
+    color: var(--text-3);
+    font-family: var(--font-mono);
+    margin-right: 8px;
+    font-size: 11px;
+  }
+  .arch-tab:hover { color: var(--text); }
+  .arch-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .arch-tab.active .tab-num { color: var(--accent); }
+  .arch-panel { display: none; animation: fadeIn 0.3s ease; }
+  .arch-panel.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .arch-intro {
+    color: var(--text-2);
+    font-size: 16.5px;
+    line-height: 1.75;
+    margin-bottom: 32px;
+    max-width: 760px;
+    font-family: var(--font-serif);
+  }
+  .skill-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .skill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 18px;
+    transition: all 0.2s;
+  }
+  .skill-card:hover {
+    border-color: var(--border-strong);
+    background: var(--surface-2);
+    transform: translateY(-1px);
+  }
+  .skill-name {
+    font-family: var(--font-mono);
+    font-size: 13px; font-weight: 500;
+    color: var(--text); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .skill-card .new-tag {
+    font-size: 9px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    font-family: var(--font-sans);
+  }
+  .skill-desc {
+    color: var(--text-2);
+    font-size: 13.5px;
+    line-height: 1.65;
+    font-family: var(--font-serif);
+  }
+
+  /* Philosophy: 3 cards */
+  .ghe-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 56px;
+  }
+  .ghe-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 36px 32px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .ghe-card:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px -8px rgba(26, 20, 16, 0.1);
+  }
+  .ghe-card.active { border-color: var(--accent); background: var(--surface-2); }
+  .ghe-card .ghe-label {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .ghe-card h3 {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .ghe-card h3 .em { font-style: normal; color: var(--accent); }
+  .ghe-card .ghe-tag {
+    color: var(--text-2);
+    font-size: 15px;
+    margin-bottom: 24px;
+    font-style: italic;
+    font-family: var(--font-serif);
+    line-height: 1.55;
+  }
+  .ghe-card .ghe-summary {
+    color: var(--text-2);
+    font-size: 15.5px;
+    line-height: 1.75;
+    font-family: var(--font-serif);
+  }
+  .ghe-card .ghe-expand {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.25s ease, margin 0.25s ease;
+    margin-top: 0;
+  }
+  .ghe-card.active .ghe-expand {
+    max-height: 900px;
+    opacity: 1;
+    margin-top: 28px;
+  }
+  .ghe-expand h4 {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    margin-top: 22px;
+  }
+  .ghe-expand h4:first-child { margin-top: 0; }
+  .ghe-expand p {
+    font-size: 14.5px;
+    color: var(--text-2);
+    line-height: 1.7;
+    font-family: var(--font-serif);
+  }
+  .ghe-expand .code {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.65;
+    margin-top: 8px;
+    overflow-x: auto;
+  }
+  .ghe-expand .code .keyword { color: var(--accent); }
+  .ghe-expand .code .str { color: var(--teal); }
+  .ghe-expand .code .com { color: var(--text-3); font-style: italic; }
+  .ghe-expand .code .num { color: var(--gold); }
+  .ghe-toggle {
+    position: absolute; top: 32px; right: 32px;
+    width: 28px; height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-3);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1;
+    transition: all 0.25s;
+  }
+  .ghe-card.active .ghe-toggle {
+    transform: rotate(45deg);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  blockquote.pullquote {
+    border-left: 3px solid var(--accent);
+    padding: 8px 0 8px 32px;
+    margin: 56px 0 56px;
+    font-family: var(--font-serif);
+    font-size: 21px;
+    line-height: 1.7;
+    color: var(--text);
+    font-weight: 400;
+    max-width: 880px;
+  }
+  blockquote.pullquote .cite {
+    display: block;
+    font-style: normal;
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    color: var(--text-3);
+    margin-top: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* Sub-module within §03 */
+  .submod-head {
+    margin-top: 80px;
+    margin-bottom: 36px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+  .submod-head:first-child, .submod-head.first { margin-top: 0; padding-top: 0; border-top: none; }
+  .submod-label {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .submod-head h3 {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    line-height: 1.25;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .submod-head h3 em { font-style: normal; color: var(--accent); }
+  .submod-lede {
+    color: var(--text-2);
+    font-size: 16.5px;
+    line-height: 1.75;
+    max-width: 740px;
+    font-family: var(--font-serif);
+  }
+  .submod-lede strong { color: var(--text); font-weight: 600; }
+
+  /* Memory: 4-corner loop */
+  .loop-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 56px 40px;
+    margin-bottom: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .loop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 24px;
+    max-width: 580px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .loop-node {
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    text-align: center;
+  }
+  .loop-node .ln-name {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .loop-node .ln-role {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .loop-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--accent);
+    color: var(--bg);
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 13.5px;
+    line-height: 1.2;
+    text-align: center;
+    font-weight: 500;
+    border: 6px solid var(--bg);
+  }
+
+  /* Librarian 3-stage cycle */
+  .lib-cycle {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0 24px;
+    position: relative;
+  }
+  .lib-stage-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 26px;
+    position: relative;
+  }
+  .lib-stage-card .stage-num {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: block;
+  }
+  .lib-stage-card h4 {
+    font-family: var(--font-serif);
+    font-size: 23px;
+    font-weight: 500;
+    letter-spacing: -0.012em;
+    margin-bottom: 8px;
+    color: var(--text);
+    line-height: 1.25;
+  }
+  .lib-stage-card h4 em { font-style: normal; color: var(--accent); }
+  .lib-stage-card .stage-tag {
+    color: var(--text-2);
+    font-size: 14.5px;
+    margin-bottom: 22px;
+    font-style: italic;
+    font-family: var(--font-serif);
+    line-height: 1.55;
+  }
+  .lib-stage-card ul { list-style: none; padding: 0; }
+  .lib-stage-card li {
+    color: var(--text-2);
+    font-size: 13.5px;
+    line-height: 1.65;
+    font-family: var(--font-serif);
+    padding: 8px 0 8px 18px;
+    border-top: 1px dashed var(--border);
+    position: relative;
+  }
+  .lib-stage-card li:first-child { border-top: none; padding-top: 4px; }
+  .lib-stage-card li::before {
+    content: '·';
+    position: absolute;
+    left: 4px;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 16px;
+    top: 6px;
+  }
+  .lib-stage-card li strong { color: var(--text); font-weight: 600; }
+  .lib-cycle-loop {
+    text-align: center;
+    margin: 24px auto 8px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .lib-cycle-loop .loop-arrow {
+    display: inline-block;
+    border: 1px solid var(--accent);
+    background: var(--accent-bg);
+    padding: 8px 18px;
+    border-radius: 100px;
+  }
+  .lib-cycle-loop .loop-arrow span {
+    font-family: var(--font-serif);
+    margin-right: 8px;
+    font-size: 14px;
+  }
+  .lib-substrate {
+    background: var(--bg-2);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+    margin-top: 32px;
+  }
+  .lib-substrate .sub-label {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-3);
+    margin-bottom: 12px;
+  }
+  .lib-substrate p {
+    font-family: var(--font-serif);
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: var(--text-2);
+  }
+  .lib-substrate strong { color: var(--text); font-weight: 600; }
+
+  /* Librarian sample output cards */
+  .lib-outputs-label {
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-weight: 600;
+    margin-bottom: 24px;
+    margin-top: 64px;
+  }
+  .lib-output {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .lib-output-head {
+    padding: 24px 28px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .lib-output-head .lo-type {
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .lib-output-head h4 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .lib-output-head h4 em { font-style: normal; color: var(--text-2); font-weight: 400; }
+  .lib-output-head .lo-meta {
+    color: var(--text-3);
+    font-family: var(--font-sans);
+    font-size: 12px;
+  }
+  .lib-output-head .lo-stagepill {
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 100px;
+    align-self: flex-start;
+    white-space: nowrap;
+    border: 1px solid var(--accent);
+  }
+  .lib-output-body {
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 28px;
+  }
+  .lib-preview {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    font-family: var(--font-serif);
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--text-2);
+    max-height: 340px;
+    overflow: hidden;
+    position: relative;
+  }
+  .lib-preview::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: linear-gradient(180deg, transparent, var(--bg-2));
+    pointer-events: none;
+  }
+  .lib-preview .preview-tag {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .lib-preview h5 {
+    font-family: var(--font-serif);
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    margin-top: 14px;
+    letter-spacing: -0.005em;
+  }
+  .lib-preview h5:first-of-type { margin-top: 0; }
+  .lib-preview p { margin-bottom: 8px; }
+  .lib-preview p strong { color: var(--text); font-weight: 600; }
+  .lib-preview ol, .lib-preview ul { padding-left: 22px; margin-bottom: 8px; }
+  .lib-preview li { margin-bottom: 6px; }
+  .lib-preview li strong { color: var(--text); font-weight: 600; }
+  .lib-preview .src {
+    color: var(--text-3);
+    font-size: 11.5px;
+    font-style: italic;
+    display: block;
+    margin-top: 2px;
+  }
+  .lib-preview table {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    border-collapse: collapse;
+    margin: 8px 0;
+    width: 100%;
+  }
+  .lib-preview th, .lib-preview td {
+    border-bottom: 1px solid var(--border);
+    padding: 5px 10px 5px 0;
+    text-align: left;
+  }
+  .lib-preview th { font-weight: 600; color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .lib-preview td { color: var(--text-2); }
+  .lib-preview td.num { font-family: var(--font-mono); color: var(--text); font-size: 11.5px; }
+  .lib-preview .pill {
+    display: inline-block;
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-right: 4px;
+    font-weight: 600;
+  }
+
+  .lib-explain h5 {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 8px;
+    margin-top: 16px;
+  }
+  .lib-explain h5:first-child { margin-top: 0; }
+  .lib-explain p {
+    font-family: var(--font-serif);
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--text-2);
+    margin-bottom: 10px;
+  }
+  .lib-explain strong { color: var(--text); font-weight: 600; }
+  .lib-foot {
+    padding: 14px 28px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--text-3);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .lib-foot a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  .lib-foot a:hover { text-decoration: underline; }
+
+  /* Pipeline (IC Memo, dark) */
+  section.pipeline-section {
+    background: var(--text);
+    color: var(--bg);
+    padding: 90px 0 100px;
+    margin-top: 80px;
+    border-radius: var(--radius-xl);
+  }
+  section.pipeline-section .section-num { color: var(--accent-soft); }
+  section.pipeline-section h2.section-title { color: var(--bg); font-size: clamp(26px, 3.4vw, 38px); margin-bottom: 16px; }
+  section.pipeline-section h2.section-title em { color: var(--accent-soft); }
+  section.pipeline-section .section-lede { color: rgba(243, 238, 228, 0.7); font-size: 17px; }
+  section.pipeline-section .section-lede strong { color: var(--bg); }
+  .pipeline-stage-wrap {
+    margin: 48px 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .pipeline-stages {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-width: 100%;
+    position: relative;
+  }
+  .pipeline-node {
+    flex: 1;
+    min-width: 160px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 20px 18px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    z-index: 2;
+  }
+  .pipeline-node:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(232, 159, 135, 0.5);
+    transform: translateY(-2px);
+  }
+  .pipeline-node.active {
+    background: rgba(192, 78, 45, 0.18);
+    border-color: var(--accent-soft);
+  }
+  .pipeline-node .pn-phase {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    color: var(--accent-soft);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .pipeline-node .pn-name {
+    font-family: var(--font-serif);
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--bg);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .pipeline-node .pn-skill {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: rgba(243, 238, 228, 0.55);
+  }
+  .pipeline-arrow {
+    flex: 0 0 28px;
+    align-self: center;
+    color: rgba(232, 159, 135, 0.4);
+    text-align: center;
+    z-index: 1;
+  }
+  .pipeline-arrow svg { width: 28px; height: 18px; }
+  .pipeline-detail {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 32px;
+    margin-top: 28px;
+    min-height: 260px;
+  }
+  .pipeline-detail .pd-head {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .pipeline-detail .pd-phase {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--accent-soft);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .pipeline-detail .pd-name {
+    font-family: var(--font-serif);
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    color: var(--bg);
+    margin-top: 4px;
+  }
+  .pipeline-detail .pd-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+  .pipeline-detail h6 {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(243, 238, 228, 0.55);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .pipeline-detail p {
+    font-family: var(--font-serif);
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: rgba(243, 238, 228, 0.85);
+  }
+  .pipeline-detail .pd-skill-tag {
+    display: inline-block;
+    background: rgba(192, 78, 45, 0.18);
+    color: var(--accent-soft);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    border: 1px solid rgba(232, 159, 135, 0.3);
+  }
+  .pipeline-output-link { margin-top: 36px; text-align: center; }
+  .pipeline-output-link .small-cap {
+    color: rgba(243, 238, 228, 0.55);
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .pipeline-output-card {
+    display: inline-flex; align-items: center; gap: 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(232, 159, 135, 0.3);
+    border-radius: 12px;
+    padding: 18px 24px;
+    text-decoration: none;
+    color: var(--bg);
+    transition: all 0.2s;
+  }
+  .pipeline-output-card:hover {
+    background: rgba(192, 78, 45, 0.18);
+    border-color: var(--accent-soft);
+    color: var(--bg);
+  }
+  .pipeline-output-card .pic-icon {
+    background: var(--accent);
+    color: var(--bg);
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+  }
+  .pipeline-output-card .pic-title {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    font-weight: 500;
+  }
+  .pipeline-output-card .pic-meta {
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    color: rgba(243, 238, 228, 0.55);
+  }
+  .pipeline-output-card .pic-arrow { color: var(--accent-soft); font-size: 18px; }
+
+  /* Sample under essay */
+  .essay-artifacts { margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--border); }
+  .artifact-label {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .artifact-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .artifact-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; gap: 16px; align-items: center;
+  }
+  .artifact-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .artifact-icon {
+    flex: 0 0 48px;
+    width: 48px; height: 48px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--accent-bg);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .artifact-body { flex: 1; min-width: 0; }
+  .artifact-title {
+    font-family: var(--font-sans);
+    font-size: 14px; font-weight: 600;
+    color: var(--text); margin-bottom: 3px;
+  }
+  .artifact-sub {
+    color: var(--text-2);
+    font-size: 12.5px;
+    font-family: var(--font-serif);
+    line-height: 1.5;
+  }
+  .artifact-arrow { color: var(--accent); font-size: 14px; font-family: var(--font-sans); }
+
+  /* Cowork section */
+  .cowork-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 36px;
+    margin-top: 16px;
+  }
+  .cowork-body {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--text-2);
+  }
+  .cowork-body p { margin-bottom: 18px; }
+  .cowork-body strong { color: var(--text); font-weight: 600; }
+  .cowork-body em { color: var(--text); font-style: italic; }
+  .cowork-side .side-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 26px 28px;
+    margin-bottom: 18px;
+  }
+  .cowork-side .side-card h5 {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .cowork-side .side-card p {
+    font-family: var(--font-serif);
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--text-2);
+  }
+  .cowork-side .side-card p strong { color: var(--text); font-weight: 600; }
+  .cowork-side .layers-mini {
+    display: flex; flex-direction: column; gap: 8px; margin-top: 10px;
+  }
+  .cowork-side .layer-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 12px;
+    align-items: baseline;
+    padding: 8px 0;
+    border-top: 1px dashed var(--border);
+    font-size: 13.5px;
+    font-family: var(--font-serif);
+  }
+  .cowork-side .layer-row:first-child { border-top: none; }
+  .cowork-side .layer-name {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    color: var(--text);
+    font-size: 12px;
+  }
+  .cowork-side .layer-status { color: var(--text-2); font-size: 13.5px; }
+  .cowork-side .layer-status .filled { color: var(--accent); font-weight: 600; }
+  .cowork-side .layer-status .empty { color: var(--text-3); font-style: italic; }
+
+  /* Reading List */
+  .reading-list { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .reading-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: var(--text);
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 24px;
+    align-items: center;
+  }
+  .reading-item:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .reading-date {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-3);
+  }
+  .reading-title {
+    font-family: var(--font-serif);
+    font-size: 18.5px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  .reading-sum {
+    color: var(--text-2);
+    font-size: 13.5px;
+    font-family: var(--font-serif);
+    line-height: 1.55;
+  }
+  .reading-arrow { color: var(--accent); font-size: 16px; font-family: var(--font-sans); }
+
+  /* Closing */
+  section.closing {
+    padding: 130px 0 80px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+  .closing-text { max-width: 640px; margin: 0 auto; }
+  .closing-text h2 {
+    font-family: var(--font-serif);
+    font-size: 34px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 24px;
+    letter-spacing: -0.015em;
+    color: var(--text);
+  }
+  .closing-text h2 em { font-style: normal; color: var(--accent); }
+  .closing-text p {
+    color: var(--text-2);
+    font-size: 17.5px;
+    line-height: 1.7;
+    font-family: var(--font-serif);
+  }
+  .contact-row {
+    margin-top: 40px;
+    display: flex; gap: 14px; justify-content: center;
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+  }
+  .contact-row a {
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    padding: 12px 22px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .contact-row a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--surface-2);
+  }
+  footer.foot {
+    padding: 32px 0 36px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 11.5px;
+    font-family: var(--font-mono);
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.04em;
+  }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(26, 20, 16, 0.55);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 40px 20px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .modal-bg.active { display: flex; opacity: 1; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    max-width: 720px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: scale(0.96);
+    transition: transform 0.2s;
+  }
+  .modal-bg.active .modal { transform: scale(1); }
+  .modal-head {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .modal-head .file-type {
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .modal-head h3 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+  }
+  .modal-close {
+    background: none; border: none;
+    color: var(--text-3); font-size: 26px;
+    cursor: pointer; line-height: 1;
+    padding: 4px 8px;
+    font-family: var(--font-sans);
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 28px 32px; }
+  .modal-section { margin-bottom: 24px; }
+  .modal-section h4 {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+  .modal-section p {
+    color: var(--text-2);
+    font-size: 15px;
+    line-height: 1.7;
+    font-family: var(--font-serif);
+  }
+  .meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .meta-cell {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .meta-cell .k {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .meta-cell .v {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text);
+  }
+  .pipeline-mini {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    overflow-x: auto;
+  }
+  .pipeline-mini .stage {
+    display: inline-flex; align-items: center;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text);
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-right: 4px;
+    background: var(--surface);
+  }
+  .pipeline-mini .arrow { color: var(--accent); margin: 0 4px; }
+  .modal .download-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: var(--bg);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 13.5px;
+    padding: 11px 18px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .modal .download-btn:hover { opacity: 0.9; text-decoration: none; }
+  .modal .secondary-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent;
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    padding: 11px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    cursor: pointer;
+    text-decoration: none;
+    margin-left: 8px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .modal .secondary-btn:hover { border-color: var(--accent); color: var(--text); text-decoration: none; }
+
+  /* In-page Markdown reader */
+  .modal-bg.reader-mode .modal { max-width: 880px; }
+  .modal-bg.reader-mode .modal-head {
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 2;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-bg.reader-mode .modal-body { padding: 32px 40px 40px; }
+  .md-content {
+    font-family: var(--font-serif);
+    font-size: 16.5px;
+    line-height: 1.85;
+    color: var(--text-2);
+  }
+  .md-content > *:first-child { margin-top: 0; }
+  .md-content h1 {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.018em;
+    margin: 8px 0 22px;
+    line-height: 1.25;
+  }
+  .md-content h2 {
+    font-family: var(--font-serif);
+    font-size: 23px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 40px 0 14px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    letter-spacing: -0.012em;
+    line-height: 1.3;
+  }
+  .md-content h2:first-child { padding-top: 0; border-top: none; margin-top: 0; }
+  .md-content h3 {
+    font-family: var(--font-serif);
+    font-size: 18.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 30px 0 10px;
+    letter-spacing: -0.005em;
+  }
+  .md-content h4 {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 22px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .md-content p { margin-bottom: 16px; }
+  .md-content p strong, .md-content li strong { color: var(--text); font-weight: 600; }
+  .md-content em { font-style: italic; color: var(--text); }
+  .md-content ul, .md-content ol { padding-left: 24px; margin-bottom: 18px; }
+  .md-content li { margin-bottom: 8px; }
+  .md-content li ul, .md-content li ol { margin-top: 6px; margin-bottom: 0; }
+  .md-content blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 18px;
+    margin: 20px 0;
+    font-style: italic;
+    color: var(--text);
+    font-size: 17px;
+  }
+  .md-content blockquote p { margin-bottom: 8px; }
+  .md-content blockquote p:last-child { margin-bottom: 0; }
+  .md-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 13.5px;
+    font-family: var(--font-sans);
+  }
+  .md-content thead { border-bottom: 2px solid var(--border-strong); }
+  .md-content th, .md-content td {
+    border-bottom: 1px solid var(--border);
+    padding: 9px 14px 9px 0;
+    text-align: left;
+    vertical-align: top;
+  }
+  .md-content th {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .md-content td { color: var(--text-2); }
+  .md-content code {
+    background: var(--bg-2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-family: var(--font-mono);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .md-content pre {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    padding: 16px 18px;
+    border-radius: 6px;
+    margin: 18px 0;
+    font-size: 12.5px;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .md-content pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    color: var(--text);
+  }
+  .md-content .wl {
+    color: var(--text-3);
+    border-bottom: 1px dotted var(--text-4);
+    cursor: help;
+    font-style: italic;
+  }
+  .md-content a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .md-content a:hover { color: var(--text); }
+  .md-content hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 36px 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 980px) {
+    h2.section-title, .submod-head h3 { white-space: normal; }
+    .ghe-grid { grid-template-columns: 1fr; }
+    .skill-grid { grid-template-columns: 1fr 1fr; }
+    .artifact-row, .lib-output-body { grid-template-columns: 1fr; }
+    .pipeline-detail .pd-grid { grid-template-columns: 1fr; }
+    .hero-stats { grid-template-columns: 1fr 1fr; gap: 24px 0; }
+    .hero-stats .stat:nth-child(2) { border-right: none; }
+    .hero-stats .stat { padding: 0 16px; }
+    nav.top .links { gap: 12px; }
+    nav.top .links a:nth-child(n+4) { display: none; }
+    .lib-cycle { grid-template-columns: 1fr; }
+    .pipeline-stages { flex-direction: column; }
+    .pipeline-arrow { transform: rotate(90deg); }
+    .reading-item { grid-template-columns: 1fr; }
+    .cowork-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="inner">
+    <div class="brand"><span class="dot"></span>投研架构笔记 <em>— architecture notes</em></div>
+    <div class="links">
+      <a href="#architecture">系统架构</a>
+      <a href="#philosophy">设计哲学</a>
+      <a href="#modules">模块拆解</a>
+      <a href="#cowork">Cowork</a>
+      <a href="#reading">阅读</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">投研系统 · AI Architecture</div>
+    <h1 class="headline">
+      我为买方投研搭了一套 <em>AI research system</em>
+    </h1>
+    <p class="hero-intro">
+      欢迎来到我的主页 —— 这里是一个 PE / LO 买方研究员的 blog。从 2026 年 3 月初接触 Claude Code 起，我用业余时间做金融 Agent 体系的开发，以及 LLM / Agent 的学习、迭代与思考。下面是这套系统，和沿途的记录。
+    </p>
+    <p class="hero-sub">
+      两个月日常生产使用，跑在 5,950 文件 vault 之上。整套系统是 <em>7 层架构</em> —— 涵盖从原始数据采集、跨源综合、深度研究、到 IC Memo / 卖方报告渲染的全流程闭环
+    </p>
+    <div class="hero-sub">
+      <p style="margin-bottom: 14px;">底下有<strong>三个互相正交的设计哲学基座</strong>：</p>
+      <ul class="hero-pillars">
+        <li><strong>Guide / Hook / Eval 三层 agent 行为框架</strong> —— agent 在 high-stakes 场景下怎么稳定产出</li>
+        <li><strong>data-validator 三维正交</strong>（信源 / 时效 / 对齐）—— 防数据幻觉的门槛</li>
+        <li><strong>活 wiki + verified thesis truth base</strong>（librarian 主动维护）—— 已对齐的 fact 集合，下游任务的 base，机器和人都能读</li>
+      </ul>
+    </div>
+    <p class="hero-sub" style="margin-bottom: 56px;">
+      再往外一层，是这两个月让我形成的一个判断 —— 关于 AI 产品里<em>被低估的中间层</em>（Professional Cowork Platform），以及下一代的持久化 agent 形态
+    </p>
+    <div class="hero-stats">
+      <div class="stat"><div class="num">65<span class="unit">+</span></div><div class="lbl">活跃 skills</div></div>
+      <div class="stat"><div class="num">7</div><div class="lbl">架构层</div></div>
+      <div class="stat"><div class="num">5,950</div><div class="lbl">vault 笔记数</div></div>
+      <div class="stat"><div class="num">3</div><div class="lbl">Eval 层级 (mech·LLM·cross)</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- §01 ARCHITECTURE -->
+<section class="block" id="architecture">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-num">01 / 系统架构</div>
+      <h2 class="section-title">七个功能层，一套<em>知识闭环</em></h2>
+      <p class="section-lede">
+        系统按"做什么"分层，不按"用哪个模型"分层。Skills 组合成 pipeline，pipeline 组合成最终产物。整套架构跑在四角知识闭环上 —— OneNote ↔ NotebookLM ↔ WebDAV ↔ Obsidian —— 让记忆在 session 之间持久化、相互复利
+      </p>
+    </div>
+
+    <div class="arch-tabs">
+      <button class="arch-tab active" data-tab="L0"><span class="tab-num">L0</span>基础设施</button>
+      <button class="arch-tab" data-tab="L1"><span class="tab-num">L1</span>数据采集</button>
+      <button class="arch-tab" data-tab="L2"><span class="tab-num">L2</span>知识库</button>
+      <button class="arch-tab" data-tab="L3"><span class="tab-num">L3</span>分析</button>
+      <button class="arch-tab" data-tab="L4"><span class="tab-num">L4</span>深度研究</button>
+      <button class="arch-tab" data-tab="L5"><span class="tab-num">L5</span>输出 / 渲染</button>
+      <button class="arch-tab" data-tab="L6"><span class="tab-num">L6</span>Eval</button>
+    </div>
+
+    <div class="arch-panel" data-panel="L1">
+      <p class="arch-intro">数据采集层 —— 具体外部数据源。每个 skill 对应一类特定来源：A 股 / 港股 / 美国宏观 / 申万板块 / 期权 / 社交平台 / 公众号 / Capital IQ。任务是把 bytes 落盘，不做分析</p>
+      <div class="skill-grid">
+        <div class="skill-card"><div class="skill-name">ak-xq-router</div><div class="skill-desc">A 股 + 港股双源 —— AKShare + 雪球，K 线 / 资金 / 北向 / 内建 consensus</div></div>
+        <div class="skill-card"><div class="skill-name">sw-api-router</div><div class="skill-desc">申万行业指数 —— PE BAND / PB-ROE / Z-score / 股息率 / 跨板块利差</div></div>
+        <div class="skill-card"><div class="skill-name">fred-router</div><div class="skill-desc">美国宏观 —— HY/IG 信用利差、失业率、JOLTS、Sahm Rule</div></div>
+        <div class="skill-card"><div class="skill-name">iv-snapshot</div><div class="skill-desc">期权 IV 实时快照 —— ATM IV / IV Rank / P/C ratio，覆盖 KWEB / TLT / USO / GLD</div></div>
+        <div class="skill-card"><div class="skill-name">reddit-research</div><div class="skill-desc">Reddit 公开 JSON API —— 品牌情绪 + 竞品分析，不用爬虫</div></div>
+        <div class="skill-card"><div class="skill-name">mediacrawler-router</div><div class="skill-desc">小红书 / 微博 / B 站并行采集，输出结构化 JSONL</div></div>
+        <div class="skill-card"><div class="skill-name">wechat-research <span class="new-tag">NEW</span></div><div class="skill-desc">公众号批量抓取 → 按月合并 PDF → NLM 建库</div></div>
+        <div class="skill-card"><div class="skill-name">capital-iq-router <span class="new-tag">NEW</span></div><div class="skill-desc">S&P Capital IQ Pro 登录态数据拉取 —— comps、consensus、ownership</div></div>
+      </div>
+    </div>
+
+    <div class="arch-panel active" data-panel="L0">
+      <p class="arch-intro">基础设施层 —— 提供上层 skill 共享的底层能力：文件路由、通用 web 入口、PDF 获取、LLM 引擎调度、QC 治理、跨 session 多层记忆。这一层不绑定具体数据源，是稳定的运行时基础</p>
+      <div class="skill-grid">
+        <div class="skill-card"><div class="skill-name">cloud-files-router</div><div class="skill-desc">文件主干道 —— WebDAV + GitHub 索引缓存 1,800 文件，所有 skill 共享的 I/O 入口</div></div>
+        <div class="skill-card"><div class="skill-name">web-access</div><div class="skill-desc">全局联网枢纽 —— CDP 携带 Chrome 登录态绕反爬，内置 WebSearch / Fetch / curl / Jina</div></div>
+        <div class="skill-card"><div class="skill-name">web-pdf-fetcher <span class="new-tag">FALLBACK</span></div><div class="skill-desc">IR 网站 PDF 终极 fallback，绕过 403 + bot 检测，支持 IR 列表页自动取 PDF</div></div>
+        <div class="skill-card"><div class="skill-name">llm-subagent <span class="new-tag">NEW</span></div><div class="skill-desc">LLM 引擎调度 —— DeepSeek-V4-Pro / V3 / 火山方舟 ASR，中文长文本 + 录音转写</div></div>
+        <div class="skill-card"><div class="skill-name">data-validator</div><div class="skill-desc">数值溯源 registry —— 跨 slide / 跨文档一致性 + staleness 检查，所有交付前 pipeline 都依赖</div></div>
+        <div class="skill-card"><div class="skill-name">session-log + 多层记忆</div><div class="skill-desc">三层记忆机制 —— MEMORY.md 常驻索引 / memory/topic/ 按需拉取 / session-log/ 跨 session 台账。state 落 disk 不在 context 里，compact 后可恢复</div></div>
+      </div>
+    </div>
+
+    <div class="arch-panel" data-panel="L2">
+      <p class="arch-intro">四角知识闭环。任一节点写入，自动同步到另外三个。这是让整套系统感觉像"一直在线的研究助手"而不是"按下才启动的工具"的核心。这一层只管知识的存储 / 检索 / 同步，不产出分析</p>
+      <div class="skill-grid">
+        <div class="skill-card"><div class="skill-name">notebooklm-router-py</div><div class="skill-desc">直接调用 Google RPC —— 跨文档批量 Q&A，语义检索</div></div>
+        <div class="skill-card"><div class="skill-name">report-prep-notebooklm</div><div class="skill-desc">自动收集 10-K / 10-Q / 业绩说明会 / 卖方研报到 NLM 建库</div></div>
+        <div class="skill-card"><div class="skill-name">onenote-nlm-sync</div><div class="skill-desc">OneNote ↔ NLM 通过 Graph API 同步，GitHub Actions 触发</div></div>
+        <div class="skill-card"><div class="skill-name">obsidian-librarian</div><div class="skill-desc">5,950 文件 Obsidian vault 上的主动研究助手 —— wiki 维护 / 健康检查 / 跨源仲裁</div></div>
+        <div class="skill-card"><div class="skill-name">onenote-obsidian-sync <span class="new-tag">NEW</span></div><div class="skill-desc">把 OneNote 个人笔记与 Obsidian 原子化片段库打通</div></div>
+      </div>
+    </div>
+
+    <div class="arch-panel" data-panel="L3">
+      <p class="arch-intro">领域专用的监控与情报产出。板块周期扫描、情绪定位、财报点评、快速初查 —— 这一层产出的是结构化分析，但还不是完整的 IC Memo 体量</p>
+      <div class="skill-grid">
+        <div class="skill-card"><div class="skill-name">hf-morning-brief</div><div class="skill-desc">开盘前决策简报 —— 宏观 / 持仓 / IV / 情绪 / 板块 / 日程 六模块</div></div>
+        <div class="skill-card"><div class="skill-name">sentiment-cycle</div><div class="skill-desc">F/N/L/M 四层评分 —— S1 萌芽 → S4 共识分裂的情绪阶段定位</div></div>
+        <div class="skill-card"><div class="skill-name">sw-sector-cycle-research</div><div class="skill-desc">申万行业估值 + leading indicator 追踪框架</div></div>
+        <div class="skill-card"><div class="skill-name">earnings-review</div><div class="skill-desc">Phase A 数字核验 → Phase B 结构化点评，自动 NLM 更新</div></div>
+        <div class="skill-card"><div class="skill-name">onenote-quick-research</div><div class="skill-desc">5 页结构化初查 —— Summary / 业务 / 市场 / 竞争 / 估值，新票快速建档用</div></div>
+        <div class="skill-card"><div class="skill-name">serious-answer</div><div class="skill-desc">三层认知标签 —— ①确认事实 ②我推断 ③我认为，强制 sourcing 纪律</div></div>
+      </div>
+    </div>
+
+    <div class="arch-panel" data-panel="L4">
+      <p class="arch-intro">旗舰层。深度研究、财务建模、IC Memo 生产。每任务 agent 数最多、sub-agent dispatch 最重、workflow 最长 —— 这是"一次性产出完整投资交付物"的工作流</p>
+      <div class="skill-grid">
+        <div class="skill-card"><div class="skill-name">deep-research-workflow <span class="new-tag">FLAGSHIP</span></div><div class="skill-desc">4 阶段、并行 sub-agent、per-slide RAG、state-machine 可恢复</div></div>
+        <div class="skill-card"><div class="skill-name">3-statements-ultra</div><div class="skill-desc">机构级三表模型，从零开始 —— 公式联动完整，季度 / 半年 / 年频自适应</div></div>
+        <div class="skill-card"><div class="skill-name">ic-memo-outliner</div><div class="skill-desc">规划层 —— thesis tree + 6 段 storyline + 逐 slide outline + data 底稿</div></div>
+        <div class="skill-card"><div class="skill-name">visiting-memo</div><div class="skill-desc">公司调研 / 专家访谈 memo 生成器 —— ASR → 结构化 docx</div></div>
+      </div>
+    </div>
+
+    <div class="arch-panel" data-panel="L5">
+      <p class="arch-intro">渲染 + 输出后处理层。PPTX（三个品牌模板族）、DOCX（机构模板）、文生图、中文 humanize。所有 deck 渲染都走 5-phase QC：repair → eval → source-clean → layout-validator</p>
+      <div class="skill-grid">
+        <div class="skill-card"><div class="skill-name">ic-pptx</div><div class="skill-desc">机构级 IC Memo PPT 渲染器 —— Pattern A–L，5-phase QC</div></div>
+        <div class="skill-card"><div class="skill-name">acme-slides-creator-json</div><div class="skill-desc">JSON SSOT → 浅色商务 deck，品牌字体锁定</div></div>
+        <div class="skill-card"><div class="skill-name">navy-slides-creator-json</div><div class="skill-desc">JSON SSOT → 深蓝机构 deck 变体</div></div>
+        <div class="skill-card"><div class="skill-name">docx skill</div><div class="skill-desc">docx-js 路径生产机构 Word</div></div>
+        <div class="skill-card"><div class="skill-name">gpt-imagegen</div><div class="skill-desc">GPT Imagine 2 CDP 文生图 + 自动下载，批量 deck 插图</div></div>
+        <div class="skill-card"><div class="skill-name">pptx-template-analyzer</div><div class="skill-desc">上传 .pptx 母版 → 自动解析 layout → 生成模板校准补丁</div></div>
+        <div class="skill-card"><div class="skill-name">humanizer-zh <span class="new-tag">NEW</span></div><div class="skill-desc">中文输出后处理 —— 剥离 AI 写作 pattern（"值得注意的是"等）</div></div>
+      </div>
+    </div>
+
+    <div class="arch-panel" data-panel="L6">
+      <p class="arch-intro">Eval 层 —— 高价值交付物的最后一道闸。机械检查、独立 context 审查、跨模型对照、密度 / 版式 / 渲染验证。这一层不产新内容，专门评判前面 6 层产出的对不对</p>
+      <div class="skill-grid">
+        <div class="skill-card"><div class="skill-name">deck-eval-router</div><div class="skill-desc">统一路由 PPTX / HTML deck QC（repair → eval → source-clean → layout-validator）</div></div>
+        <div class="skill-card"><div class="skill-name">pptx-eval</div><div class="skill-desc">PPTX 真实性验证 —— PowerPoint COM 打开、catch 修复对话框、抓渲染异常</div></div>
+        <div class="skill-card"><div class="skill-name">pptx-repair</div><div class="skill-desc">PPTX 自检 + auto-fix gate —— 过 eval 前的预处理，抓十几种已知渲染 bug</div></div>
+        <div class="skill-card"><div class="skill-name">density-eval</div><div class="skill-desc">slide 密度 9-grid eval（HTML / PPTX 通用），slide 生产末尾自动调用</div></div>
+        <div class="skill-card"><div class="skill-name">check</div><div class="skill-desc">通用 diff 审查 + 自动修复 + 大改派遣 specialist reviewer</div></div>
+        <div class="skill-card"><div class="skill-name">codex:codex-rescue</div><div class="skill-desc">Codex 跨模型审查 —— 同模型 self-eval 抓不到的盲区在这里补</div></div>
+      </div>
+    </div>
+
+    <div class="essay-artifacts">
+      <div class="artifact-label">这套架构跑出来的真实 artifacts</div>
+      <div class="artifact-row">
+        <div class="artifact-card" data-sample="aapl-deck">
+          <div class="artifact-icon">PPTX</div>
+          <div class="artifact-body">
+            <div class="artifact-title">AAPL · HF Investment Case</div>
+            <div class="artifact-sub">买方 IC deck —— 5-phase QC、Codex 把关 outline</div>
+          </div>
+          <div class="artifact-arrow">→</div>
+        </div>
+        <div class="artifact-card" data-sample="aapl-buyside">
+          <div class="artifact-icon">DOCX</div>
+          <div class="artifact-body">
+            <div class="artifact-title">AAPL · 买方 Memo</div>
+            <div class="artifact-sub">决策导向长文版本，与 deck 共享 thesis</div>
+          </div>
+          <div class="artifact-arrow">→</div>
+        </div>
+        <div class="artifact-card" data-sample="aapl-sellside">
+          <div class="artifact-icon">DOCX</div>
+          <div class="artifact-body">
+            <div class="artifact-title">AAPL · 卖方 Full Report</div>
+            <div class="artifact-sub">分析师向长文 —— 同 workflow、不同受众</div>
+          </div>
+          <div class="artifact-arrow">→</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §02 PHILOSOPHY -->
+<section class="block" id="philosophy">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-num">02 / 设计哲学</div>
+      <h2 class="section-title">三个<em>基座</em>，互相正交</h2>
+      <p class="section-lede">
+        把"AI 怎么稳定产出投研产物"这件事拆开，底下有三个不依赖具体模型的基座：<strong>Guide / Hook / Eval</strong> 解决 agent 行为框架，<strong>data validation</strong> 解决数据准确性门槛，<strong>活 wiki</strong> 作为已验证的 fact + thesis truth base，让 agent 下一次任务不用从零开始。三件事彼此正交，缺一个都补不上其他两个。
+      </p>
+    </div>
+
+    <div class="submod-head first">
+      <div class="submod-label">02 · a — Agent 行为框架</div>
+      <h3>三层架构 —— 把<em>会过期</em>的和不会过期的分开</h3>
+      <p class="submod-lede">
+        第一个月最大的错误是想用 prose 锁死 <em>agent</em> 行为。Guide 越写越长，模型越漂越多，补丁越打越乱。后来想明白了：<strong>Guide 应该轻，因为它会过期；Eval 应该重，因为结果不会过期</strong>。三层架构定义了一个 <em>agent</em> 在 high-stakes 场景下怎么稳定产出 —— 这是整个系统 agent-based 设计的骨架
+      </p>
+    </div>
+
+    <div class="ghe-grid">
+      <div class="ghe-card" data-card="guide">
+        <button class="ghe-toggle">+</button>
+        <div class="ghe-label">Layer A · 轻</div>
+        <h3><span class="em">Guide</span></h3>
+        <div class="ghe-tag">指方向，不锁路径。更强的模型可以直接绕开</div>
+        <div class="ghe-summary">
+          内化人类经验 —— 踩过的坑、工作流骨架、session 边界 —— 但不锁死每一步。Guide 超过 500 行，LLM 读完前 5 页就忘了后面。
+        </div>
+        <div class="ghe-expand">
+          <h4>真实例子 · IC Memo Outliner</h4>
+          <p>180 行主入口 + 12 份按需加载的 phase 专属 reference。允许 drift —— 有时候 LLM 漂出来的路径反而比预设的更好（比如发现数据不支持原计划的某个论点，主动回头调整论点结构再继续）</p>
+          <h4>反例</h4>
+          <p>有个老 skill 是单文件 monolithic guide。输出 checklist 合规率明显偏低 —— 后半段规则被忽略是常态。改成"薄主入口 + 按需 reference"之后，合规率明显上来。修复点不是"加更多规则"，是"任一时刻减少 LLM 要消化的表面积"</p>
+        </div>
+      </div>
+
+      <div class="ghe-card" data-card="hook">
+        <button class="ghe-toggle">+</button>
+        <div class="ghe-label">Layer B · 硬</div>
+        <h3><span class="em">Hook</span></h3>
+        <div class="ghe-tag">绝对护栏。PreToolUse 拦截、exit 2、不可绕过</div>
+        <div class="ghe-summary">
+          编码业务铁律 —— 不随模型版本变化的硬规则。硬编码路径、禁用 API、必跑的 preflight 检查。一个成熟 skill 的 hook 数应该是个位数，且 self-gated。
+        </div>
+        <div class="ghe-expand">
+          <h4>真实 hook · <span class="mono">eps_yfinance_guard.py</span></h4>
+          <div class="code">
+<span class="com"># 拦截 A 股 / 港股 ticker 调用 yfinance.forwardPE</span>
+<span class="com"># 实测偏差：BYD 35%、Changan 66%</span>
+<span class="keyword">if</span> ticker.endswith((<span class="str">".SS"</span>, <span class="str">".SZ"</span>, <span class="str">".HK"</span>)) \
+   <span class="keyword">and</span> <span class="str">"forwardPE"</span> <span class="keyword">in</span> code:
+    sys.stderr.write(<span class="str">"BLOCKED. 走 ak-xq consensus."</span>)
+    sys.exit(<span class="num">2</span>)
+          </div>
+          <h4>为什么需要这条</h4>
+          <p>某次脚本通过 yfinance 拉了 BYD 的 FwdPE，把 12 个 cell 写进模型。偏差 35%。三周后另一个 agent 走同样路径，被这条 hook 拦下来 —— 这就是 hook 的价值：业务铁律编码一次，未来所有 agent 都受这条规则约束</p>
+        </div>
+      </div>
+
+      <div class="ghe-card" data-card="eval">
+        <button class="ghe-toggle">+</button>
+        <div class="ghe-label">Layer C · 抗腐</div>
+        <h3><span class="em">Eval</span></h3>
+        <div class="ghe-tag">结果导向 · 强通用性</div>
+        <div class="ghe-summary">
+          最重要的一层，因为它评判的是"最终交付物对不对"—— 这跟"用哪个模型"无关。所以它跨模型版本最抗腐：新模型上线、Guide 可能要重写，但 Eval 主要做小修补。这就是它的强通用性。
+        </div>
+        <div class="ghe-expand">
+          <h4>财务模型的 5 层 eval stack</h4>
+          <div class="code">
+L0  <span class="com">机械</span>          BS 配平 · IS 重述 · CF 收口         <span class="num">~50ms</span>
+L1  <span class="com">独立同模型</span>     fresh-context Claude 语义检查       <span class="num">~12s</span>
+L2  <span class="com">跨模型</span>         Codex / GPT-5.4 —— 不同 prior      <span class="num">~25s</span>
+L3  <span class="com">备份跨模型</span>     L2 不可用时降级 DeepSeek-V4-Pro    <span class="num">~18s</span>
+L4  <span class="com">合并裁决</span>       三方 verdict 汇总
+          </div>
+          <h4>实测收益</h4>
+          <p>加上 L2 跨模型这一层，缺陷捕获率明显上来。最常抓的是"机械求和对得上、但比率明显不合常识"那一类 —— 同模型 review 会接受"加总对了"，跨模型会 push back "ratio 不合理"</p>
+        </div>
+      </div>
+    </div>
+
+    <blockquote class="pullquote">
+      Guide 应该轻，因为它会过期。Hook 应该硬，因为它编码的是与模型能力无关的业务边界。Eval 应该锐，因为它评判的是最终交付物 —— 这是不随 LLM 演化而变的客观事实
+      <span class="cite">摘自《Guide / Hook / Eval》 · 2026 年 5 月</span>
+    </blockquote>
+
+    <p style="margin-top: 28px; font-size: 13.5px; color: var(--text-3); font-family: var(--font-serif);">→ 延伸阅读：Eval 的下一步 —— error log 怎么归纳成 pattern，再变成 skill gate / agentic benchmark / 后训练信号：<a href="#" onclick="event.preventDefault(); openDocReader('essay-failure');" style="color: var(--accent); text-decoration: underline;">失败是金矿 · 可怕的是 not even wrong</a></p>
+
+    <div class="submod-head" style="margin-top: 96px;">
+      <div class="submod-label">02 · b — 数据信任模型</div>
+      <h3>金融信息的<em>三维正交</em>评估</h3>
+      <p class="submod-lede">
+        Guide / Hook / Eval 是关于 agent <em>行为</em>的设计；还有一个同样底层的设计问题：怎么判断<em>一条数据值不值得相信</em>？买方投研里这不是一维 yes / no —— 而是三个互相正交的维度，每一个都不能 cover 另外两个
+      </p>
+    </div>
+
+    <div class="lib-cycle">
+      <div class="lib-stage-card">
+        <span class="stage-num">维度 01</span>
+        <h4>信源质量 <em>tier</em></h4>
+        <div class="stage-tag">这条数据来自哪里 —— 决定了它的可信天花板</div>
+        <ul>
+          <li><strong>T1</strong> 一手硬数据 —— 招股书 / 年报 / 季报 / 官方公告</li>
+          <li><strong>T2</strong> 已验证 vendor —— Capital IQ / yfinance / AKShare 等 vendor 直接输出的<strong>非预测</strong>字段</li>
+          <li><strong>T3</strong> Forecast / 共识 / 单源 web —— 卖方一致预期、Bloomberg 共识（≥ 2 underlying）、公众号披露、单一调研口径</li>
+          <li><strong>T4</strong> 单源 DR 推断 —— 必须 footnote 标注，不能进交付物正文</li>
+        </ul>
+      </div>
+
+      <div class="lib-stage-card">
+        <span class="stage-num">维度 02</span>
+        <h4>时效性 <em>as_of</em></h4>
+        <div class="stage-tag">这条数据是什么时候的 —— 再硬的数据过期了也得降级</div>
+        <ul>
+          <li>每条 data point 入库就绑定 <strong>as_of date</strong></li>
+          <li>交付前 gate check 比对当前 vintage 要求；过期 data point 自动 flag —— 哪怕原本是 T1，也降级或下架</li>
+          <li>as_of 独立于 tier 计算（T1 + stale 仍然 fail），三维不互相 cover</li>
+        </ul>
+      </div>
+
+      <div class="lib-stage-card">
+        <span class="stage-num">维度 03</span>
+        <h4>交叉验证 <em>alignment</em></h4>
+        <div class="stage-tag">有多少独立来源在说同一件事 —— 单源数据天然打折</div>
+        <ul>
+          <li>单一 source 即使是 T1 也保留怀疑（口径 / 时间窗 / 错位可能）</li>
+          <li>多源对齐 → trust 显著提升；多源冲突 → 按 tier + 时间锚定仲裁</li>
+          <li>买方 alpha 经常藏在<strong>同事实多源口径不一致</strong>的 gap 里 —— gap 本身就是研究入口</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lib-substrate" style="margin-top: 32px;">
+      <div class="sub-label">data-validator registry 的设计思考</div>
+      <p>三个维度相互正交 —— 意味着<strong>不能用单一指标概括 trust</strong>。Registry 给每条 data point 同时存三个独立标签：tier + as_of + source(s)。下游 skill 引用时按所有三个维度决策。Derived data 走<strong>木桶原则</strong>继承最差 tier；但时效性和对齐度<strong>独立计算</strong>，不被 tier 覆盖</p>
+      <p>所以"为什么这条数据可以进 deck"不再是 LLM 的临场判断 —— 而是 registry 在交付前自动跑的三维检查。这把 data trust 从 ad-hoc judgement 变成了<strong>可审计的工程问题</strong>。这也是 data-validator 作为 cross-cutting QC 治理放在 L0 的根本原因 —— 它不属于任何业务层，它是每一层都得遵守的<em>物理定律</em></p>
+      <p style="margin-top: 14px; font-size: 13.5px; color: var(--text-3);">→ 延伸阅读（含真实 registry schema + 木桶原则示例 + L0 cross-cutting 的工程理由）：<a href="#" onclick="event.preventDefault(); openDocReader('essay-data-validator');" style="color: var(--accent); text-decoration: underline;">data-validator 机制 · 三维正交模型</a></p>
+    </div>
+
+    <div class="submod-head" style="margin-top: 96px;">
+      <div class="submod-label">02 · c — Verified Fact & Thesis Truth Base</div>
+      <h3>活 wiki —— 一个 <em>fact 集合</em>知识库 + verified thesis truth base</h3>
+      <p class="submod-lede">
+        活 wiki 不是"持久化记忆"，本质上是一份 <strong>fact 集合知识库 + verified thesis truth base</strong> —— 经过反复交叉验证、已经 refine 过的事实和结论的整合层（不是材料归档、不是 LLM 记忆）。它有两个用途：(1) 下游任务（生成 deck / 模型 / memo / 调研问题清单）直接拉它做 base，<strong>不用每次从零开始</strong>；(2) 人可以直接打开阅读，看到当前 thesis / 最近研究动作 / 待追问的问题 / 已识别矛盾的<strong>高密度信息流</strong>。一份合格的活 wiki 同时服务这两个读者 —— 机器和人共用同一份 truth base
+      </p>
+    </div>
+
+    <div class="lib-cycle">
+      <div class="lib-stage-card">
+        <span class="stage-num">用途 A · 机器</span>
+        <h4>下游任务的 <em>Truth Base</em></h4>
+        <div class="stage-tag">不用每次从零开始 —— 生成 deck / 模型 / memo 直接拉</div>
+        <ul>
+          <li>每条 claim cross-link 到源 visiting record / 卖方研报，全程可追溯</li>
+          <li>数字带 <strong>tier + as_of + sources</strong> 三维标签，下游 gate check 自动跑三维验证</li>
+          <li>不依赖 prompt 临场塞资料 —— skill 引用 wiki 即引用 verified truth</li>
+        </ul>
+      </div>
+
+      <div class="lib-stage-card">
+        <span class="stage-num">用途 B · 人</span>
+        <h4>可直接读的 <em>信息流</em></h4>
+        <div class="stage-tag">打开 wiki 一眼看到"我们当前怎么看"，不是旧 snapshot</div>
+        <ul>
+          <li>14 段标准结构：Bull / Bear / Tail Risk / Key Guidance / Known Truth / 近期 Thesis 等</li>
+          <li>§4 Key Take-Away 每天滚动聚合 7 桶（研究 / 公告 / 卖方 / 纪要 / 新闻 / 监管 / 竞品动态）</li>
+          <li>估值段每天按最新股价实时缩放；催化剂日历持续巡查；矛盾点显式标红</li>
+        </ul>
+      </div>
+
+      <div class="lib-stage-card">
+        <span class="stage-num">机制 · 越积越厚</span>
+        <h4>Base 复利 —— <em>Compound</em></h4>
+        <div class="stage-tag">每次研究都把下次任务的 base 抬高一层</div>
+        <ul>
+          <li>四角同步（OneNote ↔ NLM ↔ WebDAV ↔ Obsidian）确保 fact 集合不丢</li>
+          <li>Q&amp;A 双链：今天的答案归档 + 更新 wiki，明天 vault scan 起点已抬高</li>
+          <li>三个季度后，wiki 不再是材料汇总，而是反复验证的 <strong>verified thesis truth</strong> 集合</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lib-substrate" style="margin-top: 32px;">
+      <div class="sub-label">为什么这是哲学层面的基座</div>
+      <p>活 wiki 不只是 "存个文件" —— 它是<strong>把零散原始材料经过验证 / 对齐 / refine 后，整合成 verified truth + thesis</strong> 的那一层。原始材料（visiting record / 卖方研报 / 公众号 / 模型 / 调研笔记）作为<em>raw input</em>持续流入；活 wiki 作为<em>refined output</em>持续生长 —— 中间靠 librarian 的跨源仲裁、健康检查、Q&amp;A 双链等机制做"提纯"</p>
+      <p>这一层的存在，决定了 agent 跟 LLM context 的关系：临时 context 处理眼前任务，活 wiki 提供<strong>持续 refine 的 fact + thesis truth base</strong>。RAG / prompt 临场塞资料只能 cover 表层 —— 真正的研究伙伴必须有一份在所有 session 之外都持续生长的 verified truth 集合，让每次新任务都从一个比上次更高的 base 开始。这是为什么没有活 wiki 的 agent 再聪明也只能是工具，有活 wiki 的 agent 才可能成为<em>研究伙伴</em></p>
+      <p style="margin-top: 14px; font-size: 13.5px; color: var(--text-3);">→ 具体实现见 <a href="#modules" style="color: var(--accent); text-decoration: underline;">§03·a Memory System</a>（四角同步）和 <a href="#modules" style="color: var(--accent); text-decoration: underline;">§03·b Librarian</a>（三阶段循环 + 真实活 wiki sample）</p>
+    </div>
+  </div>
+</section>
+
+<!-- §03 MODULES -->
+<section class="block" id="modules">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-num">03 / 模块拆解 · 配 samples</div>
+      <h2 class="section-title">撑起这套系统的<em>三个</em>模块</h2>
+      <p class="section-lede">
+        Memory 持久化是地基，Librarian 是地基之上的主动大脑，IC Memo Pipeline 是最终产物。每一个都是独立的设计练习 —— 哪些自动化、哪些留给人判断、接缝在哪里
+      </p>
+    </div>
+
+    <!-- 03·a Memory -->
+    <div class="submod-head first">
+      <div class="submod-label">03 · a — Memory System</div>
+      <h3>一个持久化的<em>第二大脑</em>，不只是聊天记录</h3>
+      <p class="submod-lede">
+        LLM 的 context window 会扩张也会压缩；对话会结束。在 session 之间能持续存在的东西，决定了 agent 感觉像"长期搭档"还是"每天早上要重新介绍一次的工具"。系统同时往四个节点写入 —— 任一节点变更，自动同步到另外三个
+      </p>
+    </div>
+
+    <div class="loop-wrap">
+      <div class="loop-grid">
+        <div class="loop-node">
+          <div class="ln-name">OneNote</div>
+          <div class="ln-role">个人笔记 · 会议纪要</div>
+        </div>
+        <div class="loop-node">
+          <div class="ln-name">NotebookLM</div>
+          <div class="ln-role">语义检索 · 跨 transcript Q&amp;A</div>
+        </div>
+        <div class="loop-node">
+          <div class="ln-name">WebDAV（坚果云）</div>
+          <div class="ln-role">工作文档 · 模型 · deck</div>
+        </div>
+        <div class="loop-node">
+          <div class="ln-name">Obsidian vault</div>
+          <div class="ln-role">5,950 文件原子化片段库</div>
+        </div>
+        <div class="loop-center">four-corner<br>sync loop</div>
+      </div>
+    </div>
+
+    <div style="max-width: 760px;">
+      <p style="font-family: var(--font-serif); font-size: 16.5px; color: var(--text-2); line-height: 1.8; margin-bottom: 16px;">
+        关键洞察不在四个节点本身，而在"<strong style="color: var(--text)">写一次就够了</strong>"。开会时往 OneNote 写一条 memo，几分钟后 NotebookLM 能跨文档搜到，Obsidian vault 里已经是原子化片段，WebDAV 上有备份。下一个需要这条信息的 agent 直接找到 —— 不需要我再喂一遍
+      </p>
+      <p style="font-family: var(--font-serif); font-size: 16.5px; color: var(--text-2); line-height: 1.8;">
+        这是后面所有东西的地基。没有持久化记忆，每次 agent run 都从零开始；有了它，每次 session 都在复利
+      </p>
+    </div>
+
+    <!-- 03·b Librarian -->
+    <div class="submod-head">
+      <div class="submod-label">03 · b — Librarian</div>
+      <h3>从记忆系统升级到<em>主动</em>研究助手</h3>
+      <p class="submod-lede">
+        §03·a 的 memory 是被动的 —— 它存。当 vault 文件超过 5,000 之后问题翻转：<strong>今天我该看什么？哪些 thesis 过时了？下一步该问什么？</strong> Librarian 是一个三阶段循环，把 vault 变成一个真正在工作的分析师助手。每个阶段喂养下一个 —— 而下一轮循环的起点永远比上一轮高一层
+      </p>
+    </div>
+
+    <div class="lib-cycle">
+      <div class="lib-stage-card">
+        <span class="stage-num">Stage 01</span>
+        <h4>搭建 &amp; <em>维护</em></h4>
+        <div class="stage-tag">一个活的 coverage wiki，跨源仲裁内嵌其中</div>
+        <ul>
+          <li><strong>每家公司 14 段标准 wiki</strong> —— 每条 claim 都 cross-link 到源 visiting record</li>
+          <li><strong>§3 估值实时缩放</strong> —— 每天按最新股价对模型估值整体缩放；模型本身季度更新一次</li>
+          <li><strong>§4 Key Take-Away · 7 桶聚合</strong> —— 研究活动 / 公告 / 卖方研报 / 会议纪要 / 新闻 / 监管 / 竞品动态</li>
+          <li><strong>每天对 focus list 跑 4 类 WebSearch query</strong>（company news / regulatory / competitor / announcement）—— 一个永远不会忘记跑搜索的 junior RA</li>
+          <li><strong>两层健康检查</strong>：状态巡查（TP 过期、临近财报、股价偏离 TP 过大），再做跨源冲突扫描</li>
+          <li><strong>跨源仲裁</strong>按 source tier（A vs B）+ 时间锚定；判不准的不强选，主动 raise 给人</li>
+        </ul>
+      </div>
+
+      <div class="lib-stage-card">
+        <span class="stage-num">Stage 02</span>
+        <h4>任务级<em>辅助</em></h4>
+        <div class="stage-tag">有任务的时候，vault 按需生成一份 briefing</div>
+        <ul>
+          <li><strong>Question list → vault 全扫</strong>：每个问题下方自动附"vault 扫描初步结论"，从纪要 / 研报 / 模型 / 公众号里跨源拼接</li>
+          <li><strong>跨源综合</strong> —— 散布在不同时间、不同来源的证据被拼成一张完整画面，像高级分析师会前做的功课</li>
+          <li><strong>认知偏差主动纠偏</strong>：当你的假设（"FX 收益近 100 亿"）和 vault 真实数据（"管理层口径全年 27 亿"）不一致，会前就被标红了 —— 在会上才发现就晚了</li>
+          <li><strong>已知事实 / 已知矛盾 / 建议追问方向</strong>逐题附下</li>
+          <li><strong>产出是一份可打印的会前 briefing</strong>，不是一堆搜索结果</li>
+        </ul>
+      </div>
+
+      <div class="lib-stage-card">
+        <span class="stage-num">Stage 03</span>
+        <h4>闭环 &amp; <em>复利</em></h4>
+        <div class="stage-tag">会后：归档、回填、级联更新，把下次的起点抬高</div>
+        <ul>
+          <li><strong>录音 → ASR 转写 → 结构化纪要</strong>归档到 <code>visiting record/</code></li>
+          <li><strong>逐题回填</strong>：每题对应回答 + 来源 + 日期 + 状态标签 —— <em>asked / partial / skipped / avoided / contradicted</em></li>
+          <li><strong>wiki 级联更新</strong>：新数据更新对应段落；Key Take-Away 刷新；催化剂日历加入分析师提到的时间节点</li>
+          <li><strong>Next steps 自动生成</strong>，来自"还缺什么" —— 下次该问什么、要验证什么、要监控什么</li>
+          <li><strong>Q&amp;A 双链复利</strong>：今天的答案先以 <strong>T3 候选信源</strong> 入库；经多次验证（health check 定期巡检 + 跨源比对 + 后续 vault scan 引用率）才晋级到 T2 / T1。只有验证过的内容才成为明天 vault scan 的 baseline context —— 每轮循环 question list 起点更高，但起点必须是已验证的</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="lib-cycle-loop">
+      <span class="loop-arrow"><span>↻</span> 每轮循环把下一轮的起点抬高（验证过的部分）</span>
+    </div>
+
+    <div class="lib-substrate">
+      <div class="sub-label">三个阶段下面的底层基质</div>
+      <p>三阶段循环跑在 §02·b 的<strong>三维数据信任模型</strong>之上 —— tier / as_of / alignment 三个独立维度，每条 claim 入库就同时标这三个标签。Librarian 在每个阶段都对这三维做检查：</p>
+      <p><strong>Stage 01 入库</strong>：data-validator 给新增 claim 自动 assign tier（T1-T4），绑定 as_of date，记录所有 source。<strong>Stage 02 调用</strong>：question list 拼接 vault scan 答案时按 tier 排序、按 alignment 加权 —— T3/T4 单源内容标红，提示分析师追问。<strong>Stage 03 闭环</strong>：新 Q&amp;A 答案先以 T3 候选入库，经后续 health check 反复巡检 + 多源对齐验证后晋级 T2；被新数据推翻则降级</p>
+      <p><strong>Health check 双层巡检</strong>：状态层（TP 过期 / 临近财报 / 价格偏离 / 催化剂到期）+ 跨源冲突层（管理层口径 vs 卖方 forecast / 新研报 vs 旧研报 / 模型数字 vs 公众号披露）。同公司多源冲突按 tier + 时间锚定自动仲裁；真模糊的 gap 主动 raise 给我</p>
+      <p>质量控制不是交付前那一道单独的检查 —— 它在每一步都在跑，三维都在跑。所以最终的 IC Memo 或 deck 是过程的自然产物，不是事后补救</p>
+    </div>
+
+    <div class="lib-outputs-label">这套循环的真实产出 —— 每阶段一份</div>
+
+    <!-- LIB OUTPUT 1: Geely.md - Stage 01 -->
+    <div class="lib-output">
+      <div class="lib-output-head">
+        <div>
+          <div class="lo-type">Holdings Wiki · Coverage</div>
+          <h4>Geely.md <em>— 吉利汽车 / 0175.HK</em></h4>
+          <div class="lo-meta">更新于 2026-05-14 · 自动综合自 12 份 visiting records</div>
+        </div>
+        <div class="lo-stagepill">Stage 01 output</div>
+      </div>
+      <div class="lib-output-body">
+        <div class="lib-preview">
+          <div class="preview-tag">摘录 · §1.1 Bull Case</div>
+          <h5>1.1 Bull Case</h5>
+          <p><strong>核心逻辑</strong>：极氪高端化突破 + iHEV 切入全球燃油车替代市场 + 出海提速，三条主线同时兑现</p>
+          <ol>
+            <li><strong>极氪品牌基因确认</strong> —— 9X / 8X 双爆款验证团队、产品、渠道三要素齐备。9X 单车利润 7-8 万元、8X 约 4-5 万元（GPM &gt;38%），对标 BBA 30-50 万区间。<span class="src">← visiting record · 2026-04-21 卖方分析师交流</span></li>
+            <li><strong>iHEV 差异化第二牌</strong> —— 全球年销约 9000 万台，5000-6000 万仍是传统燃油车。吉利 iHEV 可切入丰田 HEV 主导的全球市场。<span class="src">← BOCI 分享 · 2026-04-30</span></li>
+            <li><strong>出海提速</strong> —— Q1 出口 +126%，全年目标 75 万辆，轻资产 + 合作伙伴双轨。<span class="src">← 26Q1 post call · 2026-04-30</span></li>
+          </ol>
+        </div>
+        <div class="lib-explain">
+          <h5>这是什么</h5>
+          <p>一份活的 coverage wiki —— 对一家持仓的当前 working hypothesis。<strong>14 段标准结构</strong>，从 thesis 到 valuations、key guidance、known truth、recent thesis。每条 claim 都 cross-link 到它来源的 visiting record 或卖方研报</p>
+          <h5>怎么生成的</h5>
+          <p>每次新 visiting record 落到 vault，Librarian 的 Stage 1 自动 ingest。Claim 被提取、匹配到现有 thesis 段落、生成 wiki diff 提案。<strong>所有 wiki 改动我手动批准。</strong> 来源间的冲突主动 raise 出来，不 auto-merge</p>
+          <h5>为什么重要</h5>
+          <p>半年前的 thesis 会随着新数据到来悄悄漂移。Wiki 保持 "我现在相信什么、为什么" 的 current consensus 版本 —— 可审计、源头可追溯、绝不投机</p>
+        </div>
+      </div>
+      <div class="lib-foot">
+        <span>4 条 Bull · 5 条 Bear · 3 条 Tail Risk · 12 条 cross-link</span>
+        <a href="#" onclick="event.preventDefault(); openDocReader('geely-wiki');">打开完整 wiki →</a>
+      </div>
+    </div>
+
+    <!-- LIB OUTPUT 2: Chery.md - Stage 01 -->
+    <div class="lib-output">
+      <div class="lib-output-head">
+        <div>
+          <div class="lo-type">Holdings Wiki · Coverage</div>
+          <h4>Chery.md <em>— 奇瑞汽车 / 9973.HK</em></h4>
+          <div class="lo-meta">更新于 2026-05-13 · IPO 后机构覆盖 + 估值重估周期跟踪</div>
+        </div>
+        <div class="lo-stagepill">Stage 01 output</div>
+      </div>
+      <div class="lib-output-body">
+        <div class="lib-preview">
+          <div class="preview-tag">摘录 · §1.1 Bull Case</div>
+          <h5>1.1 Bull Case</h5>
+          <p><strong>核心逻辑</strong>：中国出口量最大的车企，港股上市后（2025-09-25）进入机构覆盖 + 估值重估周期</p>
+          <ol>
+            <li><strong>出海绝对量领先</strong> —— 2026 年出海体量目标 160-180 万辆，海外占比远高于国内。中东、南美、俄罗斯渗透深。<span class="src">← BOC 专家访谈</span></li>
+            <li><strong>盈利增长确定性</strong> —— FY25 NI GAAP 2,647 USD mn (+35% YoY); consensus FY26E 2,875 (+9%)</li>
+            <li><strong>多品牌矩阵</strong> —— 奇瑞 / 星途 / iCAR / 智界（华为合作），覆盖大众到高端全价位</li>
+            <li><strong>NI margin 优于 Geely</strong> —— FY26E 5.5% vs Geely 4.9%</li>
+          </ol>
+        </div>
+        <div class="lib-explain">
+          <h5>为什么这份比普通 wiki 更值得讲</h5>
+          <p>奇瑞 2025 年 9 月才上市。几乎没有历史卖方覆盖可参考 —— 每条 claim 都得从一手材料（招股书、近期管理层访谈、CapIQ consensus）source-trace 出来</p>
+          <h5>和 Geely 的不同</h5>
+          <p>Geely wiki 是 12 个月共识的提炼，这一份更像是<strong>仍在 working 的 hypothesis</strong>。Bear case 占同等权重 —— 见下面 GPM-drivers 分析，那是最深的担忧：海外护城河本质上是不是个 transition window margin？</p>
+        </div>
+      </div>
+      <div class="lib-foot">
+        <span>cross-link 到 8 份 visiting records · 3 份卖方研报 · CapIQ consensus</span>
+        <a href="#" onclick="event.preventDefault(); openDocReader('chery-wiki');">打开完整 wiki →</a>
+      </div>
+    </div>
+
+    <!-- LIB OUTPUT 3: GPM-drivers - Stage 02 -->
+    <div class="lib-output">
+      <div class="lib-output-head">
+        <div>
+          <div class="lo-type">任务级辅助 · 跨源综合</div>
+          <h4>Chery GPM Drivers <em>— 五个季度从 10.6% 反弹到 16.0%</em></h4>
+          <div class="lo-meta">2026-05-11 · 综合自卖方研报 + 专家访谈 + AKShare</div>
+        </div>
+        <div class="lo-stagepill">Stage 02 output</div>
+      </div>
+      <div class="lib-output-body">
+        <div class="lib-preview">
+          <div class="preview-tag">摘录 · §1-2 定量拆解</div>
+          <h5>季度 GPM 走势</h5>
+          <table>
+            <thead><tr><th>Quarter</th><th>GPM</th><th>Export %</th></tr></thead>
+            <tbody>
+              <tr><td>FY22</td><td class="num">14.8%</td><td>~50%</td></tr>
+              <tr><td>FY23</td><td class="num">16.0%</td><td>50.0%</td></tr>
+              <tr><td>24Q4</td><td class="num">10.6%</td><td>—</td></tr>
+              <tr><td>25Q1</td><td class="num">12.4%</td><td>—</td></tr>
+              <tr><td>25H2</td><td class="num">14.5%</td><td>47.8%</td></tr>
+              <tr><td><strong>26Q1</strong></td><td class="num"><strong>16.0%</strong></td><td><strong>65.4%</strong></td></tr>
+            </tbody>
+          </table>
+          <h5>三个驱动力 —— 定量拆解</h5>
+          <ol>
+            <li><strong>出口占比从"高"到"极高"</strong> —— 贡献约 1.0-1.3ppt</li>
+            <li><strong>海外动力结构升级</strong> —— 贡献约 2.5-3.0ppt</li>
+            <li><strong>规模效应 + 成本下行</strong> —— 贡献约 1.0-1.5ppt</li>
+          </ol>
+        </div>
+        <div class="lib-explain">
+          <h5>这份回答的问题</h5>
+          <p>"奇瑞 GPM 为什么从 10.6% 五个季度反弹到 16.0%？" —— 一次研究讨论中提出。Librarian 在 Stage 02 拼出答案：拉 AKShare 季度 GPM、三份卖方拆解、一份专家访谈、IPO 招股书</p>
+          <h5>非显而易见的发现</h5>
+          <p>把 +5.4ppt 的变动拆成三个驱动力 —— 但标出来 <strong>2.5-3.0ppt（驱动 2）是最高 margin 的出口结构升级</strong>。如果这个 mix 不持续，floor 比当前 run-rate 暗示的要低得多</p>
+          <h5>它链接到什么</h5>
+          <p>被下方 CICC question list 直接引用 —— Question 0.4 让管理层回答：这是 moat 还是 transition-window margin？</p>
+        </div>
+      </div>
+      <div class="lib-foot">
+        <span>7 个 source · 1 份定量拆解 · 3 条 caveat</span>
+        <a href="#" onclick="event.preventDefault(); openDocReader('gpm-drivers');">打开完整分析 →</a>
+      </div>
+    </div>
+
+    <!-- LIB OUTPUT 4: CICC question list - Stage 02+03 -->
+    <div class="lib-output">
+      <div class="lib-output-head">
+        <div>
+          <div class="lo-type">会前 briefing → 会后闭环</div>
+          <h4>CICC 分析师交流 <em>— question list + vault 扫描答案 + 会后状态追踪</em></h4>
+          <div class="lo-meta">v3.1 · 准备日期 2026-05-11 · 交流 2026-05-13 · 28 个问题、4 个优先级</div>
+        </div>
+        <div class="lo-stagepill">Stage 02 + 03</div>
+      </div>
+      <div class="lib-output-body">
+        <div class="lib-preview">
+          <div class="preview-tag">摘录 · §0 空头核心 concerns + 会后状态</div>
+          <h5>§0 Reality-check（前置必问）</h5>
+          <p><strong>0.1</strong> 国内零售 7.38 万被零跑追平 —— 国内为什么落后？</p>
+          <p><strong>0.2</strong> 新能源无爆款 —— 60 款 SUV 内耗、资源分散问题？</p>
+          <p><strong>0.3</strong> 海外护城河本质质疑 —— NEV 转型 vs 燃油车出口窗口期红利？</p>
+          <p><strong>0.4</strong> 海外 vs 国内动力拆分毛利对照 —— 混动 18% / 燃油 10-12% / 纯电个位数 vs 国内 proxy；单车 NI 1-1.1 万 vs 5000-6000 元缺口分析</p>
+          <h5>会后状态（2026-05-13）</h5>
+          <table>
+            <thead><tr><th>状态</th><th>数量</th><th>含义</th></tr></thead>
+            <tbody>
+              <tr><td><span class="pill">Answered</span></td><td class="num">13</td><td>CICC 给了清晰可引用数据</td></tr>
+              <tr><td><span class="pill">Partial</span></td><td class="num">5</td><td>提到但未深入</td></tr>
+              <tr><td><span class="pill">Skipped</span></td><td class="num">9</td><td>时间限制未问到</td></tr>
+              <tr><td><span class="pill">Avoided</span></td><td class="num">1</td><td>问了但 CICC 未正面回答</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="lib-explain">
+          <h5>Stage 02 —— 会前 prep</h5>
+          <p>会前搭建。Librarian 对每个问题做 vault 全扫描，附"vault 扫描初步结论"—— 已知什么、源头之间哪里矛盾、值得继续追问什么。三个版本演化：<strong>v1 标准 coverage 问题 → v2 把空头核心 concerns 前置 → v3 把"海外护城河是否实际上是 transition window"作为最深的关切浮上来</strong></p>
+          <h5>Stage 03 —— 会后闭环</h5>
+          <p>会后逐题状态记录：13 Answered / 5 Partial / 9 Skipped / 1 Avoided。"Avoided"那一题是最有意思的信号 —— 分析师无法或不愿在录音上面回答。逐题回填触发 wiki 级联：新数据更新对应 §，催化剂日历加入时间节点，next-step 从"还缺什么"自动生成</p>
+        </div>
+      </div>
+      <div class="lib-foot">
+        <span>28 个问题分 4 个优先级 · 会前 prep + 会后状态追踪</span>
+        <a href="#" onclick="event.preventDefault(); openDocReader('cicc-list');">打开完整 question list →</a>
+      </div>
+    </div>
+
+    <!-- 03·c IC Memo Pipeline -->
+    <div class="submod-head">
+      <div class="submod-label">03 · c — IC Memo Pipeline</div>
+      <h3>六个阶段，从<em>原始 filings</em> 到一份完成的 deck</h3>
+      <p class="submod-lede">
+        Librarian 是一个连续维护状态的循环；IC Memo Pipeline 是一次性 build。点任意一个 stage 看它跑什么 skill、产出什么 artifact、对应的 eval 抓什么 bug
+      </p>
+    </div>
+
+    <section class="pipeline-section" id="pipeline">
+      <div class="container">
+        <div class="pipeline-stage-wrap">
+          <div class="pipeline-stages">
+            <div class="pipeline-node active" data-stage="0">
+              <div class="pn-phase">Phase 0</div>
+              <div class="pn-name">原始 filings</div>
+              <div class="pn-skill">report-prep-nlm</div>
+            </div>
+            <div class="pipeline-arrow"><svg viewBox="0 0 28 18"><path d="M2 9 L26 9 M20 4 L26 9 L20 14" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="pipeline-node" data-stage="1">
+              <div class="pn-phase">Phase 1</div>
+              <div class="pn-name">NLM ingest</div>
+              <div class="pn-skill">notebooklm-router-py</div>
+            </div>
+            <div class="pipeline-arrow"><svg viewBox="0 0 28 18"><path d="M2 9 L26 9 M20 4 L26 9 L20 14" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="pipeline-node" data-stage="2">
+              <div class="pn-phase">Phase 2</div>
+              <div class="pn-name">Outliner</div>
+              <div class="pn-skill">ic-memo-outliner</div>
+            </div>
+            <div class="pipeline-arrow"><svg viewBox="0 0 28 18"><path d="M2 9 L26 9 M20 4 L26 9 L20 14" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="pipeline-node" data-stage="3">
+              <div class="pn-phase">Phase 3</div>
+              <div class="pn-name">Data registry</div>
+              <div class="pn-skill">data-validator</div>
+            </div>
+            <div class="pipeline-arrow"><svg viewBox="0 0 28 18"><path d="M2 9 L26 9 M20 4 L26 9 L20 14" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="pipeline-node" data-stage="4">
+              <div class="pn-phase">Phase 4</div>
+              <div class="pn-name">Renderer</div>
+              <div class="pn-skill">ic-pptx</div>
+            </div>
+            <div class="pipeline-arrow"><svg viewBox="0 0 28 18"><path d="M2 9 L26 9 M20 4 L26 9 L20 14" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="pipeline-node" data-stage="5">
+              <div class="pn-phase">Phase 5</div>
+              <div class="pn-name">Eval gates</div>
+              <div class="pn-skill">5-phase QC + Codex</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipeline-detail" id="pipeline-detail"></div>
+
+        <div class="pipeline-output-link">
+          <span class="small-cap">这条 pipeline 的产物示例</span>
+          <a class="pipeline-output-card" href="#" onclick="event.preventDefault(); openModal('hv-deck');">
+            <span class="pic-icon">PPTX</span>
+            <span>
+              <div class="pic-title">HV Transmission · 行业深度研究</div>
+              <div class="pic-meta">17.5 MB · 多 agent 并行 build · 跨模型 eval</div>
+            </span>
+            <span class="pic-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- §04 COWORK -->
+<section class="block" id="cowork">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-num">04 / Commercial Perspective</div>
+      <h2 class="section-title">被低估的中间一层：<em>Professional Cowork Platform</em></h2>
+      <p class="section-lede">
+        两个月构建这套系统，让我对 AI 产品格局形成了一个比较强的判断。我做的这套东西不是 chatbot，也不是 coding tool —— 它在两者之间，而这一层在中国市场<strong>结构性供给不足</strong>
+      </p>
+    </div>
+
+    <div class="cowork-grid">
+      <div class="cowork-body">
+        <p>当下 AI 产品市场已经有两条被反复验证的赛道。<strong>Chatbot</strong> 饱和 —— 每家模型公司每家国内平台都有一个，用户教育早完成了，DAU 漂亮，但工作流沉淀很薄。<strong>Coding 工具</strong>填充很快 —— Claude Code、Cursor、Cline 证明了用户愿意为任务级生产力付费。但 coding 的价值很容易外溢到 IDE 和编排层，模型成了可替换的算子</p>
+
+        <p>真正还没被占住的，是中间那一层 —— 给"非代码的专业工作流"用的产品。人们已经在用 AI 做 earnings review、行业研究、法律 memo、咨询交付、结构化写作。但还没有产品把这些用法承接成 <em>稳定、可复用、可协作、可沉淀</em>的工作流资产</p>
+
+        <p>我把这一层叫 <strong>Professional Cowork Platform</strong>。它和 chatbot 不同（没工作流沉淀），和 coding 也不同（价值不外溢）。它的商业逻辑也不一样：它积累的是工作流资产，留存来自沉淀，用户越用越难离开。这种商业质量，比聊天和代码都要厚得多</p>
+
+        <p>Anthropic 的 Cowork 是这个方向最早的尝试之一，但读起来像半成品 —— 更像是为 managed agent 2B 产品试水铺路，顺便做的。中国市场基本是空白：Kimi、文心、通义、豆包都有成熟 chatbot；Kimi Code、通义灵码在填 coding；<strong>但真正的 Professional Cowork 没人在做。</strong></p>
+
+        <p>我自己两个月的经历就是论据。学 LLM、harness engineering、agent management 一路磕磕绊绊，本科还有点编程老底子才搭完一个个人系统进入"专业工作平台"状态。这是典型的 <em>configure first, value later</em> 路径，对小白用户极不友好。真正对的产品应该把顺序反过来：<strong>让用户先直接完成任务，再让系统识别重复 pattern、一键固化成 workflow</strong>。这个顺序的反转，才是这个市场最大的机会</p>
+
+        <p>再往前一步 —— 下一代 Cowork 的底层会从"无状态工具调用"进化到 <strong>持久化 Agent 池</strong>：agent 按行业 / 职能划分、有自己的 expertise domain，配个体 / 团队 / 组织三层记忆，技能栈运行中可从"技能市场"加载演进，Orchestrator 从"执行者"变成"分配者"</p>
+
+        <p>而把 AI 真正落进投研 / 法律 / 医疗这类垂直领域，核心是建一套<strong>让领域专家高效带 AI 迭代试错</strong>的基础设施（error log → pattern → gate / benchmark）。现在恰好是一个少见的时间窗口：模型 Agent 能力刚过"白领稳定可用"的门槛，需求被反复验证、但正确的供给还没出现，而国际巨头受合规限制、大厂还没明确押注、纯 2C 模型公司缺中间层 —— 这种"三不管地带"不会长期存在</p>
+      </div>
+
+      <div class="cowork-side">
+        <div class="side-card">
+          <h5>三层 AI 产品图</h5>
+          <div class="layers-mini">
+            <div class="layer-row">
+              <span class="layer-name">Chatbot</span>
+              <span class="layer-status"><span class="filled">饱和</span> · 沉淀薄</span>
+            </div>
+            <div class="layer-row">
+              <span class="layer-name">Coding</span>
+              <span class="layer-status"><span class="filled">填充中</span> · 价值外溢</span>
+            </div>
+            <div class="layer-row">
+              <span class="layer-name">Cowork</span>
+              <span class="layer-status"><span class="empty">结构性空缺</span> · 本文论点</span>
+            </div>
+          </div>
+        </div>
+        <div class="side-card">
+          <h5>"有功能"不等于"有平台"</h5>
+          <p>Docs / Slides / Sheets 这些功能模块 ≠ Cowork。真正的 cowork 平台需要三件事同时成立：<strong>workflow 闭环</strong>（任务 → 可复用 workflow → 共享模板）、<strong>资产归属</strong>（输出 / 模板 / context 组织成可携带资产）、<strong>协作单元</strong>（团队层而不只是单用户）。当下产品有功能，但没平台</p>
+        </div>
+        <div class="side-card">
+          <h5>下一代形态：<strong>持久化 agent</strong></h5>
+          <p>当下的 cowork 还是<em>用户驱动 + workflow 沉淀</em>。再往前一步是 <strong>persistent agent based</strong> —— 系统不止是工作流模板，而是有持久记忆 / 主动跟踪 / 跨 session 状态的 agent，能在你不开机的时候继续替你工作。我这套 Librarian + 四角知识闭环就是朝这个方向在走 —— 它已经不是"按下才启动的工具"</p>
+        </div>
+        <div class="side-card">
+          <h5>垂直领域怎么落地</h5>
+          <p>把 AI 落进投研 / 法律 / 医疗，核心不是调模型 —— 是建一套<strong>让领域专家高效带 AI 迭代试错</strong>的基础设施（error log / 归一化 feedback / gate / benchmark）。这正是垂直 AI 商业化的核心。<a href="#" onclick="event.preventDefault(); openDocReader('essay-failure');">失败是金矿 · not even wrong</a> 完整展开了这套飞轮 + FAGB 实例</p>
+        </div>
+        <div class="side-card">
+          <h5>完整论证</h5>
+          <p>完整版：<a href="#" onclick="event.preventDefault(); openDocReader('cowork-strategy');">Cowork 平台战略思考</a>。起源故事 —— 为什么离开旧平台、重头搭建：<a href="#" onclick="event.preventDefault(); openDocReader('cowork-migration');">迁移到 Claude Code</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- READING LIST -->
+<section class="block" id="reading">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-num">延伸阅读</div>
+      <h2 class="section-title">沿途写下的<em>那些文章</em></h2>
+      <p class="section-lede">
+        架构深度拆解、设计复盘、以及上文模块的长文版本。点开即可在站内 reader 阅读
+      </p>
+    </div>
+
+    <div class="reading-list">
+      <a class="reading-item" href="#" onclick="event.preventDefault(); openDocReader('essay-failure');">
+        <span class="reading-date">2026<br>05·16</span>
+        <span>
+          <div class="reading-title">失败是金矿 —— 可怕的是 not even wrong</div>
+          <div class="reading-sum">能被清楚指认的失败是资产（迭代 skill / 做成 benchmark / 反哺后训练）；可怕的是 not even wrong —— 没尺子量、连专家都不收敛的失败。含 FAGB benchmark 实例</div>
+        </span>
+        <span class="reading-arrow">→</span>
+      </a>
+      <a class="reading-item" href="#" onclick="event.preventDefault(); openDocReader('essay-data-validator');">
+        <span class="reading-date">2026<br>05·15</span>
+        <span>
+          <div class="reading-title">data-validator 机制 —— 金融数据信任的三维正交模型</div>
+          <div class="reading-sum">§02·b 的长文版。tier / as_of / alignment 三个正交维度，registry schema 设计，为什么 cross-cutting QC 放在 L0</div>
+        </span>
+        <span class="reading-arrow">→</span>
+      </a>
+      <a class="reading-item" href="#" onclick="event.preventDefault(); openDocReader('essay-ghe');">
+        <span class="reading-date">2026<br>05·13</span>
+        <span>
+          <div class="reading-title">AI Agent 三层架构 —— Guide / Hook / Eval</div>
+          <div class="reading-sum">本站围绕这一篇展开。为什么 Guide 应该轻、Eval 应该重</div>
+        </span>
+        <span class="reading-arrow">→</span>
+      </a>
+      <a class="reading-item" href="#" onclick="event.preventDefault(); openDocReader('essay-skills-net');">
+        <span class="reading-date">2026<br>05·12</span>
+        <span>
+          <div class="reading-title">Claude Code Skills Network —— 视觉架构图（65+ skills）</div>
+          <div class="reading-sum">九层架构、七条核心数据流、六个 eval 域。跨 skill 协调。</div>
+        </span>
+        <span class="reading-arrow">→</span>
+      </a>
+      <a class="reading-item" href="#" onclick="event.preventDefault(); openDocReader('essay-librarian');">
+        <span class="reading-date">2026<br>05·11</span>
+        <span>
+          <div class="reading-title">Librarian 升级 —— 从记忆系统到主动投研助手</div>
+          <div class="reading-sum">§03·b 的长文版本 —— 三阶段循环 + 某 OEM onboarding 全生命周期案例。</div>
+        </span>
+        <span class="reading-arrow">→</span>
+      </a>
+      <a class="reading-item" href="#" onclick="event.preventDefault(); openDocReader('essay-arch-v2');">
+        <span class="reading-date">2026<br>04·14</span>
+        <span>
+          <div class="reading-title">Claude Code 投研工作站架构 v2.0</div>
+          <div class="reading-sum">六层架构、~45 个 active skill、四角知识闭环。系统的 canonical map。</div>
+        </span>
+        <span class="reading-arrow">→</span>
+      </a>
+      <a class="reading-item" href="#" onclick="event.preventDefault(); openDocReader('cowork-strategy');">
+        <span class="reading-date">2026<br>04·19</span>
+        <span>
+          <div class="reading-title">Cowork 平台战略思考 —— 被低估的中间层</div>
+          <div class="reading-sum">§04 的长文版。Chatbot 饱和 / Coding 价值外溢 / Cowork 结构性空缺，以及下一代持久化 agent 形态</div>
+        </span>
+        <span class="reading-arrow">→</span>
+      </a>
+      <a class="reading-item" href="#" onclick="event.preventDefault(); openDocReader('essay-memory');">
+        <span class="reading-date">2026<br>04·14</span>
+        <span>
+          <div class="reading-title">用 Obsidian 构建持久化的投研记忆系统</div>
+          <div class="reading-sum">为什么 context window 不够。原子化笔记 + cross-link + 每日复盘怎么复利</div>
+        </span>
+        <span class="reading-arrow">→</span>
+      </a>
+      <a class="reading-item" href="#" onclick="event.preventDefault(); openDocReader('cowork-migration');">
+        <span class="reading-date">2026<br>04·06</span>
+        <span>
+          <div class="reading-title">从 Cowork 到 Claude Code —— 工作站迁移实录</div>
+          <div class="reading-sum">起源故事。Cowork 的墙：单线程卡脖子、跨 session 无记忆、断点续传不可靠。为什么离开旧平台重头搭建</div>
+        </span>
+        <span class="reading-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="closing" id="contact">
+  <div class="container">
+    <div class="closing-text">
+      <h2>如果对 <em>AI-augmented investment research</em><br>或者 agent infrastructure 感兴趣 ——</h2>
+      <p>欢迎联系，我们可以深入聊聊。这个站点只是我做过的一小部分</p>
+      <div class="contact-row">
+        <a href="mailto:willpowerju@gmail.com">willpowerju@gmail.com</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">GitHub</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="container">Prototype · 2026-05-15</div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div>
+        <div class="file-type" id="modal-type">FILE TYPE</div>
+        <h3 id="modal-title">Title</h3>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+  /* Philosophy: card expand */
+  document.querySelectorAll('.ghe-card').forEach(card => {
+    card.addEventListener('click', () => { card.classList.toggle('active'); });
+  });
+
+  /* Architecture: tabs */
+  document.querySelectorAll('.arch-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.arch-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.arch-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector(`.arch-panel[data-panel="${target}"]`).classList.add('active');
+    });
+  });
+
+  /* IC Memo Pipeline */
+  const STAGES = [
+    {
+      phase: 'Phase 0', name: '原始 filings 收集',
+      skills: ['report-prep-notebooklm', 'web-pdf-fetcher', 'capital-iq-router'],
+      output: '一个清洗过的 PDF 目录 —— 10-K/10-Q、业绩说明会 transcript、卖方研报、有 IPO 招股书的话也包括。每家公司多个 source；行业研究通常几十份 source document。',
+      eval: '机械层：hash-dedupe 保证无重复 source。Page-count sanity check 抓部分下载（常见失败模式：IR 站点返回 HTML 错误页但带 .pdf 扩展名）。'
+    },
+    {
+      phase: 'Phase 1', name: 'NotebookLM ingest + Q&A',
+      skills: ['notebooklm-router-py', 'report-prep-notebooklm', 'obsidian-librarian'],
+      output: '所有 source 装进一个 NotebookLM project，建索引、就绪做跨文档 Q&A。根据本次任务 + question pool 定制的 question list 同时跑两处 —— 新 ingest 的 NLM corpus，以及已有的活 wiki vault（§02·c 的 verified truth base）。后者让 pipeline 复用已验证的 fact 与 thesis，不从零开始，NLM corpus 只补增量。',
+      eval: '源覆盖检查：每个问题必须引用至少两个 source，引用必须带页码。独立 context Claude 对答案做抽样审查防 hallucination。'
+    },
+    {
+      phase: 'Phase 2', name: 'Outliner + thesis tree',
+      skills: ['ic-memo-outliner'],
+      output: 'Thesis tree（Bull / Bear / Tail，带 link 证据）+ 6 段 storyline + 逐 slide outline。存为 outline.md + data.xlsx —— 下游所有产物的 single source of truth。',
+      eval: 'Codex C1-C6 语义 gate。同模型 self-review 倾向接受论证链断裂；跨模型抓得到"valuation section 列了三个倍数但没说为什么选这三个" —— 这种悄悄破坏 thesis 的 bug。'
+    },
+    {
+      phase: 'Phase 3', name: 'Data registry + provenance',
+      skills: ['data-validator'],
+      output: '每个会出现在 deck 里的数字都注册到 _data_registry.json，带 source tier（A/B）、timestamp、unit、currency。下游 renderer 只能消费已注册的数字。',
+      eval: 'Schema 强制：金额类指标缺 currency 在注册时被拒。数量级 sanity：unit / value 不匹配在注册阶段就被抓，不会等到 deck 渲染出来。'
+    },
+    {
+      phase: 'Phase 4', name: 'Renderer（PPTX / DOCX）',
+      skills: ['ic-pptx', 'acme-slides-creator-json', 'navy-slides-creator-json', 'docx skill'],
+      output: '原生 PPTX 或 DOCX，完整继承品牌母版（layout、字体、配色、装饰元素）。Helper 处理所有几何，registry 处理所有数字 —— LLM 只判断 layout + flow。',
+      eval: 'pptx-repair → pptx-eval → source-clean → layout-validator。产出可交付前的 4 道检查。光 repair 阶段就抓到十几种已知渲染 bug。'
+    },
+    {
+      phase: 'Phase 5', name: '跨模型 eval',
+      skills: ['data-validator', 'check', 'codex:codex-rescue'],
+      output: '最终跨模型 gate。Codex / GPT 拿产出的 deck 对照原始 thesis tree —— deck 是不是真的论证了 outline 主张的东西？估值是不是和模型假设一致？',
+      eval: '这一层抓的是"我们交付了东西，但它没在论证我们设定要论证的东西"。最常见的 bug：deck 里的脚注数字在某次修订后和底层模型对不上。Block + 返回修订。'
+    }
+  ];
+  const stripEndPeriod = (s) => s.replace(/[。.]$/, '');
+
+  function renderPipelineDetail(idx) {
+    const s = STAGES[idx];
+    document.getElementById('pipeline-detail').innerHTML = `
+      <div class="pd-head">
+        <div>
+          <div class="pd-phase">${s.phase}</div>
+          <div class="pd-name">${s.name}</div>
+        </div>
+        <div>
+          ${s.skills.map(sk => `<span class="pd-skill-tag">${sk}</span>`).join('')}
+        </div>
+      </div>
+      <div class="pd-grid">
+        <div>
+          <h6>这一阶段产出什么</h6>
+          <p>${stripEndPeriod(s.output)}</p>
+        </div>
+        <div>
+          <h6>这里的 eval 抓什么</h6>
+          <p>${stripEndPeriod(s.eval)}</p>
+        </div>
+      </div>
+    `;
+  }
+  document.querySelectorAll('.pipeline-node').forEach(node => {
+    node.addEventListener('click', () => {
+      const idx = parseInt(node.dataset.stage);
+      document.querySelectorAll('.pipeline-node').forEach(n => n.classList.remove('active'));
+      node.classList.add('active');
+      renderPipelineDetail(idx);
+    });
+  });
+  renderPipelineDetail(0);
+
+  /* Samples modal */
+  const SAMPLES = {
+    'aapl-deck': {
+      type: 'PPTX · 买方 IC DECK',
+      title: 'AAPL · HF Investment Case',
+      desc: '一份完整的 AAPL 投资委员会 deck，走 IC Memo 生产链。从 thesis tree（Bull / Bear / Tail）开始，翻译成 6 段 storyline，再用机构级模板 renderer 逐 slide 渲染。',
+      pipeline: ['report-prep-nlm', 'ic-memo-outliner', 'data-validator', 'ic-pptx', 'pptx-repair', 'pptx-eval'],
+      meta: { '文件大小': '2.3 MB', '受众': '买方 IC', 'Render 路径': 'JSON outline → 原生 PPTX', 'QC stack': '5-phase + Codex gate', '迭代': 'V1 → V21（版本号追踪）', '模板族': 'Uninodue master' },
+      file: 'AAPL_20260428_V21.pptx'
+    },
+    'aapl-buyside': {
+      type: 'DOCX · 买方 MEMO',
+      title: 'AAPL · HF Investment Case（长文版）',
+      desc: '决策导向的买方 memo。和 deck 共享 thesis tree，以叙述形式呈现。走 docx-js 路径。短、决断 —— PM 在批准建仓前会看的格式。',
+      pipeline: ['ic-memo-outliner', 'data-validator', 'docx skill'],
+      meta: { '文件大小': '22 KB', '受众': '买方 PM', '语气': '决策导向', '长度': '简洁', '模板': 'Uninodue master', '源头': '与 deck 共享 outline' },
+      file: 'AAPL_HF_Investment_Case_Uninodue_V2.docx'
+    },
+    'aapl-sellside': {
+      type: 'DOCX · 卖方 FULL REPORT',
+      title: 'AAPL · 卖方 Initiating Coverage',
+      desc: '同一套 deep research workflow，不同受众。卖方版本是 comprehensive 的 —— 覆盖业务概述、行业 context、模型 walkthrough、估值、风险因素。比买方 memo 长很多，因为读者需要完整 briefing，不只是结论。',
+      pipeline: ['report-prep-nlm', 'deep-research-workflow', 'ic-memo-outliner', 'data-validator', 'docx skill'],
+      meta: { '文件大小': '177 KB', '受众': '卖方 / 机构', '语气': '分析性、全面', '长度': '长文', '模板': 'Uninodue master', '源头': '同 outline、扩写 prose' },
+      file: 'AAPL_uninodue_full_report_installed.docx'
+    },
+    'hv-deck': {
+      type: 'PPTX · 行业深度研究',
+      title: 'HV Transmission · 行业研究',
+      desc: 'Deep-research-workflow 旗舰的产物 —— 走上方 6 阶段 pipeline。NLM ingest + Q&A 阶段并行 dispatch 多个 sub-agent；per-slide RAG 防止长 deck 上下文退化；状态机可断点恢复。',
+      pipeline: ['report-prep-nlm', 'deep-research-workflow', 'data-validator', 'ic-pptx', 'pptx-eval'],
+      meta: { '文件大小': '17.5 MB', '受众': '行业概览', 'Workflow': 'deep-research-workflow', '恢复': 'State-machine 可恢复', '跨模型 eval': 'Yes', '模板族': 'ic master' },
+      file: 'HV_Transmission_sample.pptx'
+    }
+  };
+
+  function openModal(key) {
+    const s = SAMPLES[key];
+    if (!s) return;
+    document.getElementById('modal-type').textContent = s.type;
+    document.getElementById('modal-title').textContent = s.title;
+    const body = document.getElementById('modal-body');
+    body.innerHTML = `
+      <div class="modal-section">
+        <h4>这是什么</h4>
+        <p>${stripEndPeriod(s.desc)}</p>
+      </div>
+      <div class="modal-section">
+        <h4>Build pipeline</h4>
+        <div class="pipeline-mini">
+          ${s.pipeline.map((p, i) => `<span class="stage">${p}</span>${i < s.pipeline.length-1 ? '<span class="arrow">→</span>' : ''}`).join('')}
+        </div>
+      </div>
+      <div class="modal-section">
+        <h4>Metadata</h4>
+        <div class="meta-grid">
+          ${Object.entries(s.meta).map(([k, v]) => `
+            <div class="meta-cell"><div class="k">${k}</div><div class="v">${v}</div></div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="modal-section">
+        <a class="download-btn" href="${encodeURI(s.file)}" download>↓ 下载 artifact</a>
+      </div>
+    `;
+    document.getElementById('modal-bg').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('modal-bg').classList.remove('active', 'reader-mode');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.artifact-card').forEach(c => {
+    c.addEventListener('click', () => openModal(c.dataset.sample));
+  });
+  document.getElementById('modal-bg').addEventListener('click', e => {
+    if (e.target.id === 'modal-bg') closeModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  /* Doc reader — navigate to pre-rendered static HTML (built via build_html_pages.py) */
+  const DOC_MAP = {
+    'geely-wiki':       'geely-wiki.html',
+    'chery-wiki':       'chery-wiki.html',
+    'gpm-drivers':      'gpm-drivers.html',
+    'cicc-list':        'cicc-list.html',
+    'essay-ghe':        'essay-ghe.html',
+    'essay-data-validator': 'essay-data-validator.html',
+    'essay-failure':    'essay-failure.html',
+    'essay-skills-net': 'essay-skills-net.html',
+    'essay-librarian':  'essay-librarian.html',
+    'essay-arch-v2':    'essay-arch-v2.html',
+    'essay-memory':     'essay-memory.html',
+    'cowork-strategy':  'cowork-strategy.html',
+    'cowork-migration': 'cowork-migration.html'
+  };
+
+  function openDocReader(docId) {
+    const href = DOC_MAP[docId];
+    if (href) {
+      sessionStorage.setItem('cameFromMain', '1');
+      sessionStorage.setItem('mainScrollY', String(window.scrollY));
+      window.location.href = href;
+    }
+  }
+
+  // Scroll restoration when returning to main from essay
+  function restoreMainScroll() {
+    const saved = sessionStorage.getItem('mainScrollY');
+    if (saved !== null) {
+      window.scrollTo(0, parseInt(saved, 10));
+      sessionStorage.removeItem('mainScrollY');
+      sessionStorage.removeItem('cameFromMain');
+    }
+  }
+  // Disable browser auto-scroll restoration; we handle it manually
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.addEventListener('load', restoreMainScroll);
+  // bfcache restore (history.back from essay): pageshow fires with persisted=true
+  window.addEventListener('pageshow', function(e) {
+    if (e.persisted) restoreMainScroll();
+  });
+</script>
+
+</body>
+</html>

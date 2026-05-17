@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用 Obsidian 构建持久化的投研记忆系统 — 投研架构笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F3EEE4;
+    --bg-2: #EFE8DA;
+    --surface: #FAF6EE;
+    --text: #1a1410;
+    --text-2: #5b4f44;
+    --text-3: #918578;
+    --text-4: #b0a596;
+    --border: #DDD2BD;
+    --border-strong: #C4B79E;
+    --accent: #C04E2D;
+    --accent-bg: #FAEBE0;
+    --font-serif: 'Spectral', 'Noto Serif SC', Georgia, 'Times New Roman', serif;
+    --font-sans: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(circle at 1px 1px, rgba(91, 79, 68, 0.06) 1px, transparent 0);
+    background-size: 28px 28px;
+  }
+  nav.top {
+    position: sticky; top: 0;
+    background: rgba(243, 238, 228, 0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    padding: 14px 0;
+  }
+  nav.top .inner {
+    max-width: 1000px; margin: 0 auto; padding: 0 36px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  nav.top .back {
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    font-size: 13px; font-weight: 500;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+    transition: color 0.15s;
+  }
+  nav.top .back:hover { color: var(--accent); }
+  nav.top .back::before { content: '←'; font-size: 16px; }
+  nav.top .brand {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-2);
+  }
+
+  main.essay {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 36px 100px;
+  }
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+  .doc-title {
+    font-family: var(--font-serif);
+    font-size: clamp(28px, 3.6vw, 38px);
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 48px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .md-content > *:first-child { margin-top: 0; }
+  .md-content h1 {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.018em;
+    margin: 12px 0 24px;
+    line-height: 1.25;
+  }
+  .md-content h2 {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 48px 0 16px;
+    padding-top: 36px;
+    border-top: 1px solid var(--border);
+    letter-spacing: -0.012em;
+    line-height: 1.3;
+  }
+  .md-content h2:first-child { padding-top: 0; border-top: none; margin-top: 0; }
+  .md-content h3 {
+    font-family: var(--font-serif);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 32px 0 12px;
+    letter-spacing: -0.005em;
+  }
+  .md-content h4 {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 24px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .md-content p {
+    font-size: 16.5px;
+    line-height: 1.85;
+    color: var(--text-2);
+    margin-bottom: 18px;
+  }
+  .md-content p strong, .md-content li strong { color: var(--text); font-weight: 600; }
+  .md-content em { font-style: italic; color: var(--text); }
+  .md-content ul, .md-content ol { padding-left: 26px; margin-bottom: 20px; }
+  .md-content li {
+    color: var(--text-2);
+    font-size: 16.5px;
+    line-height: 1.8;
+    margin-bottom: 8px;
+  }
+  .md-content blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 20px;
+    margin: 24px 0;
+    font-style: italic;
+    color: var(--text);
+    font-size: 17px;
+  }
+  .md-content blockquote p { margin-bottom: 0; }
+  .md-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 14px;
+    font-family: var(--font-sans);
+  }
+  .md-content thead { border-bottom: 2px solid var(--border-strong); }
+  .md-content th, .md-content td {
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px 10px 0;
+    text-align: left;
+    vertical-align: top;
+  }
+  .md-content th {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .md-content td { color: var(--text-2); }
+  .md-content code {
+    background: var(--bg-2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 13.5px;
+    font-family: var(--font-mono);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .md-content pre {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    border-radius: 6px;
+    margin: 22px 0;
+    font-size: 13px;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .md-content pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    color: var(--text);
+  }
+  .md-content .wl {
+    color: var(--text-3);
+    border-bottom: 1px dotted var(--text-4);
+    cursor: help;
+    font-style: italic;
+  }
+  .md-content a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .md-content a:hover { color: var(--text); }
+  .md-content hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* Obsidian callout */
+  .md-content .callout {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+  .md-content .callout-title {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 14px;
+    letter-spacing: 0.01em;
+  }
+  .md-content .callout-body > *:first-child { margin-top: 0; }
+  .md-content .callout-body > *:last-child { margin-bottom: 0; }
+  .md-content .callout-body p {
+    font-size: 15.5px;
+    line-height: 1.75;
+    margin-bottom: 12px;
+  }
+  .md-content .callout-body ol, .md-content .callout-body ul {
+    margin: 8px 0 14px;
+    padding-left: 22px;
+  }
+  .md-content .callout-body li {
+    font-size: 15.5px;
+    line-height: 1.7;
+    margin-bottom: 6px;
+  }
+  .md-content .callout-info,
+  .md-content .callout-summary { border-left-color: var(--accent); }
+  .md-content .callout-warning,
+  .md-content .callout-caution { border-left-color: var(--gold, #B8862A); }
+  .md-content .callout-warning .callout-title,
+  .md-content .callout-caution .callout-title { color: var(--gold, #B8862A); }
+  .md-content .callout-tip,
+  .md-content .callout-note { border-left-color: var(--teal, #1B4D5C); }
+  .md-content .callout-tip .callout-title,
+  .md-content .callout-note .callout-title { color: var(--teal, #1B4D5C); }
+
+  footer.foot {
+    padding: 36px 36px 40px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 11.5px;
+    font-family: var(--font-mono);
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.04em;
+  }
+  footer.foot a { color: var(--text-3); text-decoration: none; }
+  footer.foot a:hover { color: var(--accent); }
+
+  @media (max-width: 720px) {
+    main.essay { padding: 40px 24px 80px; }
+    nav.top .inner { padding: 0 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="inner">
+    <a class="back" href="index.html" onclick="backToMain(event)">返回主站</a>
+    <div class="brand">投研架构笔记</div>
+  </div>
+</nav>
+
+<main class="essay">
+  <div class="eyebrow">Essay · 2026-04-14</div>
+  <h1 class="doc-title">用 Obsidian 构建持久化的投研记忆系统</h1>
+  <article class="md-content">
+<h2>一、Karpathy 的 hint</h2>
+<p>最近看到 Karpathy 的个人知识库火了，我也抽空看了一遍，深有启发</p>
+<p>AI 的本质局限在于上下文窗口——每次对话结束，所有的分析、推理、结论就消失了，下一个 session 从零开始</p>
+<p>他的回答是：把笔记当做第二大脑，把有价值的思考持久化，让 AI 下次不必从零重建</p>
+<p>这对我不是一个比喻，是一个工程问题</p>
+<p>做投资的人都知道，对一家公司的理解是累积出来的。第一次覆盖时建了模型，半年后季报出来更新了假设，一年后有新的 catalyst，两年后竞争格局变了。如果每次和 AI 谈这家公司都要从头喂材料，不是知识积累，是重复劳动</p>
+<p>我想做的事很简单：建一套系统，让 AI 对持仓的每家公司都有持久化的"专家记忆"</p>
+<h2>二、Karpathy 方法的局限，以及 NLM 是什么</h2>
+<p>Karpathy 的建议本质上是"把重要内容写进 context"。在规模化之前这没什么问题，规模化之后三个问题同时出现</p>
+<p>token 消耗。一家公司如果有两年的卖方研报、公众号追踪、调研记录、财报分析，轻松超过 10 万 tokens。同时跟踪 20 家公司，每次 session 把所有上下文喂进去，成本不可接受</p>
+<p>检索质量。不加区分地塞满 context 会让 LLM 在长文档里迷失。"高盛最新 Meta TP 是多少"这种问题应该直接命中结构化索引，不是让 AI 在 10 万字里扫描</p>
+<p>跨源综合。"过去三个月卖方对科技股的综合观点"需要跨越几十篇文章做信息聚合，关键词匹配做不到</p>
+<p>这种语义交叉检索是 NotebookLM 的强项。NLM 为"把一批文档喂给 AI 然后反复问问题"场景专门设计，向量检索和综合能力在这类任务上远好于直接给 LLM 看原文。本质上，NLM 是一个经过专门优化的 RAG（检索增强生成）模型——将文档向量化后存入索引，查询时先检索最相关的片段再交给 LLM 综合，这种架构使其在多文档跨源检索上的效果大幅优于直接扩展上下文窗口。但 NLM 每次查询结果消失在对话里，不会写回知识库，不能形成复利</p>
+<p>架构因此很清晰：Obsidian 做持久化知识库，NLM 做跨源检索引擎，查询结果写回 vault 沉淀成知识</p>
+<h2>三、架构与角色</h2>
+<p>整套系统可以用一座专业图书馆来理解</p>
+<ul><li>Obsidian vault 是图书馆建筑本身——所有的书、期刊、调研报告都存放在这里，是事实的唯一来源。公众号文章、卖方研报、调研记录每天自动入馆，就像新书和期刊持续入库。NLM 是图书馆的数字化检索系统，把馆藏扫描进去后可以用自然语言搜索，不需要知道书名，只需要描述想找什么内容</li></ul>
+<ul><li>Index 层是卡片目录，精确定位"这本书在哪个书架的哪一行"</li></ul>
+<ul><li>librarian 是图书管理员，负责新书入馆分类、书架维护、淘汰过期内容、更新检索系统，还把读者咨询记录存档——下次有人问同样的问题，直接翻上次的答案</li></ul>
+<p>从工程实现上系统具体分四层：</p>
+<ul><li>Raw 层是外部输入，AI 只读不改。公众号文章每天自动抓取，卖方研报定期入库，调研记录从 OneNote 同步过来。这一层保原文，不做加工</li></ul>
+<ul><li>Wiki 层是 AI 编译的实体页，也就是主题书架。每家被提及超过两次的公司都有一个页面，自动维护，按时间倒序列最新要点，每条要点附原文链接</li></ul>
+<ul><li>Index 层是 librarian 的自治区。全 vault 文件清单、券商研报专属索引、实体提及图谱、NLM notebook 状态都在这里。所有查询路由走这层</li></ul>
+<ul><li>Outputs 层是 Q&A 存档，对应图书馆的参考咨询记录。每次回答了一个问题，答案以 markdown 文件存下来，带时间戳和置信度。问过一次的问题不会再花同样的代价重新检索</li></ul>
+<p>librarian 的工作模式有三种：</p>
+<ul><li>被动响应（用户发起查询，判断路由，返回答案并存档）</li></ul>
+<ul><li>主动维护（定期扫描增量文件，更新索引，打标实体，同步 NLM，这类任务重复性强，用便宜的小模型跑就够了）</li></ul>
+<ul><li>健康检查（按需 lint，报告悬空实体和格式问题，输出可自动修复的 action list）。信息越积越多，维护动作也越来越多，但查询体验保持稳定——因为索引在跟着更新</li></ul>
+<h2>四、日常工作流</h2>
+<p>librarian 的日常任务分三个频率</p>
+<ul><li>增量（每次新内容入库时触发）：扫描近期新增文件，提取实体提及，更新 wiki 页的"近期要点"，将新文章加入 NLM staging 队列。这个过程以秒计，是整个系统的实时部分</li></ul>
+<ul><li>周级（每周运行一次）：把 staging 队列里积累的新文章批量上传到 NLM，每批约 10 篇，source ID 写回 manifest 做断点记录。同时运行 vault-cleanup，把冗余文件移入软删除回收站</li></ul>
+<ul><li>按需（用户触发或定期运行）：lint 健康检查、entity stub 批量建页、图片去重、研报索引重建。改动量较大，通常 dry-run 确认后再 apply</li></ul>
+<ul><li>NLM 同步需要预处理，librarian 在上传前做内容清洗，去掉模板段落和重复 boilerplate</li></ul>
+<ul><li>来源结构上，公众号文章/新闻等占大头（需要设立滚动摘要机制，去除大部分垃圾信息），其次是调研记录、研报，以及早报等辅助内容。清洗之后原始文本量下降约三成，减少喂给 NLM 的噪音，也避免浪费 source 配额</li></ul>
+<h2>五、NLM 与 Obsidian 的分工</h2>
+<p>Obsidian 是事实的唯一来源。所有原始文章、研报、调研记录都保存在 vault 里，带原始链接和时间戳</p>
+<p>NLM 里的内容是从 vault 派生出来的，不是独立存在的。当 vault 更新了但 NLM 还没同步，librarian 通过 drift report 跟踪差异，下次同步时补齐</p>
+<p>NLM 负责语义理解。Obsidian 的 wiki 页靠结构化标签和 wikilink 做关联，本质上是规则驱动的。NLM 可以做真正的语义检索——"Meta 今年在 AI 基础设施上的资本支出逻辑"这类问题，不需要文章里有对应的关键词，只需要文章里有相关的内容。这个能力 Obsidian 本身不具备</p>
+<p>结果的流向是单向的：NLM 的答案写回 Obsidian，不反过来。librarian 把 NLM 查询结果存入 Outputs 层，打上来源标注和置信度。这些档案不会自动上传回 NLM，因为 NLM 的 source 是原始文章，不是 AI 生成的摘要——保持这个边界是防止"AI 喂 AI"导致信息失真的关键</p>
+<p>查询路由的分工：</p>
+<ul><li>结构化问题（"某券商最新 TP 是多少"、"某公司最近有哪些研报"）：直接走研报索引或 wiki 页，毫秒级返回，不消耗 NLM 配额</li></ul>
+<ul><li>全文搜索（"某个术语在哪些文章里出现过"）：扫描 vault 原文，覆盖范围最广</li></ul>
+<ul><li>跨源综合（"市场对某主题的综合观点"、"多篇文章之间的观点异同"）：路由到 NLM，这是它最擅长的场景</li></ul>
+<p>三条路径的优先级依次降低，librarian 按问题类型自动选择路径与模型（有些脏活只能辛苦我们的国产便宜大碗模型了），不需要用户指定</p>
+<h2>六、归档机制</h2>
+<p>Q&A 复利存档（Outputs 层）：每次查询的答案都持久化存储，带有路由方式和置信度打分。高置信度的答案下次直接复用；低置信度的答案留着做质量追踪，下次有更好来源时覆盖更新。知识库每被用一次，就变得稍微好一点</p>
+<p>追加式操作日志：每一次 scan、index、qa、cleanup 操作都追加写入一个不可修改的日志文件，带时间戳。上次什么时候做了全量扫描、NLM 最后一次同步是什么时候、哪些文件被移入回收站——翻日志就能找到，不依赖记忆</p>
+<p>软删除回收站：vault-cleanup 不直接删除文件，而是把待清理的文件移入带时间戳的回收站目录。操作可逆，一段时间内都能找回。投研 vault 里卖方研报重复率很高，清理时一旦误删很难察觉，软删除提供了一层保险</p>
+<p>NLM staging 与断点续传：向 NLM 上传文章是分批 staging，每篇上传成功后 source ID 立即写回 manifest，下次中断从上次的位置继续。对于有数千篇文章的 vault，这个机制避免了因网络中断或 API 限流导致的重复工作</p>
+<p>实体提及图谱：每篇文章里提到的公司、机构、主题都被提取出来，建成一张有向图。当某个实体的提及次数超过阈值，librarian 自动触发建页任务，把 stub 升级为完整的 wiki 页。图谱让跨实体检索成为可能——问"Google 的机器人业务布局"，系统能从 Google 词条出发，找到所有关联的投资标的提及</p>
+<p>Vault Lint（健康检查）：定期扫描整个 vault，报告两类问题：有被引用但没有对应页面的悬空实体（某公众号账号被提及数百次但没有 wiki 页），以及缺少 frontmatter 的文件。每条 warning 标注了是否 auto-fixable，下次 librarian 运行时批量处理</p>
+<h2>七、核心实现：一家公司从头到尾</h2>
+<p>以 Meta（META）为例走一遍</p>
+<p>Initial Coverage：第一次覆盖，deep research 跑完后研究结论写进 NLM notebook。vault 里出现 Meta 的 wiki 页，初始版本只有基本信息和几条 stub。librarian 在实体提及图谱里给 META 注册词条，等待后续文章填充</p>
+<p>Catalyst Tracking：高盛发了 flash note 上调 TP，研报索引更新。tag pipeline 扫描这篇研报，提取 Meta 相关内容，在 wiki 页的"近期要点"追加一条带时间戳的记录，附原文链接。全程自动，不需人工干预</p>
+<p>News Updates：一篇写 Meta AI 商业化进展的公众号文章抓取进来，tag pipeline 识别 META 实体，把关键摘要写进 wiki 页。下次问"Meta 最近有什么新进展"，librarian 的结构化路由直接命中 wiki 页，不在数千篇公众号里全文扫描</p>
+<p>Result Review：季报出来，earnings review 跑完后财报要点和更新后的假设写入调研记录区域。Q&A 存档里保存这次分析。下个季度做财报点评，直接拿到上次的结论，不用重新翻笔记</p>
+<p>NLM 外包的边界：当问题超出结构化检索——比如"过去三个月卖方对 Meta AI 战略的综合判断"——librarian 识别出这是跨源综合问题，路由到 NLM notebook。NLM 在全量 source 里做向量检索，返回综合答案，随即写回 Outputs 层，打上置信度标签，成为下次查询的缓存起点</p>
+<h2>八、会生长的专家助手</h2>
+<p>传统投研工作流有一个隐性的知识损耗：每次分析做完，结论散在邮件、Excel、PPT 里，下次做同一家公司又从头来。人脑能记住大框架，细节一两个季度后就模糊了</p>
+<p>这套系统把每次分析的结论显式化，按实体归档，让 AI 下次处理同一家公司时能继承上次的工作</p>
+<p>更重要的是知识会交叉生长。Meta 的 wiki 页里有 Google 的提及，Google 的 wiki 页里有 Meta 的提及，两个词条互相感知。问"Meta 和 Google 在边缘 AI 上的竞争差异"，系统通过实体图谱找到这条线索，不会把两个问题当作孤立的检索任务处理</p>
+<p>Karpathy 的 hint 是对的。但光靠把东西写进笔记本还不够——你需要一套检索架构，让这些笔记能被准确、快速、低成本地找到，并且每次回答之后让知识库本身变得更好。这正是 librarian 存在的理由</p>
+  </article>
+</main>
+
+<footer class="foot">
+  <a href="index.html" onclick="backToMain(event)">← 返回主站</a>
+</footer>
+
+<script>
+  // 从主站进来（openDocReader 设了 sessionStorage 标记）用 history.back() 保留滚动位置；
+  // 直接打开 essay（无标记）则按 href 跳到主站顶部
+  function backToMain(e) {
+    if (sessionStorage.getItem('cameFromMain') === '1') {
+      e.preventDefault();
+      window.history.back();
+    }
+  }
+</script>
+
+</body>
+</html>

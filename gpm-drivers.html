@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chery GPM Drivers — 五季度从 10.6% 反弹到 16.0% — 投研架构笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F3EEE4;
+    --bg-2: #EFE8DA;
+    --surface: #FAF6EE;
+    --text: #1a1410;
+    --text-2: #5b4f44;
+    --text-3: #918578;
+    --text-4: #b0a596;
+    --border: #DDD2BD;
+    --border-strong: #C4B79E;
+    --accent: #C04E2D;
+    --accent-bg: #FAEBE0;
+    --font-serif: 'Spectral', 'Noto Serif SC', Georgia, 'Times New Roman', serif;
+    --font-sans: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-serif);
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(circle at 1px 1px, rgba(91, 79, 68, 0.06) 1px, transparent 0);
+    background-size: 28px 28px;
+  }
+  nav.top {
+    position: sticky; top: 0;
+    background: rgba(243, 238, 228, 0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    padding: 14px 0;
+  }
+  nav.top .inner {
+    max-width: 1000px; margin: 0 auto; padding: 0 36px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  nav.top .back {
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    font-size: 13px; font-weight: 500;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+    transition: color 0.15s;
+  }
+  nav.top .back:hover { color: var(--accent); }
+  nav.top .back::before { content: '←'; font-size: 16px; }
+  nav.top .brand {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-2);
+  }
+
+  main.essay {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 36px 100px;
+  }
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+  .doc-title {
+    font-family: var(--font-serif);
+    font-size: clamp(28px, 3.6vw, 38px);
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 48px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .md-content > *:first-child { margin-top: 0; }
+  .md-content h1 {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.018em;
+    margin: 12px 0 24px;
+    line-height: 1.25;
+  }
+  .md-content h2 {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 48px 0 16px;
+    padding-top: 36px;
+    border-top: 1px solid var(--border);
+    letter-spacing: -0.012em;
+    line-height: 1.3;
+  }
+  .md-content h2:first-child { padding-top: 0; border-top: none; margin-top: 0; }
+  .md-content h3 {
+    font-family: var(--font-serif);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 32px 0 12px;
+    letter-spacing: -0.005em;
+  }
+  .md-content h4 {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 24px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .md-content p {
+    font-size: 16.5px;
+    line-height: 1.85;
+    color: var(--text-2);
+    margin-bottom: 18px;
+  }
+  .md-content p strong, .md-content li strong { color: var(--text); font-weight: 600; }
+  .md-content em { font-style: italic; color: var(--text); }
+  .md-content ul, .md-content ol { padding-left: 26px; margin-bottom: 20px; }
+  .md-content li {
+    color: var(--text-2);
+    font-size: 16.5px;
+    line-height: 1.8;
+    margin-bottom: 8px;
+  }
+  .md-content blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 20px;
+    margin: 24px 0;
+    font-style: italic;
+    color: var(--text);
+    font-size: 17px;
+  }
+  .md-content blockquote p { margin-bottom: 0; }
+  .md-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 14px;
+    font-family: var(--font-sans);
+  }
+  .md-content thead { border-bottom: 2px solid var(--border-strong); }
+  .md-content th, .md-content td {
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px 10px 0;
+    text-align: left;
+    vertical-align: top;
+  }
+  .md-content th {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .md-content td { color: var(--text-2); }
+  .md-content code {
+    background: var(--bg-2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 13.5px;
+    font-family: var(--font-mono);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .md-content pre {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    border-radius: 6px;
+    margin: 22px 0;
+    font-size: 13px;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .md-content pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    color: var(--text);
+  }
+  .md-content .wl {
+    color: var(--text-3);
+    border-bottom: 1px dotted var(--text-4);
+    cursor: help;
+    font-style: italic;
+  }
+  .md-content a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .md-content a:hover { color: var(--text); }
+  .md-content hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* Obsidian callout */
+  .md-content .callout {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+  .md-content .callout-title {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 14px;
+    letter-spacing: 0.01em;
+  }
+  .md-content .callout-body > *:first-child { margin-top: 0; }
+  .md-content .callout-body > *:last-child { margin-bottom: 0; }
+  .md-content .callout-body p {
+    font-size: 15.5px;
+    line-height: 1.75;
+    margin-bottom: 12px;
+  }
+  .md-content .callout-body ol, .md-content .callout-body ul {
+    margin: 8px 0 14px;
+    padding-left: 22px;
+  }
+  .md-content .callout-body li {
+    font-size: 15.5px;
+    line-height: 1.7;
+    margin-bottom: 6px;
+  }
+  .md-content .callout-info,
+  .md-content .callout-summary { border-left-color: var(--accent); }
+  .md-content .callout-warning,
+  .md-content .callout-caution { border-left-color: var(--gold, #B8862A); }
+  .md-content .callout-warning .callout-title,
+  .md-content .callout-caution .callout-title { color: var(--gold, #B8862A); }
+  .md-content .callout-tip,
+  .md-content .callout-note { border-left-color: var(--teal, #1B4D5C); }
+  .md-content .callout-tip .callout-title,
+  .md-content .callout-note .callout-title { color: var(--teal, #1B4D5C); }
+
+  footer.foot {
+    padding: 36px 36px 40px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 11.5px;
+    font-family: var(--font-mono);
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.04em;
+  }
+  footer.foot a { color: var(--text-3); text-decoration: none; }
+  footer.foot a:hover { color: var(--accent); }
+
+  @media (max-width: 720px) {
+    main.essay { padding: 40px 24px 80px; }
+    nav.top .inner { padding: 0 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="inner">
+    <a class="back" href="index.html" onclick="backToMain(event)">返回主站</a>
+    <div class="brand">投研架构笔记</div>
+  </div>
+</nav>
+
+<main class="essay">
+  <div class="eyebrow">任务级辅助 · 跨源综合 · 2026-05-11</div>
+  <h1 class="doc-title">Chery GPM Drivers — 五季度从 10.6% 反弹到 16.0%</h1>
+  <article class="md-content">
+<h2>核心问题</h2>
+<p>奇瑞海外销量占比历来就高（FY23已50%），为什么GPM直到24Q4触底后才开始快速反弹，26Q1达到16.0%（+5.4ppt vs 24Q4）？</p>
+<h2>一、季度GPM全景</h2>
+<table><thead><tr><th>Quarter</th><th>GPM</th><th>出口占比</th><th>NEV渗透率(国内)</th><th>数据源</th></tr></thead><tbody><tr><td>FY22</td><td>14.8%</td><td>~50%</td><td>~10%</td><td>IPO招股书</td></tr><tr><td>FY23</td><td>16.0%</td><td>50.0%</td><td><10%</td><td>AKShare T2</td></tr><tr><td>24Q1</td><td>14.9%</td><td>—</td><td>—</td><td>AKShare T2</td></tr><tr><td>24Q2</td><td>15.1%</td><td>—</td><td>—</td><td>AKShare T2</td></tr><tr><td>24Q3</td><td>14.6%</td><td>—</td><td>—</td><td>AKShare T2</td></tr><tr><td><strong>24Q4</strong></td><td><strong>10.6%</strong></td><td>—</td><td>30.4% (FY)</td><td>AKShare T2 ← 底部</td></tr><tr><td>25Q1</td><td>12.4%</td><td>—</td><td>35-40%</td><td>AKShare T2</td></tr><tr><td>25Q2</td><td>13.6%</td><td>—</td><td>—</td><td>AKShare T2</td></tr><tr><td>25H2</td><td>14.5%</td><td>47.8% (FY)</td><td>35-40%</td><td>AKShare T2</td></tr><tr><td>FY25 全年</td><td>13.8%</td><td>47.8%</td><td>35-40%</td><td>中泰/AKShare</td></tr><tr><td><strong>26Q1</strong></td><td><strong>16.0%</strong></td><td><strong>65.4%</strong></td><td>44% est</td><td>东吴/中金/中泰</td></tr><tr><td>FY26E 全年</td><td>14.2%</td><td>~55% est</td><td>—</td><td>CapIQ consensus (5 analysts)</td></tr></tbody></table>
+<p>24Q4→26Q1，五个季度反弹 +5.4ppt。即使看YoY（25Q1 12.4% → 26Q1 16.0%），也是 +3.6ppt</p>
+<h2>二、三个驱动力的定量拆解</h2>
+<h3>驱动力 1：出口占比从"高"变成"极高"（贡献 ~1.0-1.3ppt）</h3>
+<p>出口占比并非一直稳定在高位，而是经历了V型：</p>
+<table><thead><tr><th>年度/季度</th><th>出口(万辆)</th><th>总销(万辆)</th><th>出口占比</th></tr></thead><tbody><tr><td>FY23</td><td>94</td><td>188</td><td>50.0%</td></tr><tr><td>FY24</td><td>115</td><td>260</td><td><strong>44.2%</strong> ← 下降（国内放量更快）</td></tr><tr><td>FY25</td><td>134.4</td><td>281</td><td>47.8%</td></tr><tr><td><strong>1Q26</strong></td><td><strong>39.33</strong></td><td><strong>60.17</strong></td><td><strong>65.4%</strong> ← 结构性拐点</td></tr><tr><td>4月单月</td><td>17.76</td><td>25.14</td><td><strong>70.7%</strong> ← 新纪录</td></tr></tbody></table>
+<blockquote><p>Source: <span class="wl" title="Chery">Cherry coverage §8.5</span> + <span class="wl" title="Holding, coverage Q&amp;A and news/Cherry/2026-05-06_news_april-sales-251k">4月销量公告</span></p></blockquote>
+<p><strong>关键insight</strong>：FY24时国内从94万辆→145万辆（+54%），增速远快于出口22%，出口占比被动下降到44%。到26Q1，出口+54% YoY而国内淡季（春节），出口占比跳到65%</p>
+<p><strong>定量测算</strong>：按FY25首次披露的分品类GPM：</p>
+<ul><li>ICE GPM：15.0%（← <span class="wl" title="Raw/Auto research/20260429-东吴证券-奇瑞汽车（9973.HK）：2026年一季报点评，业绩超预期，出口表现出色.pdf">东吴 0429</span>）</li><li>NEV GPM：8.8%（← 同上）</li><li>海外NEV渗透率：~25%（← <span class="wl" title="Chery">Cherry coverage §8.5</span>）</li><li>国内NEV渗透率：44%（← 同上）</li></ul>
+<p>海外 blended GPM ≈ 15.0% × 75% + 8.8% × 25% ≈ <strong>13.5%</strong> 国内 blended GPM ≈ 15.0% × 56% + 8.8% × 44% ≈ <strong>12.3%</strong></p>
+<p>出口占比从 48%→65%，mix shift 可解释约 <strong>+1.0-1.3ppt</strong> GPM提升</p>
+<p>⚠️ 但实际26Q1 GPM YoY提升了+3.6ppt，说明mix shift只解释了约1/3，还需要其他因素</p>
+<h3>驱动力 2：24Q4是异常低基数，均值回归（贡献 ~2.0-2.5ppt）</h3>
+<p>24Q4 GPM 10.6% 是全序列最低值，显著偏离正常区间（14-15%），原因：</p>
+<ol><li><strong>年末返利集中计提</strong><ul><li>FY24年返利总额约231亿，占收入8.5%（← <span class="wl" title="公众号收录/晚点 latepost/2025-09-13_为何近年来强势增长的奇瑞<em>市场对其估值热情并不高</em>">晚点 2025-09-13</span>）</li><li>Q4是经销商年度返利结算窗口，集中冲减毛利</li></ul></li></ol>
+<ol><li><strong>新能源占比快速爬升的稀释高峰</strong><ul><li>FY24国内NEV渗透率从前一年<10%跳到30.4%</li><li>NEV GPM仅8.8%，vs ICE 15.0%，差值6.2ppt</li><li>Q4是年度冲量季，NEV占比在Q4达到峰值</li></ul></li></ol>
+<ol><li><strong>FY24是行业价格战最烈的一年</strong><ul><li>国内单车ASP承压，竞争强度极高</li></ul></li></ol>
+<p>从10.6%回到14-15%，有 ~2.0-2.5ppt 是24Q4异常因素消退后的<strong>均值回归</strong>，不代表结构性改善</p>
+<h3>驱动力 3：海外vs国内"毛利率剪刀差"（贡献 ~0.5-1.0ppt）</h3>
+<p>海外GPM高于国内的原因不仅是ASP溢价（14%，四家最低），更关键的是<strong>国内毛利被三重因素压低</strong>：</p>
+<table><thead><tr><th>因素</th><th>海外</th><th>国内</th><th>差异来源</th></tr></thead><tbody><tr><td>Dealer rebate</td><td>较低（推测）</td><td>8-9.5%收入</td><td><span class="wl" title="公众号收录/晚点 latepost/2025-09-13_为何近年来强势增长的奇瑞<em>市场对其估值热情并不高</em>\">晚点 2025-09-13</span></td></tr><tr><td>NEV mix</td><td>24-25%</td><td>44%</td><td><span class="wl" title="Chery\">Cherry coverage §8.5</span></td></tr><tr><td>竞争强度</td><td>低（中东/俄/拉美）</td><td>极高（价格战）</td><td><span class="wl" title="visiting record/汽车/2026-04-29_BOC汽车专家访谈_V1\">BOC专家访谈</span></td></tr></tbody></table>
+<blockquote><p>晚点分析的核心发现：加回dealer rebate后，奇瑞真实GPM约20-22%（FY22 20.3% / FY23 25.5% / FY24 22.0% / 25Q1 20.4%）。报表GPM低是因为大比例返利让利给经销商</p></blockquote>
+<p><strong>奇瑞的"秘密"不是海外GPM特别高，而是国内GPM被rebate + NEV亏损 + 价格战三重压低。出口占比越大 → 被拖累的国内部分占比越小 → blended GPM自然恢复。</strong></p>
+<h3>补充因素：产能利用率159%的固定成本杠杆</h3>
+<p>产能利用率159%（← IPO招股书）意味着固定成本被极度摊薄。出口放量期（26Q1出口+54% YoY），增量产量几乎全部贡献边际利润</p>
+<h2>三、GPM三力叠加模型（总结）</h2>
+<table><thead><tr><th>驱动力</th><th>贡献估算</th><th>性质</th><th>可持续性</th></tr></thead><tbody><tr><td>出口占比从48%→65% mix shift</td><td>+1.0~1.3ppt</td><td>结构性</td><td>中等 — Q1有季节性，全年回到50-55%</td></tr><tr><td>24Q4异常低基数的均值回归</td><td>+2.0~2.5ppt</td><td>一次性</td><td>不可持续 — 已完成</td></tr><tr><td>海外vs国内毛利率剪刀差</td><td>+0.5~1.0ppt</td><td>结构性</td><td>取决于国内价格战+NEV mix</td></tr><tr><td><strong>合计</strong></td><td><strong>+3.5~4.8ppt</strong></td><td>—</td><td>与实际+3.6ppt（YoY）基本吻合</td></tr></tbody></table>
+<h2>四、前瞻：16% GPM能持续吗？</h2>
+<p><strong>我认为不能。全年大概率回落到14-15%，与consensus FY26E 14.2%一致。</strong></p>
+<p>理由：</p>
+<ol><li><strong>1Q26出口占比65%有季节性</strong>：Q1国内是传统淡季（春节），出口占比被动拉高。4月虽然出口70%继续强劲，但H2国内通常回暖</li><li><strong>NEV渗透率还在升</strong>：国内44%→全年可能50%+，8.8%的NEV GPM继续稀释</li><li><strong>俄罗斯进口报税增加</strong>：FY24 GPM下降原因之一（← 招股书）</li><li><strong>海外本地化产能上线</strong>：巴西/马来/西班牙工厂CKD→本地组装，降关税但不一定提GPM</li><li><strong>Dealer rebate仍维持高位</strong>：8-9.5%收入水平在行业内极高</li></ol>
+<p><strong>上行风险</strong>：若海外占比全年维持55%+（vs consensus ~50%），且NEV GPM从8.8%改善到10%+，则GPM可能超consensus达到15%</p>
+<h2>五、逻辑链总结（三句话）</h2>
+<ol><li><strong>GPM从10.6%到16.0%的反弹，约1/3是24Q4异常低基数的均值回归（年末返利+NEV稀释），约1/3是出口占比从48%→65%的mix shift，剩下1/3是海外竞争环境宽松+国内价格战见底。</strong></li></ol>
+<ol><li><strong>奇瑞的"秘密"不是海外GPM特别高，而是国内GPM被dealer rebate（8-9.5%收入）+ NEV亏损（8.8% GPM）+ 价格战三重压低。出口越多，被拖累的部分占比越小，blended GPM自然恢复。</strong></li></ol>
+<ol><li><strong>16%大概率是周期高点（Q1季节性+出口占比峰值），全年看14-15%更现实。长期能否稳在15%+取决于海外NEV渗透率上升后能否维持定价权 + 国内价格战缓和程度。</strong></li></ol>
+<hr>
+<blockquote><p>数据全部来自vault内AKShare T2验证过的季度拆分 + 东吴/中金/中泰研报 + 晚点深度分析 + BOC专家访谈 + 内部 OEM Study，未使用web search估算</p></blockquote>
+  </article>
+</main>
+
+<footer class="foot">
+  <a href="index.html" onclick="backToMain(event)">← 返回主站</a>
+</footer>
+
+<script>
+  // 从主站进来（openDocReader 设了 sessionStorage 标记）用 history.back() 保留滚动位置；
+  // 直接打开 essay（无标记）则按 href 跳到主站顶部
+  function backToMain(e) {
+    if (sessionStorage.getItem('cameFromMain') === '1') {
+      e.preventDefault();
+      window.history.back();
+    }
+  }
+</script>
+
+</body>
+</html>
