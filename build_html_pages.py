@@ -19,7 +19,7 @@ DOCS = [
     ('librarian output/Chery.md',                                              'chery-wiki.html',       'Chery · Coverage Wiki — 奇瑞汽车 / 9973.HK',                  'Holdings Wiki · Stage 01 output'),
     ('librarian output/2026-05-11_analysis_GPM-drivers-QA.md',                 'gpm-drivers.html',      'Chery GPM Drivers — 五季度从 10.6% 反弹到 16.0%',             '任务级辅助 · 跨源综合 · 2026-05-11'),
     ('librarian output/2026-05-11_meeting-prep_CICC-analyst-question-list.md', 'cicc-list.html',        'CICC 分析师交流 — Question List v3',                          '会前 briefing → 会后闭环 · 2026-05-11'),
-    ('2026-05-16_失败是通向成功的金矿.md',                                      'essay-failure.html',        '失败是金矿 — 可怕的是 not even wrong',                       'Essay · 2026-05-16'),
+    ('2026-05-16_失败是通向成功的金矿.md',                                      'essay-failure.html',        'AI Agent 正确的错误是资产 —— 怕的是 not even wrong',                       'Essay · 2026-05-16'),
     ('2026-05-15_data-validator机制_三维正交模型_脱敏版.md',                   'essay-data-validator.html', 'data-validator 机制 — 金融数据信任的三维正交模型',          'Essay · 2026-05-15'),
     ('2026-05-13_AI-Agent三层架构_Guide-Hook-Eval_脱敏版.md',                  'essay-ghe.html',        'Guide / Hook / Eval — 三层 Skill 设计',                       'Essay · 2026-05-13'),
     ('2026-05-12_Claude-Code-Skills-Network_visual.md',                        'essay-skills-net.html', 'Claude Code Skills Network — 视觉架构图',                     'Essay · 2026-05-12'),
