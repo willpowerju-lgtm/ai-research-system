@@ -1568,7 +1568,7 @@
   <div class="container">
     <div class="hero-eyebrow">一个买方研究员的实践与判断</div>
     <h1 class="headline">
-      Research &amp; Professional Cowork —— 下一代 AI 的 <em>key battlefield</em>
+      Research &amp; Professional Cowork —— 下一代 AI 的<br><em>key battlefield</em>
     </h1>
     <p class="hero-intro">
       下一代 AI 的主战场，不止在 chatbot 和 coding。coding 是 AI 的"手脚" —— eval 直接、ramp-up 快，自然被最先、最重地投入；但 chatbot 与 coding 之间那一层 —— 真实专业工作里的 research 与 professional cowork —— 才是下一块核心的<em>未竟之地</em>。
@@ -1587,7 +1587,7 @@
       <div class="stat"><div class="num">3</div><div class="lbl">Eval 层级 (mech·LLM·cross)</div></div>
     </div>
     <div class="hero-sub">
-      <p style="margin-bottom: 14px;">底下有<strong>三个互相正交的设计哲学基座</strong>：</p>
+      <p style="margin-bottom: 18px; font-size: 24px; font-weight: 600; color: var(--accent);">三个相互正交的设计哲学基座：</p>
       <ul class="hero-pillars">
         <li><strong>Guide / Hook / Eval 三层 agent 行为框架</strong> —— agent 在 high-stakes 场景下怎么稳定产出</li>
         <li><strong>data-validator 三维正交</strong>（信源 / 时效 / 对齐）—— 防数据幻觉的门槛</li>
@@ -1616,7 +1616,7 @@
     <div class="hero-sub" style="border-left: 3px solid var(--accent); padding-left: 18px;">
       <p style="margin-bottom: 14px;">而落到怎么商业化，我最在意的一个判断是 —— 把 AI 落进投研 / 法律 / 医疗这类垂直领域，第一步是建一套让领域专家高效带 AI 迭代试错的基础设施：error log → pattern → gate / benchmark，被 Guide / Hook / Eval 或 human feedback 识别到的错误本身就是<em>资产</em>。</p>
       <p style="margin-bottom: 14px;">但<strong>核心思想还要再近一层</strong> —— skill + hook 这套 harness 终究只是套在模型外面的<em>脚手架</em>，挡得住已知的错，却没有改变模型本身。模型要真正达到专业领域的专家水准，靠的不是更厚的脚手架，而是把这些被归一化的错误，沿 error log → eval → benchmark → 后训练 一路<strong>内化、升级进模型自身</strong>。脚手架是过渡，模型内化升级才是终点。</p>
-      <p style="margin-top: 10px; font-size: 13.5px; color: var(--text-3);">→ 完整展开（飞轮机制 + FAGB 实例）见 <a href="#" onclick="event.preventDefault(); openDocReader('essay-failure');" style="color: var(--accent); text-decoration: underline;">正确的错误是资产 · not even wrong</a></p>
+      <p style="margin-top: 10px; font-size: 13.5px; color: var(--text-3);">→ 完整展开（飞轮机制 + FAGB 实例）见 <a href="#" onclick="event.preventDefault(); openDocReader('essay-failure');" style="color: var(--accent); text-decoration: underline;">AI Agent 正确的错误是资产 —— 怕的是 not even wrong</a></p>
     </div>
   </div>
 </section>
@@ -1715,7 +1715,7 @@
     </div>
 
     <div class="arch-panel" data-panel="L6">
-      <p class="arch-intro">Eval 层 —— 高价值交付物的最后一道闸。机械检查、独立 context 审查、跨模型对照、密度 / 版式 / 渲染验证。这一层不产新内容，专门评判前面 6 层产出的对不对</p>
+      <p class="arch-intro">Eval 层 —— 高价值交付物的最后一道闸，不产新内容，专门评判前面 6 层产出的对不对。eval 的写法分两级：第一级是机械检查，纯 Python 完成 —— 配平、数值区间、密度 / 版式 / 渲染验证，绝大部分 eval 在这一级以确定性规则跑完；剩下约 20% 才交给 LLM as judge —— 独立 context 语义审查、跨模型对照，处理规则写不出来的判断</p>
       <div class="skill-grid">
         <div class="skill-card"><div class="skill-name">deck-eval-router</div><div class="skill-desc">统一路由 PPTX / HTML deck QC（repair → eval → source-clean → layout-validator）</div></div>
         <div class="skill-card"><div class="skill-name">pptx-eval</div><div class="skill-desc">PPTX 真实性验证 —— PowerPoint COM 打开、catch 修复对话框、抓渲染异常</div></div>
@@ -1853,7 +1853,7 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
       <span class="cite">摘自《Guide / Hook / Eval》 · 2026 年 5 月</span>
     </blockquote>
 
-    <p style="margin-top: 28px; font-size: 13.5px; color: var(--text-3); font-family: var(--font-serif);">→ 延伸阅读：Eval 的下一步 —— error log 怎么归纳成 pattern，再变成 skill gate / agentic benchmark / 后训练信号：<a href="#" onclick="event.preventDefault(); openDocReader('essay-failure');" style="color: var(--accent); text-decoration: underline;">正确的错误是资产 · not even wrong</a></p>
+    <p style="margin-top: 28px; font-size: 13.5px; color: var(--text-3); font-family: var(--font-serif);">→ 延伸阅读：Eval 的下一步 —— error log 怎么归纳成 pattern，再变成 skill gate / agentic benchmark / 后训练信号：<a href="#" onclick="event.preventDefault(); openDocReader('essay-failure');" style="color: var(--accent); text-decoration: underline;">AI Agent 正确的错误是资产 —— 怕的是 not even wrong</a></p>
 
     <div class="submod-head" style="margin-top: 96px;">
       <div class="submod-label">02 · b — 数据信任模型</div>
@@ -2367,7 +2367,7 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
         </div>
         <div class="side-card">
           <h5>垂直领域怎么落地</h5>
-          <p>把 AI 落进投研 / 法律 / 医疗，核心是建一套<strong>让领域专家高效带 AI 迭代试错</strong>的基础设施（error log / 归一化 feedback / gate / benchmark）。这正是垂直 AI 商业化的核心。<a href="#" onclick="event.preventDefault(); openDocReader('essay-failure');">正确的错误是资产 · not even wrong</a> 完整展开了这套飞轮 + FAGB 实例</p>
+          <p>把 AI 落进投研 / 法律 / 医疗，核心是建一套<strong>让领域专家高效带 AI 迭代试错</strong>的基础设施（error log / 归一化 feedback / gate / benchmark）。这正是垂直 AI 商业化的核心。<a href="#" onclick="event.preventDefault(); openDocReader('essay-failure');">AI Agent 正确的错误是资产 —— 怕的是 not even wrong</a> 完整展开了这套飞轮 + FAGB 实例</p>
         </div>
         <div class="side-card">
           <h5>完整论证</h5>
