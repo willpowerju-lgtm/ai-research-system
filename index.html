@@ -2620,8 +2620,8 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
       type: 'PPTX · 买方 IC DECK',
       title: 'AAPL · HF Investment Case',
       desc: '一份完整的 AAPL 投资委员会 deck，走 IC Memo 生产链。从 thesis tree（Bull / Bear / Tail）开始，翻译成 6 段 storyline，再用机构级模板 renderer 逐 slide 渲染。',
-      pipeline: ['report-prep-nlm', 'ic-memo-outliner', 'data-validator', 'ic-pptx', 'pptx-repair', 'pptx-eval'],
-      meta: { '文件大小': '2.3 MB', '受众': '买方 IC', 'Render 路径': 'JSON outline → 原生 PPTX', 'QC stack': '5-phase + Codex gate', '迭代': 'V1 → V21（版本号追踪）', '模板族': 'Uninodue master' },
+      pipeline: ['report-prep-nlm', 'data-validator', 'ic-pptx', 'pptx-repair', 'pptx-eval'],
+      meta: { '文件大小': '2.3 MB', '受众': '买方 IC', '页数': '21 页', 'QC stack': '5-phase + Codex gate', '模板族': 'Uninodue master' },
       file: 'AAPL_20260428_V21.pptx'
     },
     'aapl-buyside': {
