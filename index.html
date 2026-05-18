@@ -2044,9 +2044,20 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
       </div>
 
       <div class="lib-stage-card">
-        <span class="stage-num">Stage 02</span>
-        <h4>任务级<em>辅助</em></h4>
-        <div class="stage-tag">有任务的时候，vault 按需生成一份 briefing</div>
+        <span class="stage-num">Stage 2A</span>
+        <h4>Question <em>List</em></h4>
+        <div class="stage-tag">LLM 基于核心问题 + question pool 自动生成提问清单</div>
+        <ul>
+          <li><strong>读取核心问题 + vault 相关资料</strong> —— 基于研究焦点和当前假设，LLM 自动定位相关材料</li>
+          <li><strong>参考 question pool</strong> —— 历史积累的高质量问题模板，按场景（会前 / 财报 / 调研）分类复用</li>
+          <li><strong>自动衍生提问</strong> —— 填补盲区，产出一份结构化、有优先级的 key question list</li>
+        </ul>
+      </div>
+
+      <div class="lib-stage-card">
+        <span class="stage-num">Stage 2B</span>
+        <h4>会前 <em>Prep</em></h4>
+        <div class="stage-tag">对 question list 逐题做 vault 全扫描，生成会前 briefing</div>
         <ul>
           <li><strong>Question list → vault 全扫</strong>：每个问题下方自动附"vault 扫描初步结论"，从纪要 / 研报 / 模型 / 公众号里跨源拼接</li>
           <li><strong>跨源综合</strong> —— 散布在不同时间、不同来源的证据被拼成一张完整画面，像高级分析师会前做的功课</li>
@@ -2232,8 +2243,10 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
           </table>
         </div>
         <div class="lib-explain">
-          <h5>Stage 02 —— 会前 prep</h5>
-          <p>会前搭建。Librarian 对每个问题做 vault 全扫描，附"vault 扫描初步结论"—— 已知什么、源头之间哪里矛盾、值得继续追问什么。三个版本演化：<strong>v1 标准 coverage 问题 → v2 把空头核心 concerns 前置 → v3 把"海外护城河是否实际上是 transition window"作为最深的关切浮上来</strong></p>
+          <h5>Stage 2A —— question list</h5>
+          <p>LLM 根据我的核心问题自动读取 vault 相关资料，参考 question pool（历史积累的高质量问题模板），衍生提问、填补盲区，生成一份结构化的 key question list。三个版本演化：<strong>v1 标准 coverage 问题 → v2 把空头核心 concerns 前置 → v3 把"海外护城河是否实际上是 transition window"作为最深的关切浮上来</strong></p>
+          <h5>Stage 2B —— 会前 prep</h5>
+          <p>对 question list 逐题做 vault 全扫描，附"vault 扫描初步结论"—— 已知什么、源头之间哪里矛盾、值得继续追问什么。产出是一份可打印的会前 briefing，带认知偏差标红</p>
           <h5>Stage 03 —— 会后闭环</h5>
           <p>会后逐题状态记录：13 Answered / 5 Partial / 9 Skipped / 1 Avoided。"Avoided"那一题是最有意思的信号 —— 分析师无法或不愿在录音上面回答。逐题回填触发 wiki 级联：新数据更新对应 §，催化剂日历加入时间节点，next-step 从"还缺什么"自动生成</p>
         </div>
