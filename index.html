@@ -1763,6 +1763,30 @@
           </div>
           <div class="artifact-arrow">→</div>
         </div>
+        <div class="artifact-card" data-sample="nflx-research">
+          <div class="artifact-icon">DOCX</div>
+          <div class="artifact-body">
+            <div class="artifact-title">Netflix · Initiating Coverage</div>
+            <div class="artifact-sub">deep-research-workflow 全流程产出 · 卖方 Full Report</div>
+          </div>
+          <div class="artifact-arrow">→</div>
+        </div>
+        <div class="artifact-card" data-sample="nflx-buyside">
+          <div class="artifact-icon">DOCX</div>
+          <div class="artifact-body">
+            <div class="artifact-title">Netflix · HF Investment Case</div>
+            <div class="artifact-sub">买方 memo · 决策导向短文版</div>
+          </div>
+          <div class="artifact-arrow">→</div>
+        </div>
+        <div class="artifact-card" data-sample="nflx-pm-qa">
+          <div class="artifact-icon">DOCX</div>
+          <div class="artifact-body">
+            <div class="artifact-title">Netflix · PM Question Responses</div>
+            <div class="artifact-sub">基于已建 corpus 逐题点对点回答 PM 问题</div>
+          </div>
+          <div class="artifact-arrow">→</div>
+        </div>
         <div class="artifact-card" data-sample="acme-deck">
           <div class="artifact-icon">PPTX</div>
           <div class="artifact-body">
@@ -2655,6 +2679,30 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
       pipeline: ['acme-slides-creator-json'],
       meta: { '文件大小': '2.8 MB', '页数': '9 页', '模板族': 'acme（浅色商务）', 'Render 路径': 'JSON SSOT → 原生 PPTX', '内容': '虚构占位 · 模板演示' },
       file: 'ACME sample slides.pptx'
+    },
+    'nflx-research': {
+      type: 'DOCX · 卖方 FULL REPORT',
+      title: 'Netflix · Initiating Coverage',
+      desc: 'deep-research-workflow 产出的完整卖方 initiating coverage —— 覆盖业务概述、竞争格局、财务分析、估值框架、风险因素。全流程自动化：NLM 建库 → 跨源 Q&A → 结构化写作。',
+      pipeline: ['report-prep-nlm', 'deep-research-workflow', 'data-validator', 'docx skill'],
+      meta: { '文件大小': '168 KB', '受众': '卖方 / 机构', '语气': '分析性、全面', 'Workflow': 'deep-research-workflow' },
+      file: 'Netflix_final_research.docx'
+    },
+    'nflx-buyside': {
+      type: 'DOCX · 买方 MEMO',
+      title: 'Netflix · HF Investment Case',
+      desc: '决策导向的买方 memo —— 和 full report 共享同一套 deep research 底稿，以更短、更决断的叙述形式呈现。PM 在批准建仓前会看的格式。',
+      pipeline: ['deep-research-workflow', 'data-validator', 'docx skill'],
+      meta: { '文件大小': '43 KB', '受众': '买方 PM', '语气': '决策导向', 'Workflow': 'deep-research-workflow' },
+      file: 'Netflix_HF_Investment_Case.docx'
+    },
+    'nflx-pm-qa': {
+      type: 'DOCX · PM Q&A',
+      title: 'Netflix · PM Question Responses',
+      desc: '根据额外的 question list 点对点回答 —— deep-research-workflow 的一个独特能力：在已建好的 NLM corpus + vault 知识库之上，针对 PM 提出的具体问题逐条生成有据可查的回答，而不是泛泛的 summary。每条回答可追溯到具体 source。',
+      pipeline: ['deep-research-workflow', 'data-validator', 'docx skill'],
+      meta: { '文件大小': '92 KB', '受众': '买方 PM', '格式': '逐题 Q&A', '特点': '基于已建 corpus 点对点回答' },
+      file: 'Netflix_PM_Question_Responses.docx'
     }
   };
 
