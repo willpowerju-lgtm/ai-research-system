@@ -1571,13 +1571,6 @@
       Research &amp; Professional Cowork —— 下一代 AI 的<br><em>key battlefield</em>
     </h1>
     <p class="hero-intro">这是一个外资 PE / LO 买方研究员的 AI 投研开发的个人记录与感悟。</p>
-    <div class="hero-sub">
-      <p style="margin-bottom: 14px;">过去两个月，我用业余时间，以陡峭的学习曲线学习了 LLM、agent harness 相关知识，通过 Claude Code 不断试错迭代，把一套投研 Agent 系统做到了日常生产可用。但我发现这其中核心的价值不是"又一套 skills"，它指向两件事：</p>
-      <ul class="hero-pillars">
-        <li><strong>复合背景的专家的稀缺性</strong> —— 金融领域专家 × 已被生产验证的 workflow 工程化能力，恰好是啃下 research 中间层需要的组合</li>
-        <li><strong>Harness &amp; skills 本质还是脚手架</strong> —— 可以拓展模型现有的能力，但在专业领域达到专家水平还需依赖模型自身的迭代进化。而在标准 <strong>GHE（Guide / Hook / Eval）</strong>框架下跑真实投研，这套实践本身就是一次<strong>人类专家 input 的采集</strong>：被 Eval 或 human feedback 抓到的每一个错误，经归一化沉淀下来，都能成为反哺模型后训练的养料</li>
-      </ul>
-    </div>
     <p class="hero-sub">
       这套系统跑在 5,950 文件 vault 之上，是一个 <em>7 层架构</em> —— 涵盖从原始数据采集、跨源综合、深度研究、到 IC Memo / 卖方报告渲染的全流程闭环
     </p>
@@ -1586,6 +1579,21 @@
       <div class="stat"><div class="num">7</div><div class="lbl">架构层</div></div>
       <div class="stat"><div class="num">5,950</div><div class="lbl">vault 笔记数</div></div>
       <div class="stat"><div class="num">3</div><div class="lbl">Eval 层级 (mech·LLM·cross)</div></div>
+    </div>
+    <div class="hero-sub">
+      <p style="margin-bottom: 18px; font-size: 24px; font-weight: 600; color: var(--accent);">三个相互正交的设计哲学基座：</p>
+      <ul class="hero-pillars">
+        <li><strong>Guide / Hook / Eval 三层 agent 行为框架</strong> —— agent 在 high-stakes 场景下怎么稳定产出</li>
+        <li><strong>data-validator 三维正交</strong>（信源 / 时效 / 对齐）—— 防数据幻觉的门槛</li>
+        <li><strong>活 wiki + verified thesis truth base</strong>（librarian 主动维护）—— 已对齐的 fact 集合，下游任务的 base，机器和人都能读</li>
+      </ul>
+    </div>
+    <div class="hero-sub">
+      <p style="margin-bottom: 14px;">过去两个月，我用业余时间，以陡峭的学习曲线学习了 LLM、agent harness 相关知识，通过 Claude Code 不断试错迭代，把一套投研 Agent 系统做到了日常生产可用。但我发现这其中核心的价值不是"又一套 skills"，它指向两件事：</p>
+      <ul class="hero-pillars">
+        <li><strong>复合背景的专家的稀缺性</strong> —— 金融领域专家 × 已被生产验证的 workflow 工程化能力，恰好是啃下 research 中间层需要的组合</li>
+        <li><strong>Harness &amp; skills 本质还是脚手架</strong> —— 可以拓展模型现有的能力，但在专业领域达到专家水平还需依赖模型自身的迭代进化。而在标准 <strong>GHE（Guide / Hook / Eval）</strong>框架下跑真实投研，这套实践本身就是一次<strong>人类专家 input 的采集</strong>：被 Eval 或 human feedback 抓到的每一个错误，经归一化沉淀下来，都能成为反哺模型后训练的养料</li>
+      </ul>
     </div>
     <div class="hero-sub">
       <p style="margin-bottom: 18px; font-size: 24px; font-weight: 600; color: var(--accent);">我的观察：为什么是 research × cowork 这一层</p>
@@ -1606,14 +1614,6 @@
       </ul>
       <p style="margin-top: 14px;">这种"三不管地带"不会长期存在 —— 这是我看到的一块被低估的结构性缺口。</p>
       <p style="margin-top: 10px; font-size: 13.5px; color: var(--text-3);">→ 完整展开（平台三要件 + 下一代 agent 形态）见 <a href="#" onclick="event.preventDefault(); openDocReader('cowork-strategy');" style="color: var(--accent); text-decoration: underline;">Cowork 平台战略思考 · 被低估的中间层</a></p>
-    </div>
-    <div class="hero-sub">
-      <p style="margin-bottom: 18px; font-size: 24px; font-weight: 600; color: var(--accent);">三个相互正交的设计哲学基座：</p>
-      <ul class="hero-pillars">
-        <li><strong>Guide / Hook / Eval 三层 agent 行为框架</strong> —— agent 在 high-stakes 场景下怎么稳定产出</li>
-        <li><strong>data-validator 三维正交</strong>（信源 / 时效 / 对齐）—— 防数据幻觉的门槛</li>
-        <li><strong>活 wiki + verified thesis truth base</strong>（librarian 主动维护）—— 已对齐的 fact 集合，下游任务的 base，机器和人都能读</li>
-      </ul>
     </div>
     <div class="hero-sub" style="border-left: 3px solid var(--accent); padding-left: 18px;">
       <p style="margin-bottom: 18px; font-size: 24px; font-weight: 600; color: var(--accent);">Harness 是暂时的脚手架，模型的进步是根本</p>
