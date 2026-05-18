@@ -2109,7 +2109,7 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
           <h5>这是什么</h5>
           <p>一份活的 coverage wiki —— 对一家持仓的当前 working hypothesis。<strong>14 段标准结构</strong>，从 thesis 到 valuations、key guidance、known truth、recent thesis。每条 claim 都 cross-link 到它来源的 visiting record 或卖方研报</p>
           <h5>怎么生成的</h5>
-          <p>每次新 visiting record 落到 vault，Librarian 的 Stage 1 自动 ingest。Claim 被提取、匹配到现有 thesis 段落、生成 wiki diff 提案。<strong>所有 wiki 改动我手动批准。</strong> 来源间的冲突主动 raise 出来，不 auto-merge</p>
+          <p>每次新 visiting record 落到 vault，Librarian 的 Stage 1 自动 ingest。Claim 被提取、匹配到现有 thesis 段落、生成 wiki diff 提案。日常信息流（数据更新、新 source ingest、claim 提取）全自动；<strong>重要的 thesis 和长期判断的修改需要人工批准。</strong> 来源间的冲突主动 raise 出来，不静默覆盖</p>
           <h5>为什么重要</h5>
           <p>半年前的 thesis 会随着新数据到来悄悄漂移。Wiki 保持 "我现在相信什么、为什么" 的 current consensus 版本 —— 可审计、源头可追溯、绝不投机</p>
         </div>
