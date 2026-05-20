@@ -200,7 +200,9 @@ data-validator 不做每日巡检（那是 librarian 在 wiki 页面上的事）
 - **维度二 时效性** → `as_of_date`（数据代表的日期）+ `as_of_type`（数据形态：快照 / 期末 / TTM 截止 / 年度 / 月度）+ `period`（人读 token）+ `entity`（公司短码）
 - **维度三 交叉验证** → `sources[]` 数组本身 + cross-validation 规则（T3 必须 ≥2 sources，T4 单源但必须 footnote）
 
-`as_of_date` 拆成 first-class 字段的关键意义：staleness check 优先吃它而不是 `verified_date`——FX / 股价 / IV 这类 spot 数据不会因为今天 QC 过就显得"新鲜"。`as_of_type` 进一步把"数据形态"显式标出来，让 validator 能用不同 staleness 阈值老化（snapshot 数据日级别 stale，财报数据季度级别 stale）。这些是 v2.1 实施过程中才彻底看清楚的隐含假设，详见文末实施进展。
+`as_of_date` 拆成 first-class 字段的关键意义：staleness check 优先吃它而不是 `verified_date`——FX / 股价 / IV 这类 spot 数据不会因为今天 QC 过就显得"新鲜"。`as_of_type` 进一步把"数据形态"显式标出来，让 validator 能用不同 staleness 阈值老化（snapshot 数据日级别 stale，财报数据季度级别 stale）。
+
+`entity` 字段单拎出来的实际价值是跨 deck 时序聚合：要"拉 AAPL 所有历史季度 revenue"这种 query 直接 grep `entity:"AAPL"` 再按 `as_of_date` 排序就行，不用靠在 id 后缀里硬塞日期再 regex —— 这是把 registry 从单 deck 工具升格为可跨 deck 复用的资产库的关键。
 
 ### 两套 schema 的关系：DRW 嵌套 vs data-validator flat
 
@@ -238,14 +240,20 @@ Registry 以 JSON 形式持久化在磁盘，是机器可读的 single source of
 gate_check(data_point):
     if tier in [T3, T4] and len(sources) < 2:
         return BLOCK  # alignment 不够
-    if staleness(as_of) > threshold:
-        return BLOCK  # 时效性不够
+    if staleness(as_of_date) > threshold[as_of_type]:
+        return BLOCK  # 时效性不够 (阈值按 as_of_type 区分)
     if tier == T4 and not has_footnote:
         return BLOCK  # 必须 footnote
+    if abs(date_of(period) - as_of_date) > 31_days:
+        return WARN   # period token 和 as_of_date 不一致 (copy-paste 失误)
+    if category in PERIOD_CATS and as_of_type == "snapshot":
+        return WARN   # 语义冲突 (revenue 不该是 snapshot)
     return PASS
 ```
 
 这把 data trust 从 ad-hoc judgement 变成了**可审计的工程问题**。LLM 不再是 trust 的判断者，registry 才是。
+
+最后两条 WARN 是 v2.1 实施过程才意识到要加的：用户写 `period="2024-Q3"` 但 `as_of_date="2025-09-30"` 是典型 copy-paste 失误，必须立刻报警；`revenue` 标 `as_of_type="snapshot"` 是把"快照型"和"期间型"两种数据形态混用，semantic 上就是错的。这两条都不是"概念新"，是"概念拆细到字段层面之后才看得见的边界"——写代码反推概念，往往就是这样从抽象的维度切到可落地的字段。
 
 ---
 
@@ -399,27 +407,9 @@ agent 行为这样处理；数据信任这样处理；以后可能还有第三�
 
 拆开三个维度之后，data-validator 的设计就变得几乎是必然的——三个独立标签同时存、derived 走木桶、时效性独立巡检、对齐度独立加权、所有 gate check 在交付前自动跑。代码层面的复杂度其实不高（registry schema 也就一百多行 Python），难的是先把这三个维度从一团叫"data trust"的概念里拆出来。
 
-这是过去一段时间最实际的体感：**好的工程架构往往是先把概念拆对，代码就顺了**。
-
----
-
-## 实施进展 · 2026-05-20
-
-写完这篇五天后，data-validator 的 flat schema 实际跟上了文中讨论的三维模型。v2.1 schema 把 `as_of_date` 从 deep-research-workflow 的嵌套 schema 推广到 data-validator 的扁平 `data_points[]`，把"时效性独立维度"从纸面规范落到代码。
-
-补充三个本来没想清楚的子问题，是实施过程里暴露出来的：
-
-- **`as_of_date` 不够用，还需要 `as_of_type`**。同样标 `as_of_date=2024-09-30`，季报数据（`period_end`）、TTM 截止（`ttm_cutoff`）、当日快照（`snapshot`）三种"形态"的 staleness threshold 完全不同。把 type 显式标出来，validator 才能用不同阈值老化——快照型数据要日级别 stale，财报数据可以季度级别 stale。
-- **`verified_date` 的语义边界**。原本 `verified_date` 在含义上模糊：既是"QC 触碰时间"又被当成 staleness 输入。v2.1 强制 staleness 优先用 `as_of_date`，`verified_date` 退化为纯 QC 时间戳。否则会出现"今天 QC 过 = 数据新鲜"的伪安全感——FX / 股价 / IV 这类 spot 数据最容易栽这个坑。
-- **period token vs as_of_date 一致性检查**。用户写 `period="2024-Q3"` 但 `as_of_date="2025-09-30"` 应该立刻报错（典型 copy-paste 失误）。v2.1 加了 `as_of_consistency` check：period token 推导出的日期和 `as_of_date` 偏差 >31 天直接 WARN；category 和 as_of_type 语义冲突也 WARN（比如 `revenue` 标 `snapshot`、`forward_pe` 标 `period_end`）。
-
-外加一个 first-class 的 `entity` 字段（ticker / 公司短码），让"跨 deck 拉所有 AAPL 历史季度 revenue"这种 query 终于能 grep `entity:"AAPL"` + sort `as_of_date` 跑通，不用靠在 id 后缀里硬塞日期再 regex。
-
-这四个细节都没在原文里说到，因为没真正动手实施前是想不到的——只有把抽象的"独立维度"拆成 `as_of_date` + `as_of_type` 两个 first-class 字段，才能 surface 出"快照型 vs 期间型数据的 staleness 语义完全不同"这个隐含假设。
-
-应了文末那句话：**好的工程架构往往是先把概念拆对，代码就顺了**——但反过来，写代码也会反推你把概念拆得更细。这是 first-class field 的真实价值：不是为了好看的 schema，是为了逼自己把模糊的概念按一个 field 一个语义拆干净。
+这是过去一段时间最实际的体感：**好的工程架构往往是先把概念拆对，代码就顺了**。反过来也成立——写代码会反推你把概念拆得更细。"as_of"这个抽象维度，只有真正落到 `as_of_date` + `as_of_type` 两个 first-class 字段，才暴露出"快照型 vs 期间型数据的 staleness 语义完全不同"这个之前没看见的隐含假设。
 
 ---
 
 *脱敏说明：本文涉及的具体公司 / ticker / 基金名已隐去，只保留架构与方法论。*
-*Last updated: 2026-05-20 (v2.1 实施进展)*
+*Last updated: 2026-05-20*
