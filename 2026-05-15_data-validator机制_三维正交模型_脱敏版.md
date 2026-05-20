@@ -378,5 +378,23 @@ agent 行为这样处理；数据信任这样处理；以后可能还有第三�
 
 ---
 
+## 实施进展 · 2026-05-20
+
+写完这篇五天后，data-validator 的 flat schema 实际跟上了文中讨论的三维模型。v2.1 schema 把 `as_of_date` 从 deep-research-workflow 的嵌套 schema 推广到 data-validator 的扁平 `data_points[]`，把"时效性独立维度"从纸面规范落到代码。
+
+补充三个本来没想清楚的子问题，是实施过程里暴露出来的：
+
+- **`as_of_date` 不够用，还需要 `as_of_type`**。同样标 `as_of_date=2024-09-30`，季报数据（`period_end`）、TTM 截止（`ttm_cutoff`）、当日快照（`snapshot`）三种"形态"的 staleness threshold 完全不同。把 type 显式标出来，validator 才能用不同阈值老化——快照型数据要日级别 stale，财报数据可以季度级别 stale。
+- **`verified_date` 的语义边界**。原本 `verified_date` 在含义上模糊：既是"QC 触碰时间"又被当成 staleness 输入。v2.1 强制 staleness 优先用 `as_of_date`，`verified_date` 退化为纯 QC 时间戳。否则会出现"今天 QC 过 = 数据新鲜"的伪安全感——FX / 股价 / IV 这类 spot 数据最容易栽这个坑。
+- **period token vs as_of_date 一致性检查**。用户写 `period="2024-Q3"` 但 `as_of_date="2025-09-30"` 应该立刻报错（典型 copy-paste 失误）。v2.1 加了 `as_of_consistency` check：period token 推导出的日期和 `as_of_date` 偏差 >31 天直接 WARN；category 和 as_of_type 语义冲突也 WARN（比如 `revenue` 标 `snapshot`、`forward_pe` 标 `period_end`）。
+
+外加一个 first-class 的 `entity` 字段（ticker / 公司短码），让"跨 deck 拉所有 SY 历史季度 revenue"这种 query 终于能 grep `entity:"SY"` + sort `as_of_date` 跑通，不用靠在 id 后缀里硬塞日期再 regex。
+
+这四个细节都没在原文里说到，因为没真正动手实施前是想不到的——只有把抽象的"独立维度"拆成 `as_of_date` + `as_of_type` 两个 first-class 字段，才能 surface 出"快照型 vs 期间型数据的 staleness 语义完全不同"这个隐含假设。
+
+应了文末那句话：**好的工程架构往往是先把概念拆对，代码就顺了**——但反过来，写代码也会反推你把概念拆得更细。这是 first-class field 的真实价值：不是为了好看的 schema，是为了逼自己把模糊的概念按一个 field 一个语义拆干净。
+
+---
+
 *脱敏说明：本文涉及的具体公司 / ticker / 基金名已隐去，只保留架构与方法论。*
-*Last updated: 2026-05-15*
+*Last updated: 2026-05-20 (v2.1 实施进展)*
