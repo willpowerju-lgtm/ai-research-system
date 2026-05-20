@@ -151,42 +151,67 @@ data-validator 不做每日巡检（那是 librarian 在 wiki 页面上的事）
 
 ## 五、data-validator registry 的设计选择
 
-三维互相正交意味着**不能用单一指标概括 trust**。所以 data-validator registry 给每条 data point 同时存三个独立标签。registry 实际 schema 用了两类条目 —— L1 原子数据（一手搬运）和 L2 衍生数据（从 L1/L2 计算出）：
+三维互相正交意味着**不能用单一指标概括 trust**。所以 data-validator registry 给每条 data point 同时存三个独立维度的标签，每个维度都是 first-class 字段。下面是一条真实 data_point 在 v2.1 schema 下长什么样：
 
-```yaml
-# L1 — 原子数据（从 API / 财报 / NLM 直接搬运）
-"L1-001":
-  metric:              "FY25 营收"
-  value:               58400000000
-  unit:                "CNY"
-  as_of_date:          2026-03-31         # 时效性独立标签
-  tier:                T1                  # 信源质量
-  source_id:           "SRC-002"           # 主要来源
-  source_detail:       "年报 p.42 合并报表"
-  extraction_method:   "direct_quote"
-  cross_ref_sources:   ["SRC-007"]         # 交叉验证来源
-  cross_ref_values:    {SRC-007: 58420000000}
-  used_in:             ["IC_memo.Sec3"]
+```json
+{
+  "id": "SY_revenue_2024Q3",
+  "label": "新氧科技 2024Q3 营业收入",
 
-# L2 — 衍生数据（继承木桶 tier）
-"L2-014":
-  metric:              "Revenue YoY"
-  value:               0.183
-  tier:                T2                  # 取依赖链最低 tier
-  derivation:
-    formula:           "=L1-001/L1-009 - 1"
-    depends_on:        ["L1-001", "L1-009"]
-    method:            "yoy_growth"
-  t4_footnote:         null                # 若 tier=T4 强制必填
+  // ── 数据本身 ──
+  "value": "323.5",
+  "value_numeric": {"point_estimate": 323.5},
+  "unit": "Mn",
+  "currency": "CNY",
+
+  // ── 维度一：信源质量 (tier) ──
+  "source_tier": "T1",
+  "source_type": "quarterly_report",
+  "sources": [
+    {"name": "SY 2024Q3 6-K",
+     "timestamp": "2024-09-30",
+     "retrieval_method": "NLM",
+     "retrieval_date": "2026-05-20"}
+  ],
+
+  // ── 维度二:时效性 (as_of) ──
+  "entity":        "SY",          // ticker / 短码，支持跨 deck 时序聚合
+  "period":        "2024-Q3",     // 报告期 token (FY2024 / 2024-Q3 / TTM-... / spot-...)
+  "as_of_date":    "2024-09-30",  // 数据代表的 ISO 日期 (staleness 主输入)
+  "as_of_type":    "period_end",  // period_end / snapshot / ttm_cutoff / annual / monthly
+  "verified_date": "2026-05-20",  // QC 触碰时间 (仅作 as_of_date 缺失时的 fallback)
+
+  // ── 维度三:交叉验证 (alignment) ──
+  // 多源在 sources[] 同时存,conflict 按 tier + as_of 仲裁
+  // T3 强制 ≥2 sources;T4 允许单源但必须 footnote 标注
+
+  // ── 通用元数据 ──
+  "data_category":      "financial_metric",
+  "geographic_scope":   "CN",
+  "notes":              "Q3 营收 YoY +5%, 主要来自轻医美渗透提升",
+  "used_in":            [{"slide": "P3", "location_ref": "table_cell"}],
+  "update_history":     []
+}
 ```
 
-字段拆解对应三个维度：
+字段对应三个维度：
 
-- **维度一 信源质量** → `tier` + `source_id` + `extraction_method`
-- **维度二 时效性** → `as_of_date`（独立字段，不被 tier 覆盖）
-- **维度三 交叉验证** → `cross_ref_sources` + `cross_ref_values`（多源对比）
+- **维度一 信源质量** → `source_tier` + `source_type` + `sources[]`
+- **维度二 时效性** → `as_of_date`（数据代表的日期）+ `as_of_type`（数据形态：快照 / 期末 / TTM 截止 / 年度 / 月度）+ `period`（人读 token）+ `entity`（公司短码）
+- **维度三 交叉验证** → `sources[]` 数组本身 + cross-validation 规则（T3 必须 ≥2 sources，T4 单源但必须 footnote）
 
-L2 衍生数据的 `derivation.depends_on` 实现木桶原则：tier 自动取依赖链所有 L1/L2 的最低值。
+`as_of_date` 拆成 first-class 字段的关键意义：staleness check 优先吃它而不是 `verified_date`——FX / 股价 / IV 这类 spot 数据不会因为今天 QC 过就显得"新鲜"。`as_of_type` 进一步把"数据形态"显式标出来，让 validator 能用不同 staleness 阈值老化（snapshot 数据日级别 stale，财报数据季度级别 stale）。这些是 v2.1 实施过程中才彻底看清楚的隐含假设，详见文末实施进展。
+
+### 两套 schema 的关系：DRW 嵌套 vs data-validator flat
+
+实际跑起来 registry 存在两套 schema，都遵守"三维独立 first-class 字段"的设计原则，只是组织方式不同：
+
+| Schema | 结构 | 适合的场景 | 衍生数据怎么处理 |
+|---|---|---|---|
+| **deep-research-workflow** | L1 原子数据 + L2 衍生数据嵌套（`derivation.depends_on`） | 研究报告全文（docx）：每个数字都有 L1 / L2 身份，依赖图原生在数据条目里 | L2 显式声明 `depends_on: [L1-...]`，木桶 tier 从依赖图自动算 |
+| **data-validator** | 扁平 `data_points[]` 列表 + 单独的 `dependency_graph` 块 | PPTX / DOCX / XLSX cell-level 追溯：每个 cell 对应一个 id，slide / location 精确定位 | 依赖关系另存 `dependency_graph` 块，木桶原则按规范执行 |
+
+两套 schema 共用同一套 `as_of_date` / `as_of_type` / `source_tier` / `entity` 字段语义，可以互相 import 转换。**选哪套不重要，重要的是三维独立标签的强制性**——任何 registry 都必须能回答"这条数据来自哪里 / 是什么时候的 / 有几个来源在说同一件事"三个独立问题。
 
 下游 skill 引用时三个维度同时决策：
 

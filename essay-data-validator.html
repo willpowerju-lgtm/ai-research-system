@@ -354,34 +354,52 @@ inputs: [T3, T4] → derived tier = T4</code></pre>
 <p>这一点之前在 librarian 升级笔记里有专门展开——B 级（T3）信源的存在意义不是和 A 级（T1/T2）竞争权威性，而是和 A 级形成对照。它们的"软"反而是价值所在——只有软信息才能携带 A 级硬数据还没沉淀进去的 forward-looking 信号</p>
 <hr>
 <h2>五、data-validator registry 的设计选择</h2>
-<p>三维互相正交意味着<strong>不能用单一指标概括 trust</strong>。所以 data-validator registry 给每条 data point 同时存三个独立标签。registry 实际 schema 用了两类条目 —— L1 原子数据（一手搬运）和 L2 衍生数据（从 L1/L2 计算出）：</p>
-<pre><code># L1 — 原子数据（从 API / 财报 / NLM 直接搬运）
-&quot;L1-001&quot;:
-  metric:              &quot;FY25 营收&quot;
-  value:               58400000000
-  unit:                &quot;CNY&quot;
-  as_of_date:          2026-03-31         # 时效性独立标签
-  tier:                T1                  # 信源质量
-  source_id:           &quot;SRC-002&quot;           # 主要来源
-  source_detail:       &quot;年报 p.42 合并报表&quot;
-  extraction_method:   &quot;direct_quote&quot;
-  cross_ref_sources:   [&quot;SRC-007&quot;]         # 交叉验证来源
-  cross_ref_values:    {SRC-007: 58420000000}
-  used_in:             [&quot;IC_memo.Sec3&quot;]
+<p>三维互相正交意味着<strong>不能用单一指标概括 trust</strong>。所以 data-validator registry 给每条 data point 同时存三个独立维度的标签，每个维度都是 first-class 字段。下面是一条真实 data_point 在 v2.1 schema 下长什么样：</p>
+<pre><code>{
+  &quot;id&quot;: &quot;SY_revenue_2024Q3&quot;,
+  &quot;label&quot;: &quot;新氧科技 2024Q3 营业收入&quot;,
 
-# L2 — 衍生数据（继承木桶 tier）
-&quot;L2-014&quot;:
-  metric:              &quot;Revenue YoY&quot;
-  value:               0.183
-  tier:                T2                  # 取依赖链最低 tier
-  derivation:
-    formula:           &quot;=L1-001/L1-009 - 1&quot;
-    depends_on:        [&quot;L1-001&quot;, &quot;L1-009&quot;]
-    method:            &quot;yoy_growth&quot;
-  t4_footnote:         null                # 若 tier=T4 强制必填</code></pre>
-<p>字段拆解对应三个维度：</p>
-<ul><li><strong>维度一 信源质量</strong> → <code>tier</code> + <code>source_id</code> + <code>extraction_method</code></li><li><strong>维度二 时效性</strong> → <code>as_of_date</code>（独立字段，不被 tier 覆盖）</li><li><strong>维度三 交叉验证</strong> → <code>cross_ref_sources</code> + <code>cross_ref_values</code>（多源对比）</li></ul>
-<p>L2 衍生数据的 <code>derivation.depends_on</code> 实现木桶原则：tier 自动取依赖链所有 L1/L2 的最低值</p>
+  // ── 数据本身 ──
+  &quot;value&quot;: &quot;323.5&quot;,
+  &quot;value_numeric&quot;: {&quot;point_estimate&quot;: 323.5},
+  &quot;unit&quot;: &quot;Mn&quot;,
+  &quot;currency&quot;: &quot;CNY&quot;,
+
+  // ── 维度一：信源质量 (tier) ──
+  &quot;source_tier&quot;: &quot;T1&quot;,
+  &quot;source_type&quot;: &quot;quarterly_report&quot;,
+  &quot;sources&quot;: [
+    {&quot;name&quot;: &quot;SY 2024Q3 6-K&quot;,
+     &quot;timestamp&quot;: &quot;2024-09-30&quot;,
+     &quot;retrieval_method&quot;: &quot;NLM&quot;,
+     &quot;retrieval_date&quot;: &quot;2026-05-20&quot;}
+  ],
+
+  // ── 维度二:时效性 (as_of) ──
+  &quot;entity&quot;:        &quot;SY&quot;,          // ticker / 短码，支持跨 deck 时序聚合
+  &quot;period&quot;:        &quot;2024-Q3&quot;,     // 报告期 token (FY2024 / 2024-Q3 / TTM-... / spot-...)
+  &quot;as_of_date&quot;:    &quot;2024-09-30&quot;,  // 数据代表的 ISO 日期 (staleness 主输入)
+  &quot;as_of_type&quot;:    &quot;period_end&quot;,  // period_end / snapshot / ttm_cutoff / annual / monthly
+  &quot;verified_date&quot;: &quot;2026-05-20&quot;,  // QC 触碰时间 (仅作 as_of_date 缺失时的 fallback)
+
+  // ── 维度三:交叉验证 (alignment) ──
+  // 多源在 sources[] 同时存,conflict 按 tier + as_of 仲裁
+  // T3 强制 ≥2 sources;T4 允许单源但必须 footnote 标注
+
+  // ── 通用元数据 ──
+  &quot;data_category&quot;:      &quot;financial_metric&quot;,
+  &quot;geographic_scope&quot;:   &quot;CN&quot;,
+  &quot;notes&quot;:              &quot;Q3 营收 YoY +5%, 主要来自轻医美渗透提升&quot;,
+  &quot;used_in&quot;:            [{&quot;slide&quot;: &quot;P3&quot;, &quot;location_ref&quot;: &quot;table_cell&quot;}],
+  &quot;update_history&quot;:     []
+}</code></pre>
+<p>字段对应三个维度：</p>
+<ul><li><strong>维度一 信源质量</strong> → <code>source_tier</code> + <code>source_type</code> + <code>sources[]</code></li><li><strong>维度二 时效性</strong> → <code>as_of_date</code>（数据代表的日期）+ <code>as_of_type</code>（数据形态：快照 / 期末 / TTM 截止 / 年度 / 月度）+ <code>period</code>（人读 token）+ <code>entity</code>（公司短码）</li><li><strong>维度三 交叉验证</strong> → <code>sources[]</code> 数组本身 + cross-validation 规则（T3 必须 ≥2 sources，T4 单源但必须 footnote）</li></ul>
+<p><code>as_of_date</code> 拆成 first-class 字段的关键意义：staleness check 优先吃它而不是 <code>verified_date</code>——FX / 股价 / IV 这类 spot 数据不会因为今天 QC 过就显得"新鲜"。<code>as_of_type</code> 进一步把"数据形态"显式标出来，让 validator 能用不同 staleness 阈值老化（snapshot 数据日级别 stale，财报数据季度级别 stale）。这些是 v2.1 实施过程中才彻底看清楚的隐含假设，详见文末实施进展</p>
+<h3>两套 schema 的关系：DRW 嵌套 vs data-validator flat</h3>
+<p>实际跑起来 registry 存在两套 schema，都遵守"三维独立 first-class 字段"的设计原则，只是组织方式不同：</p>
+<table><thead><tr><th>Schema</th><th>结构</th><th>适合的场景</th><th>衍生数据怎么处理</th></tr></thead><tbody><tr><td><strong>deep-research-workflow</strong></td><td>L1 原子数据 + L2 衍生数据嵌套（<code>derivation.depends_on</code>）</td><td>研究报告全文（docx）：每个数字都有 L1 / L2 身份，依赖图原生在数据条目里</td><td>L2 显式声明 <code>depends_on: [L1-...]</code>，木桶 tier 从依赖图自动算</td></tr><tr><td><strong>data-validator</strong></td><td>扁平 <code>data_points[]</code> 列表 + 单独的 <code>dependency_graph</code> 块</td><td>PPTX / DOCX / XLSX cell-level 追溯：每个 cell 对应一个 id，slide / location 精确定位</td><td>依赖关系另存 <code>dependency_graph</code> 块，木桶原则按规范执行</td></tr></tbody></table>
+<p>两套 schema 共用同一套 <code>as_of_date</code> / <code>as_of_type</code> / <code>source_tier</code> / <code>entity</code> 字段语义，可以互相 import 转换。<strong>选哪套不重要，重要的是三维独立标签的强制性</strong>——任何 registry 都必须能回答"这条数据来自哪里 / 是什么时候的 / 有几个来源在说同一件事"三个独立问题</p>
 <p>下游 skill 引用时三个维度同时决策：</p>
 <ul><li><strong>Derived data</strong> 走木桶原则继承最差 tier（见 §二）</li><li><strong>时效性</strong>独立计算，不被 tier 覆盖——T1 + stale 依旧 flag（见 §三）</li><li><strong>Alignment</strong> 独立计算，单源即使 T1 也降权（见 §四）</li></ul>
 <h3>Registry 是 source of truth，Excel 只是视图</h3>
