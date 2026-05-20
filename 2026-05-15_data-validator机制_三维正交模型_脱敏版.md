@@ -155,29 +155,29 @@ data-validator 不做每日巡检（那是 librarian 在 wiki 页面上的事）
 
 ```json
 {
-  "id": "SY_revenue_2024Q3",
-  "label": "新氧科技 2024Q3 营业收入",
+  "id": "AAPL_revenue_FY24Q3",
+  "label": "Apple FY24 Q3 净销售额",
 
   // ── 数据本身 ──
-  "value": "323.5",
-  "value_numeric": {"point_estimate": 323.5},
-  "unit": "Mn",
-  "currency": "CNY",
+  "value": "85.78",
+  "value_numeric": {"point_estimate": 85.78},
+  "unit": "Bn",
+  "currency": "USD",
 
   // ── 维度一：信源质量 (tier) ──
   "source_tier": "T1",
   "source_type": "quarterly_report",
   "sources": [
-    {"name": "SY 2024Q3 6-K",
-     "timestamp": "2024-09-30",
+    {"name": "AAPL FY24 Q3 10-Q",
+     "timestamp": "2024-06-29",
      "retrieval_method": "NLM",
      "retrieval_date": "2026-05-20"}
   ],
 
   // ── 维度二:时效性 (as_of) ──
-  "entity":        "SY",          // ticker / 短码，支持跨 deck 时序聚合
-  "period":        "2024-Q3",     // 报告期 token (FY2024 / 2024-Q3 / TTM-... / spot-...)
-  "as_of_date":    "2024-09-30",  // 数据代表的 ISO 日期 (staleness 主输入)
+  "entity":        "AAPL",        // ticker / 短码，支持跨 deck 时序聚合
+  "period":        "FY24-Q3",     // 报告期 token (FY2024 / 2024-Q3 / TTM-... / spot-...)
+  "as_of_date":    "2024-06-29",  // 数据代表的 ISO 日期 (staleness 主输入)
   "as_of_type":    "period_end",  // period_end / snapshot / ttm_cutoff / annual / monthly
   "verified_date": "2026-05-20",  // QC 触碰时间 (仅作 as_of_date 缺失时的 fallback)
 
@@ -187,8 +187,8 @@ data-validator 不做每日巡检（那是 librarian 在 wiki 页面上的事）
 
   // ── 通用元数据 ──
   "data_category":      "financial_metric",
-  "geographic_scope":   "CN",
-  "notes":              "Q3 营收 YoY +5%, 主要来自轻医美渗透提升",
+  "geographic_scope":   "US",
+  "notes":              "Q3 净销售额 YoY +5%, 主要来自 Services 板块加速",
   "used_in":            [{"slide": "P3", "location_ref": "table_cell"}],
   "update_history":     []
 }
@@ -413,7 +413,7 @@ agent 行为这样处理；数据信任这样处理；以后可能还有第三�
 - **`verified_date` 的语义边界**。原本 `verified_date` 在含义上模糊：既是"QC 触碰时间"又被当成 staleness 输入。v2.1 强制 staleness 优先用 `as_of_date`，`verified_date` 退化为纯 QC 时间戳。否则会出现"今天 QC 过 = 数据新鲜"的伪安全感——FX / 股价 / IV 这类 spot 数据最容易栽这个坑。
 - **period token vs as_of_date 一致性检查**。用户写 `period="2024-Q3"` 但 `as_of_date="2025-09-30"` 应该立刻报错（典型 copy-paste 失误）。v2.1 加了 `as_of_consistency` check：period token 推导出的日期和 `as_of_date` 偏差 >31 天直接 WARN；category 和 as_of_type 语义冲突也 WARN（比如 `revenue` 标 `snapshot`、`forward_pe` 标 `period_end`）。
 
-外加一个 first-class 的 `entity` 字段（ticker / 公司短码），让"跨 deck 拉所有 SY 历史季度 revenue"这种 query 终于能 grep `entity:"SY"` + sort `as_of_date` 跑通，不用靠在 id 后缀里硬塞日期再 regex。
+外加一个 first-class 的 `entity` 字段（ticker / 公司短码），让"跨 deck 拉所有 AAPL 历史季度 revenue"这种 query 终于能 grep `entity:"AAPL"` + sort `as_of_date` 跑通，不用靠在 id 后缀里硬塞日期再 regex。
 
 这四个细节都没在原文里说到，因为没真正动手实施前是想不到的——只有把抽象的"独立维度"拆成 `as_of_date` + `as_of_type` 两个 first-class 字段，才能 surface 出"快照型 vs 期间型数据的 staleness 语义完全不同"这个隐含假设。
 

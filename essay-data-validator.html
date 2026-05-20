@@ -356,29 +356,29 @@ inputs: [T3, T4] → derived tier = T4</code></pre>
 <h2>五、data-validator registry 的设计选择</h2>
 <p>三维互相正交意味着<strong>不能用单一指标概括 trust</strong>。所以 data-validator registry 给每条 data point 同时存三个独立维度的标签，每个维度都是 first-class 字段。下面是一条真实 data_point 在 v2.1 schema 下长什么样：</p>
 <pre><code>{
-  &quot;id&quot;: &quot;SY_revenue_2024Q3&quot;,
-  &quot;label&quot;: &quot;新氧科技 2024Q3 营业收入&quot;,
+  &quot;id&quot;: &quot;AAPL_revenue_FY24Q3&quot;,
+  &quot;label&quot;: &quot;Apple FY24 Q3 净销售额&quot;,
 
   // ── 数据本身 ──
-  &quot;value&quot;: &quot;323.5&quot;,
-  &quot;value_numeric&quot;: {&quot;point_estimate&quot;: 323.5},
-  &quot;unit&quot;: &quot;Mn&quot;,
-  &quot;currency&quot;: &quot;CNY&quot;,
+  &quot;value&quot;: &quot;85.78&quot;,
+  &quot;value_numeric&quot;: {&quot;point_estimate&quot;: 85.78},
+  &quot;unit&quot;: &quot;Bn&quot;,
+  &quot;currency&quot;: &quot;USD&quot;,
 
   // ── 维度一：信源质量 (tier) ──
   &quot;source_tier&quot;: &quot;T1&quot;,
   &quot;source_type&quot;: &quot;quarterly_report&quot;,
   &quot;sources&quot;: [
-    {&quot;name&quot;: &quot;SY 2024Q3 6-K&quot;,
-     &quot;timestamp&quot;: &quot;2024-09-30&quot;,
+    {&quot;name&quot;: &quot;AAPL FY24 Q3 10-Q&quot;,
+     &quot;timestamp&quot;: &quot;2024-06-29&quot;,
      &quot;retrieval_method&quot;: &quot;NLM&quot;,
      &quot;retrieval_date&quot;: &quot;2026-05-20&quot;}
   ],
 
   // ── 维度二:时效性 (as_of) ──
-  &quot;entity&quot;:        &quot;SY&quot;,          // ticker / 短码，支持跨 deck 时序聚合
-  &quot;period&quot;:        &quot;2024-Q3&quot;,     // 报告期 token (FY2024 / 2024-Q3 / TTM-... / spot-...)
-  &quot;as_of_date&quot;:    &quot;2024-09-30&quot;,  // 数据代表的 ISO 日期 (staleness 主输入)
+  &quot;entity&quot;:        &quot;AAPL&quot;,        // ticker / 短码，支持跨 deck 时序聚合
+  &quot;period&quot;:        &quot;FY24-Q3&quot;,     // 报告期 token (FY2024 / 2024-Q3 / TTM-... / spot-...)
+  &quot;as_of_date&quot;:    &quot;2024-06-29&quot;,  // 数据代表的 ISO 日期 (staleness 主输入)
   &quot;as_of_type&quot;:    &quot;period_end&quot;,  // period_end / snapshot / ttm_cutoff / annual / monthly
   &quot;verified_date&quot;: &quot;2026-05-20&quot;,  // QC 触碰时间 (仅作 as_of_date 缺失时的 fallback)
 
@@ -388,8 +388,8 @@ inputs: [T3, T4] → derived tier = T4</code></pre>
 
   // ── 通用元数据 ──
   &quot;data_category&quot;:      &quot;financial_metric&quot;,
-  &quot;geographic_scope&quot;:   &quot;CN&quot;,
-  &quot;notes&quot;:              &quot;Q3 营收 YoY +5%, 主要来自轻医美渗透提升&quot;,
+  &quot;geographic_scope&quot;:   &quot;US&quot;,
+  &quot;notes&quot;:              &quot;Q3 净销售额 YoY +5%, 主要来自 Services 板块加速&quot;,
   &quot;used_in&quot;:            [{&quot;slide&quot;: &quot;P3&quot;, &quot;location_ref&quot;: &quot;table_cell&quot;}],
   &quot;update_history&quot;:     []
 }</code></pre>
@@ -485,7 +485,7 @@ inputs: [T3, T4] → derived tier = T4</code></pre>
 <p>写完这篇五天后，data-validator 的 flat schema 实际跟上了文中讨论的三维模型。v2.1 schema 把 <code>as_of_date</code> 从 deep-research-workflow 的嵌套 schema 推广到 data-validator 的扁平 <code>data_points[]</code>，把"时效性独立维度"从纸面规范落到代码</p>
 <p>补充三个本来没想清楚的子问题，是实施过程里暴露出来的：</p>
 <ul><li><strong><code>as_of_date</code> 不够用，还需要 <code>as_of_type</code></strong>。同样标 <code>as_of_date=2024-09-30</code>，季报数据（<code>period_end</code>）、TTM 截止（<code>ttm_cutoff</code>）、当日快照（<code>snapshot</code>）三种"形态"的 staleness threshold 完全不同。把 type 显式标出来，validator 才能用不同阈值老化——快照型数据要日级别 stale，财报数据可以季度级别 stale</li><li><strong><code>verified_date</code> 的语义边界</strong>。原本 <code>verified_date</code> 在含义上模糊：既是"QC 触碰时间"又被当成 staleness 输入。v2.1 强制 staleness 优先用 <code>as_of_date</code>，<code>verified_date</code> 退化为纯 QC 时间戳。否则会出现"今天 QC 过 = 数据新鲜"的伪安全感——FX / 股价 / IV 这类 spot 数据最容易栽这个坑</li><li><strong>period token vs as_of_date 一致性检查</strong>。用户写 <code>period=&quot;2024-Q3&quot;</code> 但 <code>as_of_date=&quot;2025-09-30&quot;</code> 应该立刻报错（典型 copy-paste 失误）。v2.1 加了 <code>as_of_consistency</code> check：period token 推导出的日期和 <code>as_of_date</code> 偏差 >31 天直接 WARN；category 和 as_of_type 语义冲突也 WARN（比如 <code>revenue</code> 标 <code>snapshot</code>、<code>forward_pe</code> 标 <code>period_end</code>）</li></ul>
-<p>外加一个 first-class 的 <code>entity</code> 字段（ticker / 公司短码），让"跨 deck 拉所有 SY 历史季度 revenue"这种 query 终于能 grep <code>entity:&quot;SY&quot;</code> + sort <code>as_of_date</code> 跑通，不用靠在 id 后缀里硬塞日期再 regex</p>
+<p>外加一个 first-class 的 <code>entity</code> 字段（ticker / 公司短码），让"跨 deck 拉所有 AAPL 历史季度 revenue"这种 query 终于能 grep <code>entity:&quot;AAPL&quot;</code> + sort <code>as_of_date</code> 跑通，不用靠在 id 后缀里硬塞日期再 regex</p>
 <p>这四个细节都没在原文里说到，因为没真正动手实施前是想不到的——只有把抽象的"独立维度"拆成 <code>as_of_date</code> + <code>as_of_type</code> 两个 first-class 字段，才能 surface 出"快照型 vs 期间型数据的 staleness 语义完全不同"这个隐含假设</p>
 <p>应了文末那句话：<strong>好的工程架构往往是先把概念拆对，代码就顺了</strong>——但反过来，写代码也会反推你把概念拆得更细。这是 first-class field 的真实价值：不是为了好看的 schema，是为了逼自己把模糊的概念按一个 field 一个语义拆干净</p>
 <hr>
