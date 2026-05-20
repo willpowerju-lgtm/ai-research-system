@@ -204,17 +204,6 @@ data-validator 不做每日巡检（那是 librarian 在 wiki 页面上的事）
 
 `entity` 字段单拎出来的实际价值是跨 deck 时序聚合：要"拉 AAPL 所有历史季度 revenue"这种 query 直接 grep `entity:"AAPL"` 再按 `as_of_date` 排序就行，不用靠在 id 后缀里硬塞日期再 regex —— 这是把 registry 从单 deck 工具升格为可跨 deck 复用的资产库的关键。
 
-### 两套 schema 的关系：DRW 嵌套 vs data-validator flat
-
-实际跑起来 registry 存在两套 schema，都遵守"三维独立 first-class 字段"的设计原则，只是组织方式不同：
-
-| Schema | 结构 | 适合的场景 | 衍生数据怎么处理 |
-|---|---|---|---|
-| **deep-research-workflow** | L1 原子数据 + L2 衍生数据嵌套（`derivation.depends_on`） | 研究报告全文（docx）：每个数字都有 L1 / L2 身份，依赖图原生在数据条目里 | L2 显式声明 `depends_on: [L1-...]`，木桶 tier 从依赖图自动算 |
-| **data-validator** | 扁平 `data_points[]` 列表 + 单独的 `dependency_graph` 块 | PPTX / DOCX / XLSX cell-level 追溯：每个 cell 对应一个 id，slide / location 精确定位 | 依赖关系另存 `dependency_graph` 块，木桶原则按规范执行 |
-
-两套 schema 共用同一套 `as_of_date` / `as_of_type` / `source_tier` / `entity` 字段语义，可以互相 import 转换。**选哪套不重要，重要的是三维独立标签的强制性**——任何 registry 都必须能回答"这条数据来自哪里 / 是什么时候的 / 有几个来源在说同一件事"三个独立问题。
-
 下游 skill 引用时三个维度同时决策：
 
 - **Derived data** 走木桶原则继承最差 tier（见 §二）
