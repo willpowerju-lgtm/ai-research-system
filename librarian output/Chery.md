@@ -35,7 +35,7 @@ cssclasses: [holdings]
    - **量化缺口**：国内 150 万目标（奇瑞 70 + 捷途 40 + 星纪元 ≥15 + 星途 10）按 4 月单月年化只有 **88.6 万 vs 目标 150 万，缺口 41%**
    - **估值连锁链路**：5 月底-6 月初管理层将"结合新车表现评估"国内 150 万目标 ←[[Holding, coverage Q&A and news/Cherry/2026-05-07_news_25wan-7wan-domestic|新浪汽车 2026-05-09]]。若下调到 120 万甚至 100 万 → 卖方分析师 的 FY26E 归母 202 亿大概率承压 → TP HK$40 (10x PE) 再次下修
    - **双刃剑**：70.6% 出口占比是 Cherry 当前最大的双刃剑。贸易壁垒/俄罗斯制裁/欧美关税任何一环升级 → 出口砍 20-30% → 国内 7.4 万体量**根本接不住**。如果出口持平甚至下滑（YoY 0%），FY26E NI 缩水量级可达 30-50 亿
-   - 详见 [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_卖方分析师-analyst-question-list|卖方分析师 meeting prep §零 0.1 + 0.4b]]
+   - 详见 [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_CICC-analyst-question-list|卖方分析师 meeting prep §零 0.1 + 0.4b]]
 2. **新能源时代无爆款——因果三选一未解**（thesis level）：
    - 进入新能源时代后**几乎没有月销过 2 万的车型**（vs 比亚迪秦/宋/海鸥/元 PLUS 长期月销 3-5 万；吉利星愿月销 4-6 万；零跑 C10/C11 月销 2-3 万）
    - QQ3 EV 2026-03-30 上市首日订单 56,000 辆，但奇瑞**未公布具体车型月销数据** ← 信号偏弱 ← [[visiting record/汽车/2026-04-29_BOC汽车专家访谈_V1|BOC专家访谈]]
@@ -44,26 +44,26 @@ cssclasses: [holdings]
      - ② **品牌矩阵分散**：60 款 SUV 导致单车型预算/产能/营销资源摊薄（见 #3）
      - ③ **战略选择"追求量不指望盈利"**：管理层口径"纯电补短板 26Q1 推 QQ/IX 8-15 万价格带，追求量"← [[visiting record/汽车/2025-12-25_奇瑞汽车_调研纪要|12-25 调研]]
    - 三种因果都成立但权重不同 → ① 需大幅提升研发投入；② 需品牌整合；③ 接受 NEV 长期低 GPM。Cherry 目前选择 ③，但 ① 和 ② 的结构性问题仍在
-   - 详见 [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_卖方分析师-analyst-question-list|卖方分析师 meeting prep §零 0.2]] + [[Holding, coverage Q&A and news/Cherry/2026-05-11_analysis_GPM-drivers-QA|GPM 驱动因素 Q&A]]
+   - 详见 [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_CICC-analyst-question-list|卖方分析师 meeting prep §零 0.2]] + [[Holding, coverage Q&A and news/Cherry/2026-05-11_analysis_GPM-drivers-QA|GPM 驱动因素 Q&A]]
 3. **品牌矩阵分散内耗——规模 vs 单车经济性摊薄**（thesis level）：
    - **仅 SUV 就有 60 款**，定位模糊；**星途 Exeed 2025 全年仅 12.04 万辆**（月销 ~1 万），中高端化失败
    - **完整品牌矩阵**：奇瑞主品牌 + 星途 Exeed + iCAR + 智界（华为合作）+ 捷途 Jaecoo + 星纪元 + 风云 + 风云捷途——**6+ 个品牌+多车型并存，但缺乏共享平台和爆款引领**
    - **核心 thesis**："看似规模 280 万、实际单车经济性被摊薄"——单车 NI 国内 5000-6000 元（管理层口径）远低于行业可比；NEV 国内小幅亏损
    - **对比 Geely 反向路径**：极氪+领克+银河品牌整合 + 共享 SEA 架构 + 强调矩阵协同。两条路径的资本市场定价差距：Geely 15x FY26E PE vs Cherry 5.7x，差 ~3x
    - **管理层未给品牌整合 timeline**：是否有星途回归主品牌 sub-brand 等计划？ ← Open question
-   - 详见 [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_卖方分析师-analyst-question-list|卖方分析师 meeting prep §零 0.3]]
+   - 详见 [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_CICC-analyst-question-list|卖方分析师 meeting prep §零 0.3]]
 4. **海外护城河本质质疑——燃油车出口窗口期红利**（空头最深层论点 → thesis level）：
    - Cherry 2022-2025 海外爆发性增长的根源可能是"燃油车出口窗口期"三重叠加：①中国 ICE 产能过剩外溢；②俄罗斯日韩系退出留下的真空（2022 战争触发的一次性事件）；③新兴市场 BEV 渗透率仍低（短窗口）
    - 出口毛利率结构印证：**混动 18% / 燃油 10-12% / 纯电个位数**——当前海外利润 70%+ 来自 ICE+PHEV，BEV 出口尚未贡献利润 ← [[visiting record/汽车/2026-03-18_奇瑞汽车_中金FY25业绩电话会_会议纪要|FY25 电话会]] + [[visiting record/汽车/2025-12-25_奇瑞汽车_调研纪要|12-25 调研]]
    - **真正的 transition cliff 不在 ICE 窗口关闭（已被 PHEV/HEV 接住），而在 PHEV/HEV 之后 BEV 海外能不能接棒**——海外 BEV 产能基本空白，2028-2030 关键 transition
-   - **卖方分析师 2026-05-13 卖方确认（硬证据）**：海外工厂"基本只有 ICE 和 PHEV，BEV 全都在国内"，部分海外厂还只是 KD 件出海+当地组装的简单装配厂——这是空头海外护城河质疑的最直接弹药 ← [[visiting record/汽车/2026-05-13_奇瑞汽车_卖方分析师卖方分析师交流_会议纪要|卖方分析师 卖方分析师交流]]
+   - **卖方分析师 2026-05-13 卖方确认（硬证据）**：海外工厂"基本只有 ICE 和 PHEV，BEV 全都在国内"，部分海外厂还只是 KD 件出海+当地组装的简单装配厂——这是空头海外护城河质疑的最直接弹药 ← [[visiting record/汽车/2026-05-13_奇瑞汽车_CICC卖方分析师交流_会议纪要|卖方分析师 卖方分析师交流]]
    - 海外护城河盈利 alpha **不来自 GPM 缺口**（海外 ICE GPM 反而略低于国内 12-14%），**来自单车 NI 缺口**（海外 1-1.1 万 vs 国内 5000-6000，~2x）——意味着 ASP 溢价或渠道排他任一被打破，海外单车经济性会迅速崩塌
-   - 详细窗口期分拆 + 动力 GPM 对照表见 [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_卖方分析师-analyst-question-list|卖方分析师 meeting prep §零 0.4]] + 本页 §8.6/§8.7
+   - 详细窗口期分拆 + 动力 GPM 对照表见 [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_CICC-analyst-question-list|卖方分析师 meeting prep §零 0.4]] + 本页 §8.6/§8.7
 5. **估值热情不高**：治理结构、品牌力、技术护城河存疑 ← [[公众号收录/晚点 latepost/2025-09-13_为何近年来强势增长的奇瑞_市场对其估值热情并不高_.md|晚点 2025-09-13]]
 6. **盈利质量被汇兑/补贴抬高**：报告 NPM 6.9% → 剔除汇兑 3.6% + 利息/补贴 1.7% 后**核心经营 NPM 仅 ~3.3%**；Dealer rebate 占收入 8-9.5% ← [[公众号收录/晚点 latepost/2025-09-13_为何近年来强势增长的奇瑞_市场对其估值热情并不高_.md|晚点 2025-09-13]]
 7. **分析师覆盖极低**：仅 5 位分析师覆盖（vs Geely 30 位），定价效率差
 8. **Gross margin 低于 Geely**：FY26E GPM 14.2% vs Geely 17.0%，产品溢价能力弱；海外 ASP 溢价仅 +14%（vs BYD +46% / Geely +37%），以量取胜而非价格
-9. **俄罗斯 exposure 大**：约 20 万台/年（含多个 KD 组装工厂），国际制裁风险高
+9. **俄罗斯 exposure（KD有缓冲，但报废税仍暴露）**：~20万辆/年（含多个KD工厂），KD规避进口关税（省~2-3万/辆），但报废税增量(+2.8万/辆)仍全额承受。FY26 bear（报废税再调-20%）→ 额外-4.2亿元；制裁风险独立评估 ← [[Holding, coverage Q&A and news/Cherry/2026-05-21_analysis_chery-tariff-margin-impact-quantification.md|关税影响量化 2026-05-21]]
 10. **华为合作不力**：智界 S7 代工项目进展缓慢，奇瑞未像赛力斯般全力配合 ← [[公众号收录/晚点 latepost/2024-01-26_华为智界_S7_交付难题_奇瑞代工日产量仅数十台.md|晚点 2024-01-26]]
 
 > [!summary] 📌 Bear Case 整体框架 & 多头反驳的 5 个对冲变量（2026-05-11）
@@ -84,7 +84,7 @@ cssclasses: [holdings]
 >
 > **决定性 single data point**：如果"4 月国内 7.38 万 + 被零跑追平"被 卖方分析师 接受为 case 弱化的 trigger → 大概率会进一步下修 FY26E NI / TP；如果 卖方分析师 坚持"国内是淡季 5-6 月回归" → bull case 仍在
 >
-> Source: [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_卖方分析师-analyst-question-list|卖方分析师 meeting prep §零 0.1-0.5]]（含 vault 扫描与多头反驳的对抗结构）
+> Source: [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_CICC-analyst-question-list|卖方分析师 meeting prep §零 0.1-0.5]]（含 vault 扫描与多头反驳的对抗结构）
 
 ### 1.3 Tail Risk
 
@@ -93,7 +93,7 @@ cssclasses: [holdings]
 | 上市后流动性不足/破发 | Low | Medium — 估值折价 | 日均成交额；南向资金流入 |
 | 俄罗斯制裁升级 | Medium | High — 出口量缩减20万+ | 国际制裁政策变化；物流渠道 |
 | 国内新能源转型失败 | Medium | Medium — 份额被比亚迪/吉利蚕食 | 月度新能源渗透率；纯电车型销量 |
-| 全球贸易保护升级 | Medium | High — 出口天花板下降 | 各国关税/非关税壁垒政策 |
+| 全球贸易保护升级 | Medium | High — 出口天花板下降（量化：-20%出口=-32亿/-16% NP；vs 关税因素-16亿/-8%）| 各国关税/非关税壁垒政策；出口量月度跟踪 |
 | PHEV/HEV → BEV transition cliff（2028-2030） | Medium | High — 海外护城河失效 | 海外 BEV 产能扩张节奏；西班牙/马来工厂 BEV 产线占比；东南亚 BEV 渗透率 |
 
 ## 2. 关键指引 (Key Guide)
@@ -127,7 +127,7 @@ cssclasses: [holdings]
 - 2025全年汇兑收益 **27亿**（Q1 24.3亿 / Q2 9亿 / Q3Q4各亏~4亿）← [[visiting record/汽车/2026-04-29_奇瑞汽车_26Q1业绩交流_会议纪要|26Q1交流]]
 - 26Q1汇兑损失9.5亿；对冲三策略：①海外本地化采购 ②动态调整终端价格 ③远期锁定
 
-**卖方覆盖口径（卖方分析师 2026-05-13 update）** ← [[visiting record/汽车/2026-05-13_奇瑞汽车_卖方分析师卖方分析师交流_会议纪要|卖方分析师 卖方分析师交流]]：
+**卖方覆盖口径（卖方分析师 2026-05-13 update）** ← [[visiting record/汽车/2026-05-13_奇瑞汽车_CICC卖方分析师交流_会议纪要|卖方分析师 卖方分析师交流]]：
 - 卖方分析师 FY26E 国内销量假设：**140-160万**（已较公司 150 万目标下调；管理层 5/底-6/初正式评估窗口）
 - 卖方分析师 FY26E 海外销量假设：150 万基准，上行至 160-170 万
 - 卖方分析师 FY26E 海外 GPM 假设：**17.5%**（中vs管理层 20%+；vs FY25 实际 14.4% 的中间值）
@@ -169,7 +169,7 @@ cssclasses: [holdings]
 
 > Source: [[visiting record/汽车/2026-04-29_BOC汽车专家访谈_V1|BOC汽车专家访谈 2026-04-29]]
 
-**Peers 对比数据**（← [[Raw/Auto research/20260427 Auto OEM study_v4.pptx|内部 OEM Study 2026-04-27]]）：
+**Peers 对比数据**（← [[Raw/Auto research/20260427 Auto OEM study_v4.pptx|OA OEM Study 2026-04-27]]）：
 
 **出口排名（2025A：中国第一 / 1Q26 增速第四）**
 
@@ -237,15 +237,17 @@ cssclasses: [holdings]
 
 <!-- KEY_TAKEAWAY_AUTO_START -->
 
-_最后聚合：2026-05-13 17:05（近 90 天，自动）_
+_最后聚合：2026-05-21 13:41（近 90 天，自动）_
 
-### 🔬 近期研究 Activity & Task（3 条）
+### 🔬 近期研究 Activity & Task（4 条）
 
-- **[2026-05-13]** [[Holding, coverage Q&A and news/Cherry/2026-05-13_meeting_卖方分析师-analyst-call.md|奇瑞汽车_卖方分析师卖方分析师交流_会议纪要]]
+- **[2026-05-21]** [[Holding, coverage Q&A and news/Cherry/2026-05-21_analysis_chery-tariff-margin-impact-quantification.md|研究问答：奇瑞出口关税对 Margin 的量化影响估算（FY26维度）]]
+  - 奇瑞FY26关税风险敞口约-16.3亿元，占核心利润200亿的8%，影响可控。俄罗斯KD结构提供缓冲，西班牙工厂完全规避欧盟BEV CVD，中东37.5万辆低税市场是利润压舱石。核心风险在于出口量集中度：若出口量下滑20%，利润损失可达-32亿元（-16%），远超关税直接冲击。
+- **[2026-05-13]** [[Holding, coverage Q&A and news/Cherry/2026-05-13_meeting_CICC-analyst-call.md|奇瑞汽车_卖方分析师卖方分析师交流_会议纪要]]
   - 中金覆盖奇瑞分析师电话交流：4月销量印证国内零售空心化（4月25.1万/国内仅7万），中金判断300/150/150目标'比较有挑战，达不成'；FY26E国内已下调至140-160万；海外NEV 26Q1乘联会口径25-30%（vs 公司口径40%）；海外GPM假设17.5%（中vs管理层20%+'不太信'）；FY26E归母~200亿，海外贡献70-80%+；OMODA 5 4月单月2万台是26年海外NEV毛利提升关键驱动；BEV海外工厂空白确认（'全都在国内'）；俄罗斯依赖15-20%（高峰30-40%）；同业对比吉利极氪9X单车净利4-5万贡献40-…
 - **[2026-05-11]** [[Holding, coverage Q&A and news/Cherry/2026-05-11_analysis_GPM-drivers-QA.md|奇瑞GPM变迁驱动因素分析：从24Q4底部10.6%到26Q1的16.0%]]
   - 奇瑞26Q1毛利率从24Q4的10.6%反弹至16.0%，主要受出口占比结构性提升至65.4%、24Q4异常低基数均值回归及海外毛利率剪刀差三重驱动，合计贡献约3.5-4.8ppt。但全年毛利率预计回落至14-15%，因Q1出口占比有季节性，且国内价格战与NEV渗透率仍压制国内毛利。
-- **[2026-05-11]** [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_卖方分析师-analyst-question-list.md|卖方分析师 奇瑞覆盖分析师会议 — Question List（前置空头 reality check）]]
+- **[2026-05-11]** [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_CICC-analyst-question-list.md|卖方分析师 奇瑞覆盖分析师会议 — Question List（前置空头 reality check）]]
   - 中金公司对奇瑞的海外护城河提出本质质疑：海外工厂基本只有ICE和PHEV，BEV全在国内，这意味着公司当前海外高利润主要依赖燃油车出口窗口期红利，而非NEV转型能力。卖方分析师 FY26E国内销量已下调至140-160万辆，海外GPM假设17.5%折中于自估与管理层之间，海外贡献占归母70-80%+，国内可能接近零甚至负，显示国内空心化与海外可持续性风险是估值折价的核心。
 
 ### 📢 公司公告（6 条）
@@ -384,6 +386,24 @@ _最后聚合：2026-05-13 17:05（近 90 天，自动）_
 
 **Cross-check log (2026-05-11)**：T2 (AKShare EM) vs T3 (web search) — Rev/GPM 全部匹配，差异 <0.1%。
 
+```chart
+{
+  "title": {"text": "季度营收 + GPM（亿RMB）", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a1410"}},
+  "tooltip": {"trigger": "axis", "axisPointer": {"type": "cross"}},
+  "legend": {"data": ["营收（亿RMB）", "GPM %"], "bottom": 0},
+  "grid": {"containLabel": true, "top": 50, "bottom": 40},
+  "xAxis": {"type": "category", "data": ["24Q1","24Q2","24Q3","24Q4","25Q1","25Q2","26Q1"]},
+  "yAxis": [
+    {"type": "value", "name": "亿RMB", "min": 400, "axisLabel": {"formatter": "{value}亿"}},
+    {"type": "value", "name": "GPM", "position": "right", "min": 8, "max": 20, "axisLabel": {"formatter": "{value}%"}}
+  ],
+  "series": [
+    {"name": "营收（亿RMB）", "type": "bar", "yAxisIndex": 0, "data": [549.1, 572.1, 700.3, 877.4, 682.2, 733.8, 658.7], "itemStyle": {"color": "#C04E2D"}, "label": {"show": true, "position": "top", "fontSize": 10, "formatter": "{c}亿"}},
+    {"name": "GPM %", "type": "line", "yAxisIndex": 1, "data": [14.9, 15.1, 14.6, 10.6, 12.4, 13.6, 16.0], "itemStyle": {"color": "#1B4D5C"}, "lineStyle": {"color": "#1B4D5C", "width": 2}, "symbol": "circle", "symbolSize": 6, "label": {"show": true, "fontSize": 11, "formatter": "{c}%"}}
+  ]
+}
+```
+
 **关键发现：GPM 触底反弹**
 
 | Quarter | GPM | 趋势 |
@@ -467,17 +487,17 @@ _最后聚合：2026-05-13 17:05（近 90 天，自动）_
 | ⏳ | 监控 | 海外 NEV 占比兑现 60% 目标 | 2026-12-31 | 26Q1 已达 ~40%（PHEV 60-70%/BEV 20-30%）。是否能从 PHEV/HEV 主导切换到 BEV 接棒决定海外护城河可持续性 ←[[visiting record/汽车/2026-04-29_奇瑞汽车_26Q1业绩交流_会议纪要\|26Q1 交流]] |
 | ⏳ | 监控 | 海外 BEV 产能空白补齐 | 2028-2030 | 西班牙/马来工厂当前以 ICE/PHEV 产线为主；BEV 海外产能落后是 PHEV/HEV → BEV transition cliff 的核心软肋 |
 | ⏳ | 监控 | HEV 高倍率电池产能爬坡 | 2026-08 / 2026 年底 | 月产 2.6-2.8 万 → 8 月 3.5 万 → 年底再释放；瓶颈解除决定海外 HEV 销量弹性 ←[[visiting record/汽车/2026-04-29_奇瑞汽车_26Q1业绩交流_会议纪要\|26Q1 交流]] |
-| ⏳ | 预期差 | OMODA 5 月销持续性 | 月度跟踪 | 4 月单月 **2万台** 爬升轨迹（25H2 5000→9000→1万+→4月 2万）能否维持；卖方分析师 视其为 2026 海外 NEV 毛利弹性的核心 single name ←[[visiting record/汽车/2026-05-13_奇瑞汽车_卖方分析师卖方分析师交流_会议纪要\|卖方分析师 交流]] |
+| ⏳ | 预期差 | OMODA 5 月销持续性 | 月度跟踪 | 4 月单月 **2万台** 爬升轨迹（25H2 5000→9000→1万+→4月 2万）能否维持；卖方分析师 视其为 2026 海外 NEV 毛利弹性的核心 single name ←[[visiting record/汽车/2026-05-13_奇瑞汽车_CICC卖方分析师交流_会议纪要\|卖方分析师 交流]] |
 | ⏳ | 预期差 | QQ3 EV 月度批发 | 月度跟踪 | 4月批发 **1.36万**；卖方分析师 估 5月可上 1.5-2 万；决定国内新能源能否破爆款缺失格局 |
 | ⏳ | 预期差 | 智界 V9 大定数据 | 5/15+ | 4/22 小订 72h 22000 超预期；5/15 正式上市启动大定；首月订单是否扛得住小订预期 |
 | ⏳ | 信号 | 卖方分析师 FY26E 国内销量假设是否进一步下修 | 2026-06-中 | 卖方分析师 当前假设已下调至 **140-160万**（vs 公司 150 万目标）；若公司 5/底-6/初评估窗口正式下调到 120-130 万，卖方分析师 200 亿归母能否撑住 |
 | ⏳ | 卖方 | 卖方分析师 海关总署口径打通 | 待回传 | 卖方分析师 已 ask：拿到海关总署新数据后回传，打通乘联会 vs 海关 NEV 口径差异（公司 26Q1 海外 NEV 40% vs 乘联会 25-30%） |
-| ⏳ | 卖方 | 买方→卖方分析师 海内外价差拆解模板交付 | 短期 | 买方已 ask：提供比亚迪历史 Cost-FOB-关税-经销商分成-终端价拆解模板，请 卖方分析师 按同方法做奇瑞/吉利对照 |
+| ⏳ | 卖方 | OA→卖方分析师 海内外价差拆解模板交付 | 短期 | OA 已 ask：提供比亚迪历史 Cost-FOB-关税-经销商分成-终端价拆解模板，请 卖方分析师 按同方法做奇瑞/吉利对照 |
 
 **Legend**: ⏳ pending · 🟡 in_progress · 🟢 near_target · ⚠️ due_soon · ✅ hit · ❌ missed
 
 ## 8. 财务数据（Annual, USD mn）
-> 数据源：CapIQ consensus（PRC GAAP）。待内部 model 接入或 IPO 后扩展。
+> 数据源：CapIQ consensus（PRC GAAP）。待 OA model 接入或 IPO 后扩展。
 
 ### 8.1 Revenue & Profitability（Annual, 亿 RMB, T2 AKShare）
 
@@ -503,7 +523,7 @@ _最后聚合：2026-05-13 17:05（近 90 天，自动）_
 | FCF | 762 | 1,379 | 3,861 | 3,861 (1 analyst) |
 | CapEx | 2,039 | 2,093 | 1,969 | 2,353 |
 
-### 8.5 Operating Metrics（← [[Raw/Auto research/20260427 Auto OEM study_v4.pptx|内部 OEM Study]] + 东吴/中泰/中金研报）
+### 8.5 Operating Metrics（← [[Raw/Auto research/20260427 Auto OEM study_v4.pptx|OA OEM Study]] + 东吴/中泰/中金研报）
 
 | 指标 | FY23A | FY24A | FY25A | 1Q26A |
 |:---|---:|---:|---:|---:|
@@ -559,7 +579,7 @@ _最后聚合：2026-05-13 17:05（近 90 天，自动）_
 | **Window C：新兴市场（中东/拉美/非洲）ICE 红利** | **5-10 年** | BEV 渗透率 < 5%，ICE 仍主流 | 日系（丰田 HEV）+ 国内同行（BYD/Geely/长城）加速布局 |
 | **Window C'：东南亚 BEV 窗口** | **3-7 年** | 泰国/印尼 BEV 渗透 5-15% 快速起量 | Cherry 海外 BEV 产品力 + 产能空白是最大软肋 |
 
-> **综合**：纯 ICE 红利 3-5 年内大幅缩水；PHEV/HEV 5-10 年（管理层正在切换的目的地）；BEV 出口尚未形成红利。**真正的 transition cliff 不在 ICE 窗口关闭，而在 PHEV/HEV 之后 BEV 海外能不能接棒**——卖方分析师 当前 5.7x FY26E PE 大概率未充分 price in 这个 2028-2030 risk。详见 [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_卖方分析师-analyst-question-list|卖方分析师 meeting prep §零 0.4]]。
+> **综合**：纯 ICE 红利 3-5 年内大幅缩水；PHEV/HEV 5-10 年（管理层正在切换的目的地）；BEV 出口尚未形成红利。**真正的 transition cliff 不在 ICE 窗口关闭，而在 PHEV/HEV 之后 BEV 海外能不能接棒**——卖方分析师 当前 5.7x FY26E PE 大概率未充分 price in 这个 2028-2030 risk。详见 [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_CICC-analyst-question-list|卖方分析师 meeting prep §零 0.4]]。
 
 ### 8.8 Volume Detail — 国内/海外 × ICE/HEV/BEV + NEV %（← [[Raw/Auto research/OEM local export data collection.xlsx|OEM 销量明细 data sheet]]）
 
@@ -611,6 +631,20 @@ _最后聚合：2026-05-13 17:05（近 90 天，自动）_
 
 > **26Q1 关键观察**：(1) 出口 37.97 万 (+54.1% YoY) 创单季新高，但增速 +54% 落后 Geely +126% / BYD +56%（绝对量仍第一）；(2) 国内 20.21 万 (-42.9% YoY) 严重下滑——**国内空心化加剧**，印证 §1.2 Bear Case #1；(3) 出口占总销 65.3%（25Q1 41.1%）——结构性 mix shift 拉升 GPM 至 16.0% (§6.3.1)；(4) **海外 NEV % 25Q1 14.5% → 26Q1 25.2%**（+10.7ppt，但 25Q4 32.8% 是峰值，26Q1 回落 7.6ppt）——海外 NEV 起步但波动；(5) 海外 BEV 仅占出口 2.8%（26Q1），管理层 26E 海外 NEV % 60% 目标隐含 PHEV/HEV 是主力——验证 §1.2 #4 "海外 BEV 产能空白"软肋。
 
+```chart
+{
+  "title": {"text": "海外出口 NEV 渗透率（近8季度）", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a1410"}},
+  "tooltip": {"trigger": "axis"},
+  "grid": {"containLabel": true, "top": 50, "bottom": 40},
+  "xAxis": {"type": "category", "data": ["24Q2","24Q3","24Q4","25Q1","25Q2","25Q3","25Q4","26Q1"]},
+  "yAxis": {"type": "value", "name": "NEV %", "min": 0, "max": 70, "axisLabel": {"formatter": "{value}%"}},
+  "series": [
+    {"name": "海外 NEV %", "type": "line", "data": [5.2, 4.4, 8.0, 14.5, 25.7, 21.7, 32.8, 25.2], "itemStyle": {"color": "#C04E2D"}, "lineStyle": {"color": "#C04E2D", "width": 2}, "symbol": "circle", "symbolSize": 7, "label": {"show": true, "fontSize": 11, "formatter": "{c}%"}, "areaStyle": {"color": {"type": "linear", "x": 0, "y": 0, "x2": 0, "y2": 1, "colorStops": [{"offset": 0, "color": "rgba(192,78,45,0.18)"}, {"offset": 1, "color": "rgba(192,78,45,0.02)"}]}},
+    "markLine": {"data": [{"yAxis": 60}], "lineStyle": {"type": "dashed", "color": "#918578"}, "label": {"formatter": "管理层目标 60%", "position": "insideEndTop", "fontSize": 10}}}
+  ]
+}
+```
+
 #### 8.8.3 最近 6 个月（2025-11 – 2026-04, 辆）
 
 | 维度 | 类型 | 2025-11 | 2025-12 | 2026-01 | 2026-02 | 2026-03 | 2026-04 |
@@ -632,6 +666,21 @@ _最后聚合：2026-05-13 17:05（近 90 天，自动）_
 |  | NEV % | 36.3% | 29.0% | 23.0% | 24.1% | 27.8% | 26.7% |
 
 > **2026-04 月度亮点**：(1) 出口 17.20 万创单月新高（环比 +17.8%，连续两月破 14 万）—— 海外动能保持；(2) 国内仅 6.87 万（环比 -20.1%，批发口径 vs §1.2 提及零售 7.38 万）—— 印证 §1.2 Bear Case #1 国内空心化加剧；(3) Export ICE 12.41 万占出口 72.2%（同比 +97.0%）—— 仍是 4 月出口主力；(4) **海外 NEV % 2025-11 36.3% → 2026-04 26.7% 反而回落 -9.6ppt**（vs Geely 同期 +26.8ppt）—— ICE 出口加速 vs NEV 出口增长不平衡，距 26E 海外 NEV % 60% 目标差距拉大；(5) Export BEV 仅 4,165 辆/月（同比 +84.6%, 但绝对量微薄）—— 海外 BEV 产能瓶颈未解，验证 §1.2 #4 软肋。
+
+```chart
+{
+  "title": {"text": "国内 vs 出口 月度销量（万辆，近6个月）", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a1410"}},
+  "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+  "legend": {"data": ["国内", "出口"], "bottom": 0},
+  "grid": {"containLabel": true, "top": 50, "bottom": 40},
+  "xAxis": {"type": "category", "data": ["25-11","25-12","26-01","26-02","26-03","26-04"]},
+  "yAxis": {"type": "value", "name": "万辆", "axisLabel": {"formatter": "{value}万"}},
+  "series": [
+    {"name": "国内", "type": "bar", "data": [13.1, 9.4, 7.7, 3.9, 8.6, 6.9], "itemStyle": {"color": "#C04E2D"}, "label": {"show": true, "position": "top", "fontSize": 10, "formatter": "{c}万"}},
+    {"name": "出口", "type": "bar", "data": [13.2, 14.0, 11.7, 11.7, 14.6, 17.2], "itemStyle": {"color": "#1B4D5C"}, "label": {"show": true, "position": "top", "fontSize": 10, "formatter": "{c}万"}}
+  ]
+}
+```
 
 ## 9. 券商评级日历
 
@@ -699,8 +748,8 @@ _最后聚合：2026-05-13 17:05（近 90 天，自动）_
 **行业动态**（7，合并1篇同题）
 
 - **[2026-05-11]** 奇瑞GPM变迁驱动因素分析：从24Q4底部10.6%到26Q1的16.0% — [[Holding, coverage Q&A and news/Cherry/2026-05-11_analysis_GPM-drivers-QA.md|奇瑞GPM变迁驱动因素分析：从24Q4底部10.6%到26Q1的16.0%]] `Cherry`
-- **[2026-05-11]** 卖方分析师 奇瑞覆盖分析师会议 — Question List（前置空头 reality check） — [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_卖方分析师-analyst-question-list.md|卖方分析师 奇瑞覆盖分析师会议 — Question List（前置空头 reality check）]] `Cherry`
-- **[2026-05-11]** 卖方分析师 奇瑞会议 — §零 空头核心 concerns 一页纸（开场必问） — [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_卖方分析师-bear-concerns-onepager.md|卖方分析师 奇瑞会议 — §零 空头核心 concerns 一页纸（开场必问）]] `Cherry`
+- **[2026-05-11]** 卖方分析师 奇瑞覆盖分析师会议 — Question List（前置空头 reality check） — [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_CICC-analyst-question-list.md|卖方分析师 奇瑞覆盖分析师会议 — Question List（前置空头 reality check）]] `Cherry`
+- **[2026-05-11]** 卖方分析师 奇瑞会议 — §零 空头核心 concerns 一页纸（开场必问） — [[Holding, coverage Q&A and news/Cherry/2026-05-11_meeting-prep_CICC-bear-concerns-onepager.md|卖方分析师 奇瑞会议 — §零 空头核心 concerns 一页纸（开场必问）]] `Cherry`
 - **[2026-05-09]** 奇瑞2026年集团销量目标320万辆（+14.03%），计划面向全球推出17款重点车型。从产品出海加速向品牌、生态出海转型。 — [[Holding, coverage Q&A and news/Cherry/2026-05-09_news_2026-nian-qi-rui-qi-che-yan-jiu-shen-geng-chu-hai-duo-pin-pa.md|2026年奇瑞汽车研究：深耕出海 多品牌协同]] `Cherry`
   - 奇瑞2026年集团销量目标320万辆（+14.03%），计划面向全球推出17款重点车型。从产品出海加速向品牌、生态出海转型。
 - **[2026-05-09]** 奇瑞4月总销25.1万辆中出口占70.6%(17.76万)，国内零售仅7.38万辆已被零跑(7.14万)几乎追平，国内业务空心化加剧。新能源时代奇瑞至今无月销过2万的爆款，60款SUV内耗+星途12.04万年销中高端化失败。强化§1.2 Bear Case #1国内空心化+#3品牌矩阵分散两条核心空头论点，触发管理层5月底-6月初评估是否下调国内150万销量目标。 — [[Holding, coverage Q&A and news/Cherry/2026-05-09_news_25wan-7wan-domestic.md|25万月销但7万内需：奇瑞的「爆款」去哪儿了？]] `Cherry`
@@ -720,7 +769,7 @@ _最后聚合：2026-05-13 17:05（近 90 天，自动）_
 - 可比公司：[[比亚迪]], [[Geely]]
 - 相关主题：[[出海]]
 - 调研纪要：`visiting record/汽车/`
-  - [[visiting record/汽车/2026-05-13_奇瑞汽车_卖方分析师卖方分析师交流_会议纪要|2026-05-13 卖方分析师 卖方分析师交流]] — FY26E 国内已下调至 140-160万；海外 GPM 假设 17.5%；BEV 海外工厂"全在国内"是海外护城河本质质疑核心证据；OMODA 5 4月单月 2万台是 26 年海外 NEV 毛利弹性 single name
+  - [[visiting record/汽车/2026-05-13_奇瑞汽车_CICC卖方分析师交流_会议纪要|2026-05-13 卖方分析师 卖方分析师交流]] — FY26E 国内已下调至 140-160万；海外 GPM 假设 17.5%；BEV 海外工厂"全在国内"是海外护城河本质质疑核心证据；OMODA 5 4月单月 2万台是 26 年海外 NEV 毛利弹性 single name
   - [[visiting record/汽车/2026-04-29_奇瑞汽车_26Q1业绩交流_会议纪要|2026-04-29 26Q1 业绩交流]] — 核心归母 +52% YoY；海外 NEV 占比 40%/GPM 20%+；HEV 电池产能瓶颈
   - [[visiting record/汽车/2026-03-18_奇瑞汽车_中金FY25业绩电话会_会议纪要|2026-03-18 中金 FY25 电话会]] — 海外单车净利 1-1.1万；混动 GPM 18%/燃油 10-12%/纯电个位数
   - [[visiting record/汽车/2025-12-25_奇瑞汽车_调研纪要|2025-12-25 管理层调研]] — 海外 3200 网点排他；中东非欧洲拿日韩份额；俄罗斯 25Q4 拖累 GPM 2ppt → 26 消除
