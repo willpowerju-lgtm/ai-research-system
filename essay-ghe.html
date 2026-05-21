@@ -369,11 +369,12 @@
 <h4>B. PPT 渲染 skill — 多层机械 + 人审尾</h4>
 <p>PPT 的好处是视觉约束大部分可形式化——文本溢出、几何越界、形状重叠、配色合规、密度分布、已知渲染 bug——这些都能脚本化。所以前几层全部交给机械检查（写入时即时校验 + 编译后整体校验 + 渲染产物物理检查），LLM judge 反而用不上</p>
 <p>最后留一层给人——视觉一致性、节奏感、叙事流畅度。这部分 LLM 目前还判不准，所以不假装能自动化，老实写到清单里让自己最后看一遍</p>
-<h4>C. IC Memo Outliner skill — Codex 跨模型语义 gate</h4>
-<p>Outliner 的产物是 thesis tree + slide outline。最早的设计是"LLM 自己 self-eval"——同模型同 context 跑一遍 6 项 check（论据覆盖、估值必要段、金字塔结构、连贯性等）</p>
-<p>实测：<strong>完全没用</strong>。同 context self-eval 永远 PASS——sycophancy 太重</p>
-<p>替换方案：<strong>dispatch 跨模型 Codex agent 做 C1-C6 语义审</strong>。Codex 看不到前面的对话历史，只看落盘的 <code>_thesis_tree.json</code> + <code>_outline.md</code>，针对 6 项 check 给 PASS/CONDITIONAL/FAIL verdict</p>
-<p>切换后第一次跑就抓到一条之前 self-eval 漏掉的硬伤——"Valuation section 写了三个倍数法，但没说为什么选这三个"。这种"看起来都写了，但论证链断了一截"的问题，同模型同 context 自审看不出来</p>
+<h4>C. IC Memo Outliner — 让另一个 AI 来审稿</h4>
+<p>IC Memo Outliner 负责生成投研报告的论点骨架和 slide 大纲。最初的设计是让同一个 AI 自己审自己：写完之后，原地跑一遍 6 条检查——论据有没有覆盖每个核心论点、估值逻辑有没有说清楚、结构有没有遵循金字塔原则，等等。</p>
+<p>实测：<strong>完全没用</strong>。刚写完一篇东西，让它审自己的草稿，几乎永远通过。道理和"让作者自己校稿"一样——错误已经被"看习惯了"，越熟悉越看不见。</p>
+<p>解法：把审查完全外包给另一个 AI（Codex，OpenAI 系，跟 Claude 是不同家族）。这个 AI 没有见过前面任何对话，只拿到最终写好的文件，按同一套 6 条标准逐条判断：通过 / 有条件通过 / 拒绝。这 6 条分别检查：论点有没有数据支撑、估值方法的选择逻辑有没有说清楚、每一页的核心结论能不能独立成立、全文论证有没有断链……</p>
+<p>换上跨模型审查后，第一次运行就抓到了一个之前一直漏过的问题——"估值部分列了三个估值方法，但整份报告没解释为什么用这三个、不用其他的"。数字都没错，版块也齐全，但推理链有一节是断的：一个从未被论证的隐含前提就这样直接用进去了。同一个 AI 自审发现不了这种问题，因为它会自动脑补那段没写出来的逻辑；换一个陌生 AI 来读，断链就变得很明显。</p>
+
 <h3>5.4 Eval 设计的几条原则</h3>
 <ol><li><strong>机械层尽量厚</strong>：能用 Python 判断的全部前置（成本零、速度毫秒级）</li><li><strong>LLM 层必须独立 context agent</strong>：清零启动，不要在主对话里 self-eval</li><li><strong>关键产物必须跨模型</strong>：高价值交付（最终模型、IC Memo、deck）至少跑一层 Codex 或其他外部模型</li><li><strong>多层并行不串行，但交付前必须 join</strong>：L0/L1/L2 同时 fire，主线程不阻塞——但任何 commit / MODEL_COMPLETE 写入之前，必须等所有 verdict 回齐再合并裁决。并行只省墙钟，不松绑 gate 顺序</li><li><strong>失败要可解释</strong>：每个 verdict 必须带 evidence + fix_hint，不允许 "FAIL, please fix"</li></ol>
 <h3>5.5 Eval 是结果导向，所以最抗腐</h3>
