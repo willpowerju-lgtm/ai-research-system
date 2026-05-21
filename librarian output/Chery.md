@@ -395,7 +395,7 @@ _最后聚合：2026-05-21 13:41（近 90 天，自动）_
   "xAxis": {"type": "category", "data": ["24Q1","24Q2","24Q3","24Q4","25Q1","25Q2","26Q1"]},
   "yAxis": [
     {"type": "value", "name": "亿RMB", "min": 400, "axisLabel": {"formatter": "{value}亿"}},
-    {"type": "value", "name": "GPM", "position": "right", "min": 8, "max": 20, "axisLabel": {"formatter": "{value}%"}}
+    {"type": "value", "name": "GPM", "position": "right", "min": 8, "max": 20, "axisLabel": {"formatter": "{value}%"}, "splitLine": {"show": false}}
   ],
   "series": [
     {"name": "营收（亿RMB）", "type": "bar", "yAxisIndex": 0, "data": [549.1, 572.1, 700.3, 877.4, 682.2, 733.8, 658.7], "itemStyle": {"color": "#C04E2D"}, "label": {"show": true, "position": "top", "fontSize": 10, "formatter": "{c}亿"}},
