@@ -56,6 +56,8 @@ def render_inline(s):
     # Italic (asterisk + 安全的 underscore —— underscore 前后必须不是字母/数字/下划线，避免误匹配 file_name)
     s = re.sub(r'(^|[^*])\*([^*\n]+)\*(?!\*)', r'\1<em>\2</em>', s)
     s = re.sub(r'(?<![a-zA-Z0-9_])_([^_\n]{1,200}?)_(?![a-zA-Z0-9_])', r'<em>\1</em>', s)
+    # Markdown images ![alt](src) — must precede link regex
+    s = re.sub(r'!\[([^\]]*)\]\(([^)\s]+)\)', r'<img class="md-img" src="\2" alt="\1" loading="lazy">', s)
     # Markdown links [text](url)
     s = re.sub(r'\[([^\]]+)\]\(([^)\s]+)\)', r'<a href="\2" target="_blank" rel="noopener">\1</a>', s)
     return s
@@ -519,6 +521,7 @@ TEMPLATE = '''<!DOCTYPE html>
   .md-content .callout-note .callout-title { color: var(--teal, #1B4D5C); }
 
   .md-chart { width: 100%; height: 360px; margin: 28px 0; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); }
+  .md-img { max-width: 100%; height: auto; margin: 24px 0; border-radius: 6px; border: 1px solid var(--border); }
 
   footer.foot {
     padding: 36px 36px 40px;
