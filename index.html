@@ -2062,7 +2062,7 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
           <li><strong>§4 Key Take-Away · 7 桶聚合</strong> —— 研究活动 / 公告 / 卖方研报 / 会议纪要 / 新闻 / 监管 / 竞品动态</li>
           <li><strong>每天对 focus list 跑 4 类 WebSearch query</strong>（company news / regulatory / competitor / announcement）—— 一个永远不会忘记跑搜索的 junior RA</li>
           <li><strong>两层健康检查</strong>：状态巡查（TP 过期、临近财报、股价偏离 TP 过大），再做跨源冲突扫描</li>
-          <li><strong>跨源仲裁</strong>按 source tier（A vs B）+ 时间锚定；判不准的不强选，主动 raise 给人</li>
+          <li><strong>跨源仲裁</strong>按 source tier（T1-T4）+ 时间锚定；判不准的不强选，主动 raise 给人</li>
         </ul>
       </div>
 
@@ -2476,14 +2476,7 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
         </span>
         <span class="reading-arrow">→</span>
       </a>
-      <a class="reading-item" href="#" onclick="event.preventDefault(); openDocReader('essay-arch-v2');">
-        <span class="reading-date">2026<br>04·14</span>
-        <span>
-          <div class="reading-title">Claude Code 投研工作站架构 v2.0</div>
-          <div class="reading-sum">六层架构、~45 个 active skill、四角知识闭环。系统的 canonical map。</div>
-        </span>
-        <span class="reading-arrow">→</span>
-      </a>
+      
       <a class="reading-item" href="#" onclick="event.preventDefault(); openDocReader('cowork-strategy');">
         <span class="reading-date">2026<br>04·19</span>
         <span>
@@ -2585,7 +2578,7 @@ L4  <span class="com">合并裁决</span>       三方 verdict 汇总
     {
       phase: 'Phase 3', name: 'Data registry + provenance',
       skills: ['data-validator'],
-      output: '每个会出现在 deck 里的数字都注册到 _data_registry.json，带 source tier（A/B）、timestamp、unit、currency。下游 renderer 只能消费已注册的数字。',
+      output: '每个会出现在 deck 里的数字都注册到 _data_registry.json，带 source tier（T1-T4）、timestamp、unit、currency。下游 renderer 只能消费已注册的数字。',
       eval: 'Schema 强制：金额类指标缺 currency 在注册时被拒。数量级 sanity：unit / value 不匹配在注册阶段就被抓，不会等到 deck 渲染出来。'
     },
     {
