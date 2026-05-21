@@ -14,6 +14,8 @@ if sys.platform == 'win32':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
+_chart_counter = [0]  # reset per doc in main(); module-level so recursive render_markdown calls share it
+
 DOCS = [
     ('librarian output/Geely.md',                                              'geely-wiki.html',       'Geely · Coverage Wiki — 吉利汽车 / 0175.HK',                  'Holdings Wiki · Stage 01 output'),
     ('librarian output/Chery.md',                                              'chery-wiki.html',       'Chery · Coverage Wiki — 奇瑞汽车 / 9973.HK',                  'Holdings Wiki · Stage 01 output'),
@@ -74,6 +76,24 @@ def render_markdown(md):
 
     while i < len(lines):
         line = lines[i]
+
+        # ECharts chart block  ```chart
+        if line.startswith('```chart'):
+            chart_lines = []
+            i += 1
+            while i < len(lines) and not lines[i].startswith('```'):
+                chart_lines.append(lines[i])
+                i += 1
+            if i < len(lines):
+                i += 1
+            cid = f'chart-{_chart_counter[0]}'
+            _chart_counter[0] += 1
+            chart_json = '\n'.join(chart_lines)
+            out.append(
+                f'<div id="{cid}" class="md-chart"></div>\n'
+                f'<script>echarts.init(document.getElementById("{cid}")).setOption({chart_json});</script>'
+            )
+            continue
 
         # Fenced code block
         if line.startswith('```'):
@@ -498,6 +518,8 @@ TEMPLATE = '''<!DOCTYPE html>
   .md-content .callout-tip .callout-title,
   .md-content .callout-note .callout-title { color: var(--teal, #1B4D5C); }
 
+  .md-chart { width: 100%; height: 360px; margin: 28px 0; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); }
+
   footer.foot {
     padding: 36px 36px 40px;
     text-align: center;
@@ -515,6 +537,7 @@ TEMPLATE = '''<!DOCTYPE html>
     nav.top .inner { padding: 0 24px; }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 </head>
 <body>
 
@@ -565,6 +588,7 @@ def main():
             continue
         with open(src_path, 'r', encoding='utf-8') as f:
             md = f.read()
+        _chart_counter[0] = 0
         content = render_markdown(md)
         html_out = (TEMPLATE
                     .replace('{{TITLE}}', esc(title))

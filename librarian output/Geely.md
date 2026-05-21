@@ -348,6 +348,24 @@ _最后聚合：2026-05-21 12:23（近 90 天，自动）_
 > GAAP NI 与核心 NI 口径差异大。GAAP 含汇兑损益+一次性项目（25Q4 含 11亿电池费用）。Holdings/Coverage 统一用核心净利比较。
 > 25Q2/Q3/Q4 单季度值由 Python 从累计数据计算（H1/Q1Q3/FY 减法）。
 
+```chart
+{
+  "title": {"text": "季度营收 + YoY（亿RMB）", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a1410"}},
+  "tooltip": {"trigger": "axis", "axisPointer": {"type": "cross"}},
+  "legend": {"data": ["营收（亿RMB）", "YoY %"], "bottom": 0},
+  "grid": {"containLabel": true, "top": 50, "bottom": 40},
+  "xAxis": {"type": "category", "data": ["25Q1","25Q2","25Q3","25Q4","26Q1"]},
+  "yAxis": [
+    {"type": "value", "name": "亿RMB", "min": 600, "axisLabel": {"formatter": "{value}亿"}},
+    {"type": "value", "name": "YoY", "position": "right", "min": 0, "max": 60, "axisLabel": {"formatter": "{value}%"}}
+  ],
+  "series": [
+    {"name": "营收（亿RMB）", "type": "bar", "yAxisIndex": 0, "data": [725.0, 778.0, 891.8, 1057.5, 837.8], "itemStyle": {"color": "#C04E2D"}, "label": {"show": true, "position": "top", "fontSize": 11, "formatter": "{c}亿"}},
+    {"name": "YoY %", "type": "line", "yAxisIndex": 1, "data": [25, 27, 27, 45.9, 15.2], "itemStyle": {"color": "#1B4D5C"}, "lineStyle": {"color": "#1B4D5C", "width": 2}, "symbol": "circle", "symbolSize": 6, "label": {"show": true, "fontSize": 11, "formatter": "{c}%"}}
+  ]
+}
+```
+
 #### 6.3.2 Quarterly Deep Dive
 
 ##### 26Q1（2026-04-30 post call）
@@ -625,9 +643,37 @@ _最后聚合：2026-05-21 12:23（近 90 天，自动）_
 
 > **2026-04 月度亮点**：(1) 出口 8.32 万创单月新高（连续 2 月破 8 万 — 全年 75 万节奏达标）；(2) **海外 NEV % 2025-11 37.1% → 2026-04 63.9%**（6 个月 +26.8ppt）— 海外 NEV 加速渗透；(3) 国内 NEV % 25-12 69.2% (峰值) → 26-04 54.2% 回落，反映 Q1 春节淡季 + ICE 月销回稳（26-01 11.75 万）；(4) 全集团 NEV % 维持 50%+ 区间（vs FY25 55.8%）。
 
+```chart
+{
+  "title": {"text": "国内 vs 出口 月度销量（万辆，近6个月）", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a1410"}},
+  "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+  "legend": {"data": ["国内", "出口"], "bottom": 0},
+  "grid": {"containLabel": true, "top": 50, "bottom": 40},
+  "xAxis": {"type": "category", "data": ["25-11","25-12","26-01","26-02","26-03","26-04"]},
+  "yAxis": {"type": "value", "name": "万辆", "axisLabel": {"formatter": "{value}万"}},
+  "series": [
+    {"name": "国内", "type": "bar", "data": [26.8, 19.7, 21.0, 14.5, 15.1, 15.2], "itemStyle": {"color": "#C04E2D"}, "label": {"show": true, "position": "top", "fontSize": 10, "formatter": "{c}万"}},
+    {"name": "出口", "type": "bar", "data": [4.2, 4.0, 6.1, 6.1, 8.2, 8.3], "itemStyle": {"color": "#1B4D5C"}, "label": {"show": true, "position": "top", "fontSize": 10, "formatter": "{c}万"}}
+  ]
+}
+```
+
 ## 9. 券商评级日历
 
 **当前共识**：全部买入/推荐（19/19），核心分歧在出口持续性和极氪品牌溢价能否维持。Citi 最激进（TP HK$30），华泰/JPM 紧随（HK$30/28）。
+
+```chart
+{
+  "title": {"text": "卖方目标价（HK$，最新 per 券商）", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a1410"}},
+  "tooltip": {"trigger": "axis"},
+  "grid": {"containLabel": true, "left": "22%", "top": 40, "bottom": 40, "right": "14%"},
+  "xAxis": {"type": "value", "min": 24, "max": 34, "name": "HK$", "axisLabel": {"formatter": "HK${value}"}},
+  "yAxis": {"type": "category", "data": ["招银国际","JPMorgan","华泰","Citi"]},
+  "series": [
+    {"type": "bar", "data": [27, 28, 30, 30], "itemStyle": {"color": "#C04E2D"}, "barMaxWidth": 40, "label": {"show": true, "position": "right", "formatter": "HK${c}", "fontSize": 12}}
+  ]
+}
+```
 
 - **[2026-05-06]** 开源证券 — **买入** — [[Raw/Auto research/20260506-开源证券-吉利汽车（0175.HK）：Q1核心利润同比高增，"出海+高端化"双轮驱动.pdf|开源 0506]]
   - 26Q1 核心归母 45.61亿 +31%，GPM 17.5%（同环比+1.7/+0.6pct）。新能源出口 12.5万辆 +527%，拉美/非洲 +300%，欧洲 +400%

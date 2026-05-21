@@ -265,6 +265,8 @@
   .md-content .callout-tip .callout-title,
   .md-content .callout-note .callout-title { color: var(--teal, #1B4D5C); }
 
+  .md-chart { width: 100%; height: 360px; margin: 28px 0; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); }
+
   footer.foot {
     padding: 36px 36px 40px;
     text-align: center;
@@ -282,6 +284,7 @@
     nav.top .inner { padding: 0 24px; }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 </head>
 <body>
 
@@ -377,6 +380,22 @@
 <h4>6.3.1 Quarterly Summary</h4>
 <table><thead><tr><th>季度</th><th>收入 (亿RMB)</th><th>YoY</th><th>GPM</th><th>归母 GAAP (亿)</th><th>核心净利 (亿)</th><th>来源</th></tr></thead><tbody><tr><td><strong>26Q1</strong></td><td>837.8</td><td>+15.2%</td><td>17.5%</td><td>41.7 (-26.6%)</td><td>45.6 (+31%)</td><td>东吴/中泰 · <span class="wl" title="visiting record/汽车/2026-04-30_吉利汽车_26Q1业绩post call会议纪要_V1">post call</span></td></tr><tr><td><strong>25Q4</strong></td><td>1,057.5</td><td>+45.9%</td><td>16.9%</td><td>37.4</td><td>37.9</td><td>国信 20260330 · Citi 30414029</td></tr><tr><td><strong>25Q3</strong></td><td>891.8</td><td>+27%</td><td>16.7%</td><td>n/a</td><td>39.6 (+19%)</td><td><a href="https://finance.sina.com.cn/stock/hkstock/ggscyd/2025-11-17/doc-infxstse6552796.shtml" target="_blank" rel="noopener">新浪</a></td></tr><tr><td><strong>25Q2</strong></td><td>778.0</td><td>+27%</td><td>17.0%</td><td>36.2</td><td>31.6 (+102%)</td><td><a href="https://finance.sina.com.cn/tech/csj/2025-08-14/doc-infkxuaa2370685.shtml" target="_blank" rel="noopener">新浪</a></td></tr><tr><td><strong>25Q1</strong></td><td>725.0</td><td>+25%</td><td>15.8%</td><td>56.7 (+264%)</td><td>35.0</td><td><a href="https://www.geely.com/en/news-test/2025/geely-auto-q1-2025-financial-results" target="_blank" rel="noopener">Geely IR</a> · Citi</td></tr><tr><td><strong>FY25</strong></td><td>3,452.3</td><td>+25%</td><td>16.61%</td><td>168.5 (+1.3%)</td><td>144.1 (+36%)</td><td>银河/国信 20260322/0330</td></tr></tbody></table>
 <blockquote><p>GAAP NI 与核心 NI 口径差异大。GAAP 含汇兑损益+一次性项目（25Q4 含 11亿电池费用）。Holdings/Coverage 统一用核心净利比较。 25Q2/Q3/Q4 单季度值由 Python 从累计数据计算（H1/Q1Q3/FY 减法）</p></blockquote>
+<div id="chart-0" class="md-chart"></div>
+<script>echarts.init(document.getElementById("chart-0")).setOption({
+  "title": {"text": "季度营收 + YoY（亿RMB）", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a1410"}},
+  "tooltip": {"trigger": "axis", "axisPointer": {"type": "cross"}},
+  "legend": {"data": ["营收（亿RMB）", "YoY %"], "bottom": 0},
+  "grid": {"containLabel": true, "top": 50, "bottom": 40},
+  "xAxis": {"type": "category", "data": ["25Q1","25Q2","25Q3","25Q4","26Q1"]},
+  "yAxis": [
+    {"type": "value", "name": "亿RMB", "min": 600, "axisLabel": {"formatter": "{value}亿"}},
+    {"type": "value", "name": "YoY", "position": "right", "min": 0, "max": 60, "axisLabel": {"formatter": "{value}%"}}
+  ],
+  "series": [
+    {"name": "营收（亿RMB）", "type": "bar", "yAxisIndex": 0, "data": [725.0, 778.0, 891.8, 1057.5, 837.8], "itemStyle": {"color": "#C04E2D"}, "label": {"show": true, "position": "top", "fontSize": 11, "formatter": "{c}亿"}},
+    {"name": "YoY %", "type": "line", "yAxisIndex": 1, "data": [25, 27, 27, 45.9, 15.2], "itemStyle": {"color": "#1B4D5C"}, "lineStyle": {"color": "#1B4D5C", "width": 2}, "symbol": "circle", "symbolSize": 6, "label": {"show": true, "fontSize": 11, "formatter": "{c}%"}}
+  ]
+});</script>
 <h4>6.3.2 Quarterly Deep Dive</h4>
 <h5>26Q1（2026-04-30 post call）</h5>
 <p><strong>Beat/Miss</strong></p>
@@ -439,8 +458,32 @@
 <h4>8.7.3 最近 6 个月（2025-11 – 2026-04, 辆）</h4>
 <table><thead><tr><th>维度</th><th>类型</th><th>2025-11</th><th>2025-12</th><th>2026-01</th><th>2026-02</th><th>2026-03</th><th>2026-04</th></tr></thead><tbody><tr><td><strong>Total</strong></td><td>总量</td><td>310,428</td><td>236,817</td><td>270,167</td><td>206,160</td><td>233,031</td><td>235,164</td></tr><tr><td></td><td>ICE</td><td>122,630</td><td>82,553</td><td>145,915</td><td>88,672</td><td>105,712</td><td>99,573</td></tr><tr><td></td><td>HEV</td><td>85,196</td><td>75,133</td><td>56,240</td><td>49,656</td><td>56,762</td><td>60,731</td></tr><tr><td></td><td>BEV</td><td>102,602</td><td>79,131</td><td>68,012</td><td>67,832</td><td>70,557</td><td>74,860</td></tr><tr><td></td><td>NEV %</td><td>60.5%</td><td>65.1%</td><td>46.0%</td><td>57.0%</td><td>54.6%</td><td>57.7%</td></tr><tr><td><strong>Local 国内</strong></td><td>总量</td><td>268,337</td><td>196,507</td><td>209,661</td><td>145,281</td><td>151,392</td><td>151,978</td></tr><tr><td></td><td>ICE</td><td>96,168</td><td>60,518</td><td>117,526</td><td>68,645</td><td>76,259</td><td>69,562</td></tr><tr><td></td><td>HEV</td><td>78,093</td><td>68,044</td><td>44,251</td><td>32,194</td><td>32,643</td><td>36,155</td></tr><tr><td></td><td>BEV</td><td>94,076</td><td>67,945</td><td>47,884</td><td>44,442</td><td>42,490</td><td>46,261</td></tr><tr><td></td><td>NEV %</td><td>64.2%</td><td>69.2%</td><td>43.9%</td><td>52.8%</td><td>49.6%</td><td>54.2%</td></tr><tr><td><strong>Export 海外</strong></td><td>总量</td><td>42,091</td><td>40,310</td><td>60,506</td><td>60,879</td><td>81,639</td><td>83,186</td></tr><tr><td></td><td>ICE</td><td>26,462</td><td>22,035</td><td>28,389</td><td>20,027</td><td>29,453</td><td>30,011</td></tr><tr><td></td><td>HEV</td><td>7,103</td><td>7,089</td><td>11,989</td><td>17,462</td><td>24,119</td><td>24,576</td></tr><tr><td></td><td>BEV</td><td>8,526</td><td>11,186</td><td>20,128</td><td>23,390</td><td>28,067</td><td>28,599</td></tr><tr><td></td><td>NEV %</td><td>37.1%</td><td>45.3%</td><td>53.1%</td><td>67.1%</td><td>63.9%</td><td>63.9%</td></tr></tbody></table>
 <blockquote><p><strong>2026-04 月度亮点</strong>：(1) 出口 8.32 万创单月新高（连续 2 月破 8 万 — 全年 75 万节奏达标）；(2) <strong>海外 NEV % 2025-11 37.1% → 2026-04 63.9%</strong>（6 个月 +26.8ppt）— 海外 NEV 加速渗透；(3) 国内 NEV % 25-12 69.2% (峰值) → 26-04 54.2% 回落，反映 Q1 春节淡季 + ICE 月销回稳（26-01 11.75 万）；(4) 全集团 NEV % 维持 50%+ 区间（vs FY25 55.8%）</p></blockquote>
+<div id="chart-1" class="md-chart"></div>
+<script>echarts.init(document.getElementById("chart-1")).setOption({
+  "title": {"text": "国内 vs 出口 月度销量（万辆，近6个月）", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a1410"}},
+  "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+  "legend": {"data": ["国内", "出口"], "bottom": 0},
+  "grid": {"containLabel": true, "top": 50, "bottom": 40},
+  "xAxis": {"type": "category", "data": ["25-11","25-12","26-01","26-02","26-03","26-04"]},
+  "yAxis": {"type": "value", "name": "万辆", "axisLabel": {"formatter": "{value}万"}},
+  "series": [
+    {"name": "国内", "type": "bar", "data": [26.8, 19.7, 21.0, 14.5, 15.1, 15.2], "itemStyle": {"color": "#C04E2D"}, "label": {"show": true, "position": "top", "fontSize": 10, "formatter": "{c}万"}},
+    {"name": "出口", "type": "bar", "data": [4.2, 4.0, 6.1, 6.1, 8.2, 8.3], "itemStyle": {"color": "#1B4D5C"}, "label": {"show": true, "position": "top", "fontSize": 10, "formatter": "{c}万"}}
+  ]
+});</script>
 <h2>9. 券商评级日历</h2>
 <p><strong>当前共识</strong>：全部买入/推荐（19/19），核心分歧在出口持续性和极氪品牌溢价能否维持。Citi 最激进（TP HK$30），华泰/JPM 紧随（HK$30/28）</p>
+<div id="chart-2" class="md-chart"></div>
+<script>echarts.init(document.getElementById("chart-2")).setOption({
+  "title": {"text": "卖方目标价（HK$，最新 per 券商）", "left": "center", "textStyle": {"fontSize": 14, "color": "#1a1410"}},
+  "tooltip": {"trigger": "axis"},
+  "grid": {"containLabel": true, "left": "22%", "top": 40, "bottom": 40, "right": "14%"},
+  "xAxis": {"type": "value", "min": 24, "max": 34, "name": "HK$", "axisLabel": {"formatter": "HK${value}"}},
+  "yAxis": {"type": "category", "data": ["招银国际","JPMorgan","华泰","Citi"]},
+  "series": [
+    {"type": "bar", "data": [27, 28, 30, 30], "itemStyle": {"color": "#C04E2D"}, "barMaxWidth": 40, "label": {"show": true, "position": "right", "formatter": "HK${c}", "fontSize": 12}}
+  ]
+});</script>
 <ul><li><strong>[2026-05-06]</strong> 开源证券 — <strong>买入</strong> — <span class="wl" title="Raw/Auto research/20260506-开源证券-吉利汽车（0175.HK）：Q1核心利润同比高增，&quot;出海+高端化&quot;双轮驱动.pdf">开源 0506</span><ul><li>26Q1 核心归母 45.61亿 +31%，GPM 17.5%（同环比+1.7/+0.6pct）。新能源出口 12.5万辆 +527%，拉美/非洲 +300%，欧洲 +400%</li><li>FY26/27/28E 归母 212.6/267.7/311.1亿，PE 10.0/7.9/6.8x。海外经销商突破 1900家覆盖 110国，全年出口目标 75万辆</li></ul></li></ul>
 <ul><li><strong>[2026-05-05]</strong> 中泰证券 — <strong>买入</strong> — <span class="wl" title="Raw/Auto research/20260505-中泰证券-吉利汽车（0175.HK）：26Q1业绩符合预期，高端化+出口拉动利润增长.pdf">中泰 0505</span><ul><li>26Q1 Rev 837.8亿 +15.25%，核心归母 45.6亿 +31%，汇兑损失 4.97亿（vs 25Q1 汇兑收益 30.28亿）。单车 ASP 11.8万元 +14.7%</li><li>FY26/27/28E 归母 203.6/261.1/317.8亿，Rev 4823/5510/6155亿，GPM 16.4%/16.8%/17.0%，PE 10.7/8.4/6.9x</li></ul></li></ul>
 <ul><li><strong>[2026-04-30]</strong> 招银国际 — <strong>买入</strong> — TP HK$27.00↑ — <span class="wl" title="Raw/Auto research/20260430-招银国际-吉利汽车（0175.HK）：Higher+earnings+visibility+after+strong+1Q26.pdf">招银 0430</span><ul><li>上调 TP 至 HK$27（from HK$25），基于 12x FY26E PE。上调 FY26E NP +8% 至 Rmb20.9bn，上调 FY26E GPM 至 17.7%（from 17.4%）</li><li>1Q26 NP Rmb4.2bn beat 预估 9%，核心 NP/车约 Rmb6,400。极氪高端定位巩固后带来 margins 和估值双提升空间</li></ul></li></ul>
