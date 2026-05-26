@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -318,8 +318,8 @@
 <p><strong>3. 通用 prompt，不给分析方向。</strong> prompt 模板是固定的，只说"写 memo"，<strong>绝不</strong>说"帮我算 ICE 贡献占比"或"帮我找报告间矛盾"。原因很硬：真实 PM 不会给这种提示。一旦 prompt 提示了具体分析方向，测的就从"能否自主发现问题"退化成了"被告知后能否执行"——而后者前沿模型早就会了</p>
 <p><strong>4. 分层评分，regex 只是基础层。</strong> v3 时期的设计原则是"默认不用 LLM-as-judge"，评分全靠 checkpoint 正则匹配。这保证了 verdict 的确定性和可重放——同一份 response 跑一百遍评分结果完全一样。但 v3 跑完发现**诸多分析判断类的内容grading的难题——正则太宽，keyword stuffing 蒙混过关；正则太窄，换个说法就误杀</p>
 <p>v4 的直接回应是 6 层分层评分，把正则从"唯一评分器"降级为"基础层"：</p>
-<table><thead><tr><th>层</th><th>权重</th><th>做什么</th><th>性质</th></tr></thead><tbody><tr><td>T3 regex</td><td>20%</td><td>v3 baseline，关键词/数字 pattern 匹配</td><td>deterministic</td></tr><tr><td>T1 citation</td><td>25%</td><td>模型声称"引用/披露"的 source-stated 数字必须在 source 文件中可 grep——编造的数字被拦；derived 数字（模型自己算的）走 T0 computation 层验证，不适用 grep</td><td>deterministic</td></tr><tr><td>T0 computation</td><td>15%</td><td>有 <code>derived_formula</code> 的 checkpoint 实际执行公式，比对模型给的数字</td><td>deterministic</td></tr><tr><td>T2 depth</td><td>15%</td><td>4 项 binary rubric（DID_COMPUTE / DID_COMPARE / DID_CHALLENGE / DID_CAUSE），区分"提到了"和"主动分析了"</td><td>LLM judge，限定 rubric + 正反例</td></tr><tr><td>T1 timeliness</td><td>15%</td><td>引用数字的时段标记必须匹配 expected period</td><td>deterministic</td></tr><tr><td>Unit/currency</td><td>10%</td><td>单位一致性 + 币种标注</td><td>deterministic</td></tr></tbody></table>
-<p>设计逻辑：T0/T1 hard verifier 占 55%（citation + computation + timeliness）完全 deterministic 不可 hack。数字分三类处理：source-stated（引用披露值）走 citation grep，derived（模型主动计算）走 computation 公式验证，model-estimated（模型估算）当前不覆盖。T2 depth 用 LLM 但严格限定在 binary rubric + 正反例 pair + source 数字对照（constrained LLM judge），比开放式 LLM-judge 可复现得多，但不是全 deterministic——Haiku 一致率仅 62%，当前用 Opus 做 judge。"默认不用 LLM-as-judge"仍然是原则——T2 只占 15%</p>
+<table><thead><tr><th>层</th><th>权重</th><th>做什么</th><th>性质</th></tr></thead><tbody><tr><td>T3 regex</td><td>20%</td><td>v3 baseline，关键词/数字 pattern 匹配</td><td>weak deterministic（可被 keyword stuffing）</td></tr><tr><td>T1 citation</td><td>25%</td><td>模型声称"引用/披露"的 source-stated 数字必须在 source 文件中可 grep——编造的数字被拦；derived 数字（模型自己算的）走 T0 computation 层验证，不适用 grep</td><td>deterministic</td></tr><tr><td>T0 computation</td><td>15%</td><td>有 <code>derived_formula</code> 的 checkpoint 实际执行公式，比对模型给的数字</td><td>deterministic</td></tr><tr><td>T2 depth</td><td>15%</td><td>4 项 binary rubric（DID_COMPUTE / DID_COMPARE / DID_CHALLENGE / DID_CAUSE），区分"提到了"和"主动分析了"</td><td>LLM judge，限定 rubric + 正反例</td></tr><tr><td>T1 timeliness</td><td>15%</td><td>引用数字的时段标记必须匹配 expected period</td><td>deterministic</td></tr><tr><td>Unit/currency</td><td>10%</td><td>单位一致性 + 币种标注</td><td>deterministic</td></tr></tbody></table>
+<p>设计逻辑：T0/T1 hard verifier 占 55%（citation + computation + timeliness）完全 deterministic 不可 hack；加 unit/currency 10% = 65% non-regex deterministic；含 T3 regex 则 85% 涵盖某种 deterministic 判断，但 T3 属 weak deterministic（可 keyword stuffing hack）。下文"65% deterministic"特指 non-regex 口径，"55% hard verifier"特指 T0/T1 口径。数字分三类处理：source-stated（引用披露值）走 citation grep，derived（模型主动计算）走 computation 公式验证，model-estimated（模型估算）当前不覆盖。T2 depth 用 LLM 但严格限定在 binary rubric + 正反例 pair + source 数字对照（constrained LLM judge），比开放式 LLM-judge 可复现得多，但不是全 deterministic——Haiku 一致率仅 62%，当前用 Opus 做 judge。"默认不用 LLM-as-judge"仍然是原则——T2 只占 15%</p>
 <p><strong>5. Runtime leak-resistant。</strong> 环境层面<strong>禁掉联网</strong>（<code>tools_denied: web_search / web_fetch</code>），模型只能基于给定文件作答，切断"现场上网搜标准答案"这条路。需要明确的是，这只解决 runtime web leak——如果素材来自公开 filing 或研报，模型预训练阶段可能已经记住了部分内容（training contamination），这一层当前未解决。未来可通过时间窗（post-cutoff 材料）、私有素材、或 held-out source 机制进一步加固</p>
 <p><strong>6. 深度感知，不止测广度。</strong> v3 的 regex-only 评分有一个结构性盲区：它只能测"有没有提到"（广度），测不了"有没有主动分析"（深度）。v4 加入 T2 depth judge，用 4 项 binary rubric 做这件事：</p>
 <ul><li><strong>DID_COMPUTE</strong> — 模型是否自己做了报告没做的计算（比如减法拆出 NEV 贡献）并且给出了清晰的理由与逻辑</li><li><strong>DID_COMPARE</strong> — 模型是否做了跨报告/跨时期的数据对比</li><li><strong>DID_CHALLENGE</strong> — 模型是否用数据质疑了管理层声明或报告结论</li><li><strong>DID_CAUSE</strong> — 模型是否做了因果归因（不只是列数字，而是解释为什么）</li></ul>
@@ -354,7 +354,7 @@
 }</code></pre>
 <p>材料里管理层因为合规原因明确拒绝确认"全年核心净利 220 亿"这个数。会议纪要里这个数被反复提到，模型很容易顺手把它当成已确认的全年目标写进 memo。这个 checkpoint 测的就是：模型有没有掉进"管理层提了 → 当成确认目标"这个陷阱（F9 = 盲信权威）。删掉纪要里任何单句都不影响——只要模型读到了"管理层不予确认"，它就该知道不能把 220 亿当 base case</p>
 <h3>3.3 规模与素材</h3>
-<p>v4 benchmark：<strong>7 家公司 × 5 个行业，~86 个 checkpoint（122 减去删除的 3 个 ticker × 12 CP/ticker）</strong></p>
+<p>v4 benchmark：<strong>7 家公司 × 5 个行业，合计约 86 个 raw checkpoints，平均约 12 个/公司（从初始 10 家 122 CP 删去 3 个 ticker：122 − 3×12 = 86）</strong></p>
 <table><thead><tr><th>#</th><th>Ticker</th><th>公司</th><th>行业</th></tr></thead><tbody><tr><td>1</td><td>Co-A</td><td>公司A</td><td>医美</td></tr><tr><td>2</td><td>Co-B</td><td>公司B</td><td>物流</td></tr><tr><td>3</td><td>Co-C</td><td>公司C</td><td>汽车</td></tr><tr><td>4</td><td>AAPL</td><td>苹果</td><td>美股科技</td></tr><tr><td>5</td><td>1211.HK</td><td>比亚迪</td><td>EV</td></tr><tr><td>6</td><td>AUTEL</td><td>道通智能</td><td>汽车诊断</td></tr><tr><td>7</td><td>002028</td><td>思源电气</td><td>变压器</td></tr></tbody></table>
 <p>素材类型（"高质量金融产物"在这里的落地）：</p>
 <table><thead><tr><th>格式</th><th>数量</th><th>例子</th></tr></thead><tbody><tr><td>券商研报 .txt</td><td>12</td><td>Citi 多页分析师报告（PDF 提取）</td></tr><tr><td>会议纪要 .md</td><td>6</td><td>中文公司调研 / 业绩会纪要</td></tr><tr><td>JSON 财务模型</td><td>1</td><td>Citi banker model 季度时序</td></tr><tr><td>Wiki .md</td><td>1</td><td>Holdings 页（论点 / 指引 / 催化剂）</td></tr><tr><td>Earnings review .md</td><td>1</td><td>完整 P&L 拆解 + model variance</td></tr><tr><td>PDF 研报</td><td>1</td><td>公司C 1Q Citi 报告</td></tr></tbody></table>
@@ -388,9 +388,9 @@
 <p>出题硬规则：≥8/12 的 checkpoint 必须匹配 P1-P8</p>
 <h3>4.3 三大系统性弱点（最有价值的发现）</h3>
 <p>跑完 7 家公司、对失败做归因，在当前样本中前沿模型反复暴露出三类系统性弱点（以 F-code 归因的失败为分母；另有 59% 的失败归入 H 类 catch-all，尚未细分到 F-code，不在此三类计数中）。这是整个 benchmark 最值钱的产出：</p>
-<p><strong>弱点一：不独立计算（约占失败的 12%）。</strong> 报告没算的衍生指标，模型也不算——它跟随，不引领。典型例子是公司C（汽车）：报告分别披露了燃油车合营公司的净利和集团合并净利，做个减法就能拆出新能源业务（剔除合营贡献后）的真实盈利水平。模型把两个数都列出来了，但没相减，于是没得出"NEV 板块对集团净利的实际拖累"这个结论</p>
-<p><strong>弱点二：不质疑权威（约占失败的 16%）。</strong> 管理层说 X，数据说 not-X，模型抄管理层。公司C 220 亿核心净利：纪要里这个数被反复提到，但管理层因为合规原因明确<strong>拒绝确认</strong>。模型多数直接把 220 亿当成"全年目标"或"已确认 base case"写进 memo，没 flag 管理层那句不予确认。这是 sycophancy bias 在金融场景的具体形态</p>
-<p><strong>弱点三：不追踪静默修订（约占失败的 59%——绝对主力）。</strong> 多份报告之间数字在漂移，标题或叙事却写 unchanged 或反向。比亚迪 25 年出口预测从 1.5M 上调到 1.62M 做了头条（"上调出口"），同份报告里国内预测被悄悄下调更多，总量其实是降的，但模型跟着标题写"出口强劲驱动增长"。苹果 iPhone 出货从 247M 改到 246M 看着像 rounding，可 sell-side 体系里 1M units × ~$800 ASP ≈ $800M 收入差，足够把季度推到 below-consensus 区，研报 summary 仍写 shipments unchanged，模型照抄。模型一律抓不到的原因也很直接：单份报告差异落在 rounding 噪音里，跨多份报告又只读了标题</p>
+<p><strong>弱点一：不独立计算（约占 F-code 已归因失败的 12%）。</strong> 报告没算的衍生指标，模型也不算——它跟随，不引领。典型例子是公司C（汽车）：报告分别披露了燃油车合营公司的净利和集团合并净利，做个减法就能拆出新能源业务（剔除合营贡献后）的真实盈利水平。模型把两个数都列出来了，但没相减，于是没得出"NEV 板块对集团净利的实际拖累"这个结论</p>
+<p><strong>弱点二：不质疑权威（约占 F-code 已归因失败的 16%）。</strong> 管理层说 X，数据说 not-X，模型抄管理层。公司C 220 亿核心净利：纪要里这个数被反复提到，但管理层因为合规原因明确<strong>拒绝确认</strong>。模型多数直接把 220 亿当成"全年目标"或"已确认 base case"写进 memo，没 flag 管理层那句不予确认。这是 sycophancy bias 在金融场景的具体形态</p>
+<p><strong>弱点三：不追踪静默修订（约占 F-code 已归因失败的 59%——绝对主力）。</strong> 多份报告之间数字在漂移，标题或叙事却写 unchanged 或反向。比亚迪 25 年出口预测从 1.5M 上调到 1.62M 做了头条（"上调出口"），同份报告里国内预测被悄悄下调更多，总量其实是降的，但模型跟着标题写"出口强劲驱动增长"。苹果 iPhone 出货从 247M 改到 246M 看着像 rounding，可 sell-side 体系里 1M units × ~$800 ASP ≈ $800M 收入差，足够把季度推到 below-consensus 区，研报 summary 仍写 shipments unchanged，模型照抄。模型一律抓不到的原因也很直接：单份报告差异落在 rounding 噪音里，跨多份报告又只读了标题</p>
 <p>注意三类弱点全都是<strong>静默错误</strong>——模型不报错，输出看上去完整又自信，但一个有经验的分析师一眼就能看出来。这正是 失败金矿 那篇讲的"尺子造得出、错误却静默"的领域——必须主动造尺子，错误才会现形</p>
 <h3>4.4 v4 结果</h3>
 <p>v4 的 6 层分层评分给出比 v3 更丰富的维度。<strong>注意：以下为未校准（uncalibrated）结果</strong>——完整的投票校准（≥2/3 模型 fail 才保留）是当前待做项，headline 数字会在校准后变动：</p>
@@ -422,7 +422,7 @@
 <p>改成<strong>投票校准</strong>——保留 ≥2/3 模型都 fail 的 checkpoint。方法论在 v3 早期 4 公司小规模 set 上验证有效：σ 从单模型锚定的 14pp 降到 4pp，三个模型分数差距收敛到合理区间</p>
 <p>v4 当前态（7 家公司 / ~86 raw checkpoints / 6 层分层评分）：</p>
 <table><thead><tr><th>模型</th><th>Combined 总分</th><th>未校准 binary (regex 层)</th></tr></thead><tbody><tr><td>Sonnet</td><td>0.721</td><td>58.2%</td></tr><tr><td>Opus</td><td>0.710</td><td>53.3%</td></tr><tr><td>DS</td><td>0.675</td><td>45.9%</td></tr></tbody></table>
-<p>未校准 binary 层 σ = 6.2pp，绝对分数 46-58% 区间已接近 Ofir Press 建议的 10-60% 上沿——区分度会随模型变强快速失效。v4 完整的 ~86 CP 投票校准是当前待做项（3 个模型的 fresh response 全部跑完后执行，产出 v4 calibrated subset）。当前 v4 headline 用 6 层 combined：regex 20% + citation 25% + computation 15% + depth 15% + timeliness 15% + unit 10%，depth judge 在 binary 之外提供连续分维度</p>
+<p>未校准 binary 层 σ = 6.2pp，绝对分数 46-58% 区间已高出 Ofir Press 建议的发布时难度目标（其文建议 top LM accuracy 在 1%–35%，2025 年更新进一步收紧到 0.1%–9%）——区分度会随模型变强快速失效。v4 完整的 ~86 CP 投票校准是当前待做项（3 个模型的 fresh response 全部跑完后执行，产出 v4 calibrated subset）。当前 v4 headline 用 6 层 combined：regex 20% + citation 25% + computation 15% + depth 15% + timeliness 15% + unit 10%，depth judge 在 binary 之外提供连续分维度</p>
 <p>出题全流程还有一道<strong>三阶段 QC gate</strong>（Q1-Q21）：生成后查 ground truth 完整性 / P1-P8 覆盖 / 删除测试通过率 / 正则质量；Opus 测试后查未校准难度 / grading suspect 率；校准后查最终难度 / ticker 均衡</p>
 <hr>
 <h2>六、生成器 scalable 吗</h2>
@@ -432,7 +432,7 @@
 <p>这些全部<strong>由数据 pattern 参数化，不由公司参数化</strong>。<code>scalable_benchmark.py</code> 把它串起来：给一个 ticker → 自动找 context 文件 → 抽 FactSheet → 生成 checkpoint → 组装 mega-task。新公司只要有足够的材料，几分钟出题。<strong>这一层（仅 Tier 1 数据陷阱）</strong>实测 7 家公司全部零人工干预出题。注意"零人工"仅指 Tier 1——Tier 2 分析陷阱和 Tier 3 taxonomy 维护仍需人工参与，详见下文</p>
 <h3>Tier 2：分析陷阱（hard core）→ 半自动 ⚠️</h3>
 <p>但<strong>真正让 benchmark 难的不是数据陷阱</strong>。回看 §四里若干硬核 F-code（如 F12 利润结构倒挂、F14 定义精度）——这些 checkpoint 要求读异构文档、识别 P1-P8 跨报告 pattern。这种东西 <code>checkpoint_generator.py</code> 生成不了</p>
-<p>实际做法是反过来的：不是人坐在白板前定 taxonomy 再给 agent 套用，而是 pattern 从真实 error log 里长出来。日常做投研 workflow 时把模型的失败 case 记下来——什么场景、什么原始数据、模型漏了什么、为什么错。攒到一定量后批量喂给 Opus，让它统一读取、归一化、做相似性聚类、抽象成命名 pattern，P1-P8 / F-code 就是这么从一堆真实失败里抽出来的，不是按某个先验框架设计的。Feedback loop 一直在跑，新失败模式不属于已有 pattern 就追加（H 类 catch-all 占 59%，就是这条 loop 的待消化库存）</p>
+<p>实际做法是反过来的：不是人坐在白板前定 taxonomy 再给 agent 套用，而是 pattern 从真实 error log 里长出来。日常做投研 workflow 时把模型的失败 case 记下来——什么场景、什么原始数据、模型漏了什么、为什么错。攒到一定量后批量喂给 Opus，让它统一读取、归一化、做相似性聚类、抽象成命名 pattern，P1-P8 / F-code 就是这么从一堆真实失败里抽出来的，不是按某个先验框架设计的。Feedback loop 一直在跑，新失败模式不属于已有 pattern 就追加（H 类 catch-all 占全部失败的 59%，就是这条 loop 的待消化库存）</p>
 <p>Pattern 一旦固化，per-ticker 出题就完全自动化：SKILL 2 spawn 一个 Opus trap-finding agent 读全部材料，按 P1-P8 在新素材里找对应实例 + evidence_span，直接成型 12 个 checkpoint，后面跟三阶段 QC gate、校准、feedback loop。全流程 ~30 min/ticker，7 家公司实测基本符合</p>
 <p>成本结构是一次性高、边际低：上游花在 error log 持续积累 + Opus 周期性抽象 taxonomy 这一段（人脑出真实 case，Opus 出 pattern，没有"坐着想 taxonomy"这一步），但攒到当前 P1-P8 粒度后，分摊到新公司近乎零。所以仍叫"半自动"——半在 pattern 出现的一次性环节，per-ticker 出题已经是 auto</p>
 <p>为什么最终 checkpoint ID 是 <code>C_C21</code> / <code>A_C09</code> 这种语义化命名而非 <code>checkpoint_generator.py</code> 产出的 <code>AUTO_*</code> 风格？因为正式 benchmark 跑的是 <strong>trap-finding agent 路径</strong>（覆盖 T1-T5 模板分析），不是纯数据 pattern 的全自动路径——后者只能覆盖 GPM 字段误标、segment 重叠这一档数据层陷阱，硬核分析陷阱 (P1-P8) 还得靠 trap-finding agent 找</p>
@@ -446,8 +446,8 @@
 <hr>
 <h2>七、对比其他金融 benchmark</h2>
 <h3>7.1 主流金融 QA benchmark 的共同结构</h3>
-<p>经典的金融 benchmark——FinQA、ConvFinQA、TAT-QA、FinanceBench、DocFinQA 这一族——各有侧重（FinQA 偏数值推理链、FinanceBench 偏大规模检索式 QA、TAT-QA 兼顾表格和文本），但在本文关心的维度上，它们<strong>共享一个结构</strong>：</p>
-<ul><li>任务是<strong>孤立 Q&A</strong>：一个明确问题 → 一个明确答案</li><li>素材多为<strong>单份文档或单张表</strong>（一份 10-K 的某节、一张财务表）</li><li>测的是<strong>信息抽取 + 数值推理</strong>：能不能在文档里找到/算出那个答案</li><li>评分靠<strong>标准答案精确匹配</strong>（数值题尤其干净），部分用 LLM-judge</li><li>素材是<strong>公开 filing</strong>，大概率已进训练集</li></ul>
+<p>经典的金融 benchmark——FinQA、ConvFinQA、TAT-QA、FinanceBench、DocFinQA 这一族——各有侧重（FinQA 偏数值推理链、TAT-QA 兼顾表格和文本；FinanceBench 覆盖 10,231 题 361 份 filing 的大规模 open-book QA、DocFinQA 测全文档长上下文 retrieval，两者检索保真度更高），但在本文关心的维度上，它们<strong>共享一个结构</strong>：</p>
+<ul><li>任务是<strong>孤立 Q&A</strong>：一个明确问题 → 一个明确答案</li><li>素材多为预选证据上下文（FinQA/TAT-QA 以单表/节选为主；FinanceBench/DocFinQA 已扩展到多 filing 检索和全文档长上下文——但仍是明确问题驱动，不是 workflow memo + 隐藏 checkpoint）</li><li>测的是<strong>信息抽取 + 数值推理</strong>：能不能在文档里找到/算出那个答案</li><li>评分靠<strong>标准答案精确匹配</strong>（数值题尤其干净），部分用 LLM-judge</li><li>素材是<strong>公开 filing</strong>，大概率已进训练集</li></ul>
 <p>我的理解（认知标签：判断）是，这一族 benchmark 解决的是"金融文档理解 + 数值推理"这个问题，而且解决得相当扎实——FinQA 类的数值推理题、FinanceBench 类的大规模检索式 QA，都是成熟、可复现、规模大的工作。FAGB 不试图取代它们，FAGB 测的是它们结构上<strong>测不到</strong>的另一块</p>
 <h3>7.2 逐维对比</h3>
 <table><thead><tr><th>维度</th><th>主流金融 QA benchmark</th><th>FAGB</th></tr></thead><tbody><tr><td>任务格式</td><td>孤立 Q&A</td><td>workflow 嵌入（写投资备忘录）</td></tr><tr><td>素材</td><td>多为单份文档/单表</td><td>多份异构、跨时间、互相冲突</td></tr><tr><td>测什么</td><td>信息抽取 + 数值推理</td><td>分析判断（没人指路时能否自主发现）</td></tr><tr><td>难度来源</td><td>题目本身（问题=难点+指针）</td><td>材料里的天然误导（陷阱在数据里）</td></tr><tr><td>评分</td><td>标准答案精确匹配（干净）</td><td>6 层分层评分（T0/T1 hard verifier 55% + T2 depth 15% + T3 regex 20% + unit 10%），正则脆性由分层架构缓解</td></tr><tr><td>数据泄漏</td><td>公开 filing，大概率已进训练集</td><td>runtime leak-resistant（禁联网 + checkpoint 隐藏）；training contamination 未解决（见 §2 #5）</td></tr><tr><td>prompt</td><td>直接告诉你要找什么</td><td>通用 prompt，不给分析方向</td></tr><tr><td>规模</td><td>大（千~万级题量）</td><td>中等（7 公司 / ~86 CP）</td></tr><tr><td>生成</td><td>人工标注，静态</td><td>半自动生成，可在新材料上复现 pattern</td></tr></tbody></table>
@@ -465,7 +465,7 @@
 <p>每条 weakness 都不是抽象的"模型不够好"，是可以直接喂下游训练的具体能力 gap——这是 FAGB 一开始就埋好的下游接口</p>
 <h3>8.2 训练路线假设（取决于 verifier 强度）</h3>
 <blockquote><p><strong>硬约束</strong>：FAGB eval set 不能直接用于训练——必须划分 train / held-out split，held-out 最好是 OOD（新公司 / 新报告期）。以下是路线假设，从 verifier 到 production reward 还有 reward hacking、coverage、rollout 成本等工程问题待验证</p></blockquote>
-<ul><li>FAGB 65% deterministic 层（citation 25% + computation 15% + timeliness 15% + unit 10%）可作 GRPO + RLVR reward prototype；</li><li>T2 depth 15% 走 GRPO + RLAIF 或 fallback DPO；</li><li>T3 regex 20% 虽 deterministic 但 keyword stuffing 易 hack，作 SFT 监督比作 RLVR reward 稳；</li><li>Thesis quality 类只能 SFT / DPO，补完 T5 hard verifier 才能进 GRPO + RLVR</li></ul>
+<ul><li>FAGB 65% non-regex deterministic 层（citation 25% + computation 15% + timeliness 15% + unit 10%）可作 GRPO + RLVR reward prototype；</li><li>T2 depth 15% 走 GRPO + RLAIF 或 fallback DPO；</li><li>T3 regex 20% 虽 deterministic 但 keyword stuffing 易 hack，作 SFT 监督比作 RLVR reward 稳；</li><li>Thesis quality 类只能 SFT / DPO，补完 T5 hard verifier 才能进 GRPO + RLVR</li></ul>
 <p>实际跑 RLVR 还要 SFT cold-start，否则 base model 直接 RL 有可能信号稀疏跑不起来</p>
 <p><strong>Reward function 容易写漂移少稳定就 GRPO，写不出走 DPO</strong>。GRPO 要 rollout + reward，但能探索超越 SFT 数据上限；DPO 在静态偏好对上用 preference loss 做梯度训练，不需要 rollout 不需要 reward function，简单稳定但被 chosen pair quality 锁死。RLVR 是 reward 形态（deterministic 算出）——可以套 GRPO，也可以套 PPO</p>
 <h4>FAGB 各类 checkpoint 的路由</h4>
@@ -478,7 +478,7 @@ FAGB v4+ 重测 → 看三大弱点 pass rate 有没有上升
    ├─ 没动 → 训练数据 hypothesis 错 → 回去重新构造
    └─ 动了 → 弱点可 train → 沉淀为 benchmark 一轮 update</code></pre>
 <p>两个 Goodhart 风险要 hold 住：</p>
-<ol><li><strong>不能只看 FAGB pass rate</strong> — 训完模型可能在 FAGB 上分数飙升但实际能力没动（过拟合 FAGB 的具体表达 pattern）。必须留 held-out checkpoint，<strong>最好是 OOD</strong>（新公司 / 新报告期 / 新源格式 / 对抗性扰动），同 distribution held-out 也可能 leak。训练时不可见，最终验证用</li><li><strong>不能只看三大弱点</strong> — H 类 catch-all 占 59% 待消化，还有大量未命名的失败模式。训完模型可能在三大弱点上进步，但在 H 类某些子 pattern 上退化。需要 per-pattern pass rate 跟踪，不只是 aggregate</li></ol>
+<ol><li><strong>不能只看 FAGB pass rate</strong> — 训完模型可能在 FAGB 上分数飙升但实际能力没动（过拟合 FAGB 的具体表达 pattern）。必须留 held-out checkpoint，<strong>最好是 OOD</strong>（新公司 / 新报告期 / 新源格式 / 对抗性扰动），同 distribution held-out 也可能 leak。训练时不可见，最终验证用</li><li><strong>不能只看三大弱点</strong> — H 类 catch-all 占全部失败的 59% 待消化，还有大量未命名的失败模式。训完模型可能在三大弱点上进步，但在 H 类某些子 pattern 上退化。需要 per-pattern pass rate 跟踪，不只是 aggregate</li></ol>
 <h3>8.4 现在到这一步还差什么</h3>
 <ul><li><strong>Per-checkpoint 训练 pair 自动生成</strong> — 目前从 fail case 构造 SFT pair 是手工的，不 scalable。要做一个 SKILL 3 (training data generator)：input = FAGB fail trace，output = SFT / preference pair。配合 §9.2 claim 三元组 evidence 结构化，提取的 evidence span 直接就是训练数据的 chosen 部分</li><li><strong>跑分 → 重训的频率定义</strong> — benchmark 跑分多久喂一次给训练？每月？每季度？取决于训练数据积累速度和模型迭代节奏，目前没定</li></ul>
 <hr>
@@ -504,7 +504,7 @@ FAGB v4+ 重测 → 看三大弱点 pass rate 有没有上升
 <table><thead><tr><th>真实分析师场景</th><th>FAGB 当前环境</th><th>删掉的是什么</th></tr></thead><tbody><tr><td>自己 search / 拉 Wind / 调 CapIQ / 抓 IR 网站 PDF</td><td>文件已经给齐，禁联网</td><td>"知道该去哪里找数据"这一步</td></tr><tr><td>PDF 扫描件、表格 OCR、半成功的 API、rate limit、跨语言素材</td><td>全是 pre-extract 过的 .txt / .md / JSON</td><td>"在 noisy 输入里 robust 拿数"的能力</td></tr><tr><td>PM 多轮反馈、需求漂移、跨 session memory</td><td>单 turn 给指令，一次成稿</td><td>long-horizon trajectory</td></tr></tbody></table>
 <p>这正好对应 A3 §十.12 那张表里"金融分析"那一行——FAGB 现在跑的是"干净 CSV / 单份研报"左列，不是"真实 PDF 扫描件、跨报告矛盾、管理层 Q&A vs 数据矛盾"右列。把禁联网当成核心约束是早期 leak-resistance 的代价</p>
 <p>未来可以做的升级：</p>
-<ol><li>**联网放开 + leak-resistance 由"时间窗"保证，不由"切断 web access"保证</li><li><strong>真工具替 mock</strong> — 允许调用 yfinance / AKShare / web_search / PDF reader 等真实工具，checkpoint 同步扩展：F-codes 多两个新陷阱，F15 = 该联网时没联网（错把陈旧 context 当 fact）/ F16 = 联网拿到错数没识别（被 web 上的噪声误导）</li><li><strong>noisy 输入</strong> — 扔进真实 PDF 扫描件（不预先做 OCR / table 提取）、半成功的 API 返回、跨语言素材。测的不再是"读完给定材料能不能推"，而是"在脏环境里能不能把信号拿出来"</li><li><strong>multi-turn trajectory</strong> — 从单 turn memo 扩到 "memo → PM 给 pushback → 改 → PM 再问"，trajectory 长度从 1 步走到 5-10 步。代价是中间 step 怎么打分（process reward 问题），但这条正好和 9.2/9.3 的 evidence 结构化重合，可以共建</li></ol>
+<ol><li><strong>联网放开</strong> + leak-resistance 由"时间窗"保证，不由"切断 web access"保证</li><li><strong>真工具替 mock</strong> — 允许调用 yfinance / AKShare / web_search / PDF reader 等真实工具，checkpoint 同步扩展：F-codes 多两个新陷阱，F15 = 该联网时没联网（错把陈旧 context 当 fact）/ F16 = 联网拿到错数没识别（被 web 上的噪声误导）</li><li><strong>noisy 输入</strong> — 扔进真实 PDF 扫描件（不预先做 OCR / table 提取）、半成功的 API 返回、跨语言素材。测的不再是"读完给定材料能不能推"，而是"在脏环境里能不能把信号拿出来"</li><li><strong>multi-turn trajectory</strong> — 从单 turn memo 扩到 "memo → PM 给 pushback → 改 → PM 再问"，trajectory 长度从 1 步走到 5-10 步。代价是中间 step 怎么打分（process reward 问题），但这条正好和 9.2/9.3 的 evidence 结构化重合，可以共建</li></ol>
 <p>这条轴推下去 FAGB 就从静态 benchmark 变成了<strong>带 trajectory 的 RL 训练环境</strong>——直接接 A3 §七 RLVR 那条工业化版本，跟 §十.13 表里"高保真"列对齐</p>
 <h3>9.5 覆盖维度 + 人类 baseline</h3>
 <p>最低成本、价值最直接的一条，但拖得最久：</p>
@@ -538,3 +538,4 @@ FAGB v4+ 重测 → 看三大弱点 pass rate 有没有上升
 
 </body>
 </html>
+
